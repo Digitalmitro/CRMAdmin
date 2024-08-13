@@ -2,9 +2,22 @@ import React, { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Modal, Button, Input, Form, Row, Col, Select, message } from "antd";
 import axios from "axios";
+import { NavLink, useParams } from "react-router-dom";
 
 const ProjectList = () => {
+  // const { id } = useParams();
   const user = JSON.parse(localStorage.getItem("user"));
+
+  const [modalOpened, setModalOpened] = useState(false);
+  const [taskAssignees, setTaskAssignees] = useState([]);
+  const [showAssignees, setShowAssignees] = useState(false);
+  const [selectedAssigneeId, setSelectedAssigneeId] = useState(null);
+  const [meMode, setMeMode] = useState(false);
+  const [taskNames, setTaskNames] = useState([]);
+  const [selectedTaskName, setSelectedTaskName] = useState("");
+  const [docss, setdocss] = useState([]);
+  const [docsDatas, setDocsDatas] = useState("");
+
   const [ProjectsData, setprojectsData] = useState([]);
   const [EmployeeTasks, setEmployeeTasks] = useState([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -12,8 +25,8 @@ const ProjectList = () => {
   const [projectName, setProjectsName] = useState("");
   const [projectListId, setProjectListId] = useState("");
   const [taskListId, setTaskListId] = useState("");
- 
-  const [modalOpened, setModalOpened] = useState(false);
+  const [selectedTask, setSelectedTask] = useState([]);
+
   const [newSubList, setNewSubList] = useState({
     TaskName: "",
     AsigneeName: "",
@@ -24,6 +37,8 @@ const ProjectList = () => {
     docsName: "",
     Status: "",
   });
+
+  console.log("assignees", taskAssignees);
 
   const showModals = () => {
     setModalOpened(true);
@@ -69,7 +84,6 @@ const ProjectList = () => {
         );
       }
 
-     
       // Call getProjectsData to refresh the data
       // await getProjectsData();
       // Reset modal and newSubList state
@@ -89,24 +103,30 @@ const ProjectList = () => {
       console.error("Error saving task data:", error);
     }
   };
-  const handleDelete = async(projectId, taskItem, taskId) => {
-    console.log(projectId, taskId, taskItem)
-    console.log(`${import.meta.env.VITE_BACKEND_API}/projects/${projectId}/tasks/${taskId}`)
-    if ( window.confirm(  "Do you want to Delete this Task" )
-    ) {   try {
+  const handleDelete = async (projectId, taskItem, taskId) => {
+    console.log(projectId, taskId, taskItem);
+    console.log(
+      `${
+        import.meta.env.VITE_BACKEND_API
+      }/projects/${projectId}/tasks/${taskId}`
+    );
+    if (window.confirm("Do you want to Delete this Task")) {
+      try {
         const response = await axios.delete(
-          `${import.meta.env.VITE_BACKEND_API}/projects/${projectId}/tasks/${taskId}`  );
-             console.log("Action confirmed!");
-             message.success("task Deleted Successfully")
-             getProjectsData()
+          `${
+            import.meta.env.VITE_BACKEND_API
+          }/projects/${projectId}/tasks/${taskId}`
+        );
+        console.log("Action confirmed!");
+        message.success("task Deleted Successfully");
+        getProjectsData();
       } catch (err) {
         console.log("catch error ", err);
       }
-
     } else {
       console.log("Action canceled.");
     }
-  }
+  };
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewSubList({ ...newSubList, [name]: value });
@@ -143,16 +163,177 @@ const ProjectList = () => {
     console.log("newSubList", newSubList);
   };
 
+  const getAllTaskname = async (selectedTaskName) => {
+    try {
+      // Fetch project data
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_API}/projects`
+      );
+      console.log("response", response.data);
+
+      const ProjectKaname = response.data.map((item) => item.projectName);
+      const taskName = response.data.flatMap((project) =>
+        project.tasks.map((task) => task.taskname)
+      );
+      console.log("taskss", taskName);
+      setTaskNames(ProjectKaname);
+      setProjectsName(ProjectKaname);
+      // Update state with the new task data
+      setData(newData);
+      setSelectedTask(filteredTasks);
+    } catch (error) {
+      console.error("Error fetching project data:", error);
+    }
+  };
+
+  console.log("taskNames", taskNames);
+  const handleTaskNameChange = (event) => {
+    setSelectedTaskName(event.target.value);
+  };
+
+  const handleFilterClick = () => {
+    getAllTaskname(selectedTaskName);
+  };
+
+  const clearFilter = () => {
+    setSelectedTaskName("");
+    setSelectedTask([]);
+    setSelectedAssigneeId(null);
+  };
+
   const getUsersData = async () => {
     const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`);
 
     setUserData(res.data);
   };
-  useEffect(() => {
-    getUsersData();
-  }, []);
 
-   const handleSubmit = async () => {
+  const handleMeModeToggle = async () => {
+    try {
+      // Toggle the mode here (if needed, e.g., toggle a state value for Me Mode)
+      setMeMode((prevMode) => !prevMode);
+
+      // Fetch tasks assigned to the logged-in user
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_API}/tasks/${user._id}`
+      );
+      const fetchedTasks = response.data;
+
+      // Flatten and filter tasks assigned to the logged-in user
+      let tasks = fetchedTasks.reduce((tasks, project) => {
+        const userTasks = project.tasks.filter(
+          (task) => task.assigneeId === user._id
+        );
+        return tasks.concat(userTasks);
+      }, []);
+
+      // Categorize tasks based on their status
+      const categorizeTask = (task) => {
+        if (task.status === "Completed") return "list3";
+        if (task.status === "In Progress") return "list2";
+        return "list1";
+      };
+
+      // Initialize a new data structure for the DragDropContext
+      const newData = { ...initialData };
+      tasks.forEach((task) => {
+        const listId = categorizeTask(task);
+
+        const subList = {
+          id: task._id,
+          content: (
+            <div
+              key={task._id}
+              style={{
+                fontSize: "0.8rem",
+                fontWeight: "300",
+                lineHeight: "10px",
+                letterSpacing: "0.7px",
+              }}
+            >
+              <h6 style={{ fontWeight: "300", fontSize: "0.9rem" }}>
+                <span style={{ paddingRight: "5px" }}>{/* SVG Icon */}</span>
+                {task.taskname || "Task"}
+              </h6>
+              <p style={{ paddingTop: "10px" }}>
+                <span style={{ paddingRight: "5px" }}>{/* SVG Icon */}</span>
+                {task.assigneeName || "Assignee"}
+              </p>
+              <p>
+                <span style={{ paddingRight: "3px" }}>{/* SVG Icon */}</span>
+                {task.DeadLine || "01-01-24"}
+              </p>
+              <p
+                style={{ color: task.priority === "pending" ? "red" : "green" }}
+              >
+                {/* Priority SVG Icon */}
+                {task.priority || "Priority"}
+              </p>
+              <p className="d-flex align-items-start gap-1">
+                <span style={{ paddingRight: "5px" }}>{/* SVG Icon */}</span>
+                <textarea
+                  rows="4"
+                  readOnly={true}
+                  cols="25"
+                  placeholder={task.comments || "Comments"}
+                  style={{ border: "none" }}
+                ></textarea>
+              </p>
+            </div>
+          ),
+        };
+
+        newData.lists = newData.lists.map((list) =>
+          list.id === listId
+            ? { ...list, items: [...list.items, subList] }
+            : list
+        );
+      });
+
+      // Update the state with the new data
+      setData(newData);
+      setTaskList(tasks); // Optionally, you can also update a separate task list state
+    } catch (error) {
+      console.error("Error fetching project data:", error);
+    }
+  };
+  const getAllAssigneeData = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_API}/projects`
+      );
+
+      // Extract assignee names and IDs
+      const assigneeData = response.data.flatMap((project) =>
+        project.tasks.map((task) => ({
+          assigneeName: task.assigneeName,
+          assigneeId: task.assigneeId,
+        }))
+      );
+
+      console.log("response.data", assigneeData);
+
+      // Create a Set to track unique assignee IDs and corresponding names
+      const uniqueAssignees = new Map();
+
+      assigneeData.forEach(({ assigneeId, assigneeName }) => {
+        if (!uniqueAssignees.has(assigneeId)) {
+          uniqueAssignees.set(assigneeId, assigneeName);
+        }
+      });
+
+      // Extract unique assignee names from the Map
+      const uniqueAssigneeNames = Array.from(uniqueAssignees.values());
+
+      console.log("uniqueAssigneeNames", uniqueAssigneeNames);
+
+      // Update state with the unique assignee names
+      setTaskAssignees(uniqueAssigneeNames);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleSubmit = async () => {
     const formData = new FormData();
     docsDatas.trim() !== "" && formData.append("docsName", docsDatas);
     if (docss) {
@@ -175,14 +356,37 @@ const ProjectList = () => {
       console.log(err);
     }
   };
+  const handleToggles = () => {
+    setShowAssignees(!showAssignees);
+  };
+  const resetFilter = () => {
+    window.location.reload();
+  };
+
+  const showAssigneeTask = (assigneeName) => {
+    const assigneeTask = projectsData.tasks.find(
+      (task) => task.assigneeName === assigneeName
+    );
+
+    if (assigneeTask) {
+      setSelectedAssigneeId(assigneeTask.assigneeId);
+    }
+    setprojectsData(assigneeTask);
+  };
+
+  useEffect(() => {
+    getUsersData();
+    getAllAssigneeData();
+  }, []);
 
   return (
     <>
-      <div className="projects-list-heading projectsSection d-flex justify-content-end">
-        {/* <ul>
+      <div className="projects-list-heading ">
+        <ul>
           <li>
-            <button>
-              {" "}
+            {/* <button onClick={toggleSearchVisibility}> */}
+
+            <button onClick={handleFilterClick} style={{ width: "190px" }}>
               <span style={{ paddingRight: "5px" }}>
                 <svg
                   width="15px"
@@ -191,99 +395,126 @@ const ProjectList = () => {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                  <g
-                    id="SVGRepo_tracerCarrier"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></g>
-                  <g id="SVGRepo_iconCarrier">
-                    {" "}
-                    <path
-                      fill-rule="evenodd"
-                      clip-rule="evenodd"
-                      d="M3 7C3 6.44772 3.44772 6 4 6H20C20.5523 6 21 6.44772 21 7C21 7.55228 20.5523 8 20 8H4C3.44772 8 3 7.55228 3 7ZM6 12C6 11.4477 6.44772 11 7 11H17C17.5523 11 18 11.4477 18 12C18 12.5523 17.5523 13 17 13H7C6.44772 13 6 12.5523 6 12ZM9 17C9 16.4477 9.44772 16 10 16H14C14.5523 16 15 16.4477 15 17C15 17.5523 14.5523 18 14 18H10C9.44772 18 9 17.5523 9 17Z"
-                      fill="#616161"
-                    ></path>{" "}
-                  </g>
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M3 7C3 6.44772 3.44772 6 4 6H20C20.5523 6 21 6.44772 21 7C21 7.55228 20.5523 8 20 8H4C3.44772 8 3 7.55228 3 7ZM6 12C6 11.4477 6.44772 11 7 11H17C17.5523 11 18 11.4477 18 12C18 12.5523 17.5523 13 17 13H7C6.44772 13 6 12.5523 6 12ZM9 17C9 16.4477 9.44772 16 10 16H14C14.5523 16 15 16.4477 15 17C15 17.5523 14.5523 18 14 18H10C9.44772 18 9 17.5523 9 17Z"
+                    fill="#616161"
+                  ></path>
                 </svg>
-              </span>{" "}
-              Filter
+              </span>
+              <select
+                className="filter-selected"
+                onChange={handleTaskNameChange}
+                value={selectedTaskName}
+              >
+                <option value="">Select Task Name</option>
+                {taskNames.map((name, index) => (
+                  <option
+                    className="options"
+                    style={{ border: "2px solid red" }}
+                    key={index}
+                    value={name}
+                  >
+                    {name}
+                  </option>
+                ))}
+              </select>
             </button>
+
+            {/* {taskNames.length > 0 && (
+    <select onChange={(e) => setSelectedTask(e.target.value)}>
+      <option value="">Select Task</option>
+      {taskNames.map((taskname, index) => (
+        <option key={index} value={taskname}>
+          {taskname}
+        </option>
+      ))}
+    </select>
+  )} */}
+
+            {/* {showFilter ? (
+        <ul className="list-group list-group-flush dropdown my-2">
+            <button style={{background:"#5f55ed",width:"160px",color:"#fff"}} onClick={clearFilter} className="mx-auto">Clear Filter</button>
+          
+          {taskAssignees.map((name, index) => (
+            <li
+              key={index}
+              className="list-group-item"
+              onClick={() => showAssigneeTask(name)}
+            >
+              {name}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        ""
+      )} */}
+
+            {/* {isSearchVisible && (
+                  <input
+                    type="text"
+                    placeholder="Search by task name..."
+                    onChange={handleSearchChange}
+                  />
+                )} */}
           </li>
-          <li>
-            <button>
-              <span style={{ paddingRight: "5px" }}>
-                <svg
-                  viewBox="0 0 24 24"
-                  width="15px"
-                  height="20px"
-                  fill="#616161"
-                  xmlns="http://www.w3.org/2000/svg"
-                  stroke="#616161"
-                >
-                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                  <g
-                    id="SVGRepo_tracerCarrier"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></g>
-                  <g id="SVGRepo_iconCarrier">
-                    {" "}
+
+          {/* <li>
+              <button>
+                <span style={{ paddingRight: "5px" }}>
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="15px"
+                    height="20px"
+                    fill="#616161"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#616161"
+                  >
                     <path
                       d="M13 12H21M13 8H21M13 16H21M6 7V17M6 17L3 14M6 17L9 14"
                       stroke="#616161"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    ></path>{" "}
-                  </g>
-                </svg>
-              </span>{" "}
-              Sort
-            </button>
-          </li>
-          <li>
-            <button>
-              <span style={{ paddingRight: "5px" }}>
-                <svg
-                  width="15px"
-                  height="20px"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  stroke="#616161"
-                >
-                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                  <g
-                    id="SVGRepo_tracerCarrier"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></g>
-                  <g id="SVGRepo_iconCarrier">
-                    {" "}
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></path>
+                  </svg>
+                </span>
+                Sort
+              </button>
+            </li> */}
+          {/* <li>
+              <button onClick={handleMeModeToggle}>
+                <span style={{ paddingRight: "5px" }}>
+                  <svg
+                    width="15px"
+                    height="20px"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#616161"
+                  >
                     <path
                       d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z"
                       stroke="#616161"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    ></path>{" "}
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></path>
                     <path
                       d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z"
                       stroke="#616161"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    ></path>{" "}
-                  </g>
-                </svg>
-              </span>{" "}
-              Me mode
-            </button>
-          </li>
-          <li>
-            <button>
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></path>
+                  </svg>
+                </span>
+                Me mode
+              </button>
+            </li> */}
+          <li style={{ position: "relative" }}>
+            <button id="emp-assignee" onClick={handleToggles}>
               <span style={{ paddingRight: "5px" }}>
                 <svg
                   width="12px"
@@ -293,6 +524,51 @@ const ProjectList = () => {
                   version="1.1"
                   xmlns="http://www.w3.org/2000/svg"
                 >
+                  <title>user-profiles</title>
+                  <path d="M0 26.016q0 2.496 1.76 4.224t4.256 1.76h12q2.464 0 4.224-1.76t1.76-4.224q-0.448-2.688-2.112-4.928t-4.096-3.552q2.208-2.368 2.208-5.536v-4q0-3.296-2.336-5.632t-5.664-2.368-5.664 2.368-2.336 5.632v4q0 3.168 2.208 5.536-2.4 1.344-4.064 3.552t-2.144 4.928zM4 26.016q0.672-2.592 2.944-4.288t5.056-1.696 5.056 1.696 2.944 4.288q0 0.832-0.576 1.44t-1.408 0.576h-12q-0.832 0-1.44-0.576t-0.576-1.44zM8 12.032v-4q0-1.664 1.184-2.848t2.816-1.152 2.816 1.152 1.184 2.848v4q0 1.664-1.184 2.816t-2.816 1.184-2.816-1.184-1.184-2.816zM18.208 0.224q0.896-0.224 1.792-0.224 3.328 0 5.664 2.368t2.336 5.632v4.032q0 3.168-2.208 5.504 2.4 1.344 4.096 3.584t2.112 4.896q0 2.496-1.76 4.256t-4.224 1.76h-2.784q1.888-1.632 2.496-4h0.288q0.8 0 1.408-0.576t0.576-1.44q-0.384-1.472-1.312-2.688t-2.336-2.048q-1.44-2.528-3.712-4.256 0.352-0.608 0.608-1.216 1.216-0.416 1.984-1.44t0.768-2.368v-4q0-1.312-0.768-2.336t-1.984-1.44q-0.96-2.336-3.040-4z"></path>
+                </svg>
+              </span>
+              Assignees
+            </button>
+            {showAssignees ? (
+              <ul className="list-group list-group-flush dropdown my-2">
+                <button
+                  style={{
+                    background: "#5f55ed",
+                    width: "160px",
+                    color: "#fff",
+                  }}
+                  onClick={clearFilter}
+                  className="mx-auto"
+                >
+                  Clear Filter
+                </button>
+
+                {taskAssignees.map((name, index) => (
+                  <li
+                    key={index}
+                    className="list-group-item"
+                    onClick={() => showAssigneeTask(name)}
+                  >
+                    {name}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              ""
+            )}
+          </li>
+
+          <li>
+            <button style={{ width: "120px" }} onClick={resetFilter}>
+              <span style={{ marginRight: "8px" }}>
+                <svg
+                  width="12px"
+                  height="12px"
+                  fill="#616161"
+                  viewBox="0 0 1920 1920"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
                   <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                   <g
                     id="SVGRepo_tracerCarrier"
@@ -301,18 +577,47 @@ const ProjectList = () => {
                   ></g>
                   <g id="SVGRepo_iconCarrier">
                     {" "}
-                    <title>user-profiles</title>{" "}
-                    <path d="M0 26.016q0 2.496 1.76 4.224t4.256 1.76h12q2.464 0 4.224-1.76t1.76-4.224q-0.448-2.688-2.112-4.928t-4.096-3.552q2.208-2.368 2.208-5.536v-4q0-3.296-2.336-5.632t-5.664-2.368-5.664 2.368-2.336 5.632v4q0 3.168 2.208 5.536-2.4 1.344-4.064 3.552t-2.144 4.928zM4 26.016q0.672-2.592 2.944-4.288t5.056-1.696 5.056 1.696 2.944 4.288q0 0.832-0.576 1.44t-1.408 0.576h-12q-0.832 0-1.44-0.576t-0.576-1.44zM8 12.032v-4q0-1.664 1.184-2.848t2.816-1.152 2.816 1.152 1.184 2.848v4q0 1.664-1.184 2.816t-2.816 1.184-2.816-1.184-1.184-2.816zM18.208 0.224q0.896-0.224 1.792-0.224 3.328 0 5.664 2.368t2.336 5.632v4.032q0 3.168-2.208 5.504 2.4 1.344 4.096 3.584t2.112 4.896q0 2.496-1.76 4.256t-4.224 1.76h-2.784q1.888-1.632 2.496-4h0.288q0.8 0 1.408-0.576t0.576-1.44q-0.384-1.472-1.312-2.688t-2.336-2.048q-1.44-2.528-3.712-4.256 0.352-0.608 0.608-1.216 1.216-0.416 1.984-1.44t0.768-2.368v-4q0-1.312-0.768-2.336t-1.984-1.44q-0.96-2.336-3.040-4z"></path>{" "}
+                    <path
+                      d="M960 0v213.333c411.627 0 746.667 334.934 746.667 746.667S1371.627 1706.667 960 1706.667 213.333 1371.733 213.333 960c0-197.013 78.4-382.507 213.334-520.747v254.08H640V106.667H53.333V320h191.04C88.64 494.08 0 720.96 0 960c0 529.28 430.613 960 960 960s960-430.72 960-960S1489.387 0 960 0"
+                      fill-rule="evenodd"
+                    ></path>{" "}
                   </g>
                 </svg>
-              </span>{" "}
-              Assignees
+              </span>
+              Reset Filter
             </button>
           </li>
-        </ul> */}
-        <div className="add-task text-end d-flex justify-content-end" style={{right:"2px"}}>
-            <button onClick={showModals}>Add Task</button>
-          </div>
+          <li>
+            <NavLink to={`/doccuments`}>
+              <button style={{ width: "80px" }}>
+                <span style={{ marginRight: "6px" }}>
+                  <svg
+                    width="12px"
+                    height="12px"
+                    fill="#616161"
+                    viewBox="0 0 56 56"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <path d="M 15.5547 53.125 L 40.4453 53.125 C 45.2969 53.125 47.7109 50.6640 47.7109 45.7890 L 47.7109 24.5078 C 47.7109 21.4844 47.3828 20.1718 45.5078 18.2500 L 32.5703 5.1015 C 30.7891 3.2734 29.3359 2.8750 26.6875 2.8750 L 15.5547 2.8750 C 10.7266 2.8750 8.2891 5.3594 8.2891 10.2344 L 8.2891 45.7890 C 8.2891 50.6875 10.7266 53.125 15.5547 53.125 Z M 15.7422 49.3515 C 13.3281 49.3515 12.0625 48.0625 12.0625 45.7187 L 12.0625 10.3047 C 12.0625 7.9844 13.3281 6.6484 15.7656 6.6484 L 26.1718 6.6484 L 26.1718 20.2656 C 26.1718 23.2187 27.6718 24.6718 30.5781 24.6718 L 43.9375 24.6718 L 43.9375 45.7187 C 43.9375 48.0625 42.6953 49.3515 40.2578 49.3515 Z M 31.0000 21.1328 C 30.0859 21.1328 29.7109 20.7578 29.7109 19.8203 L 29.7109 7.3750 L 43.2109 21.1328 Z"></path>
+                    </g>
+                  </svg>
+                </span>
+                Doc
+              </button>
+            </NavLink>
+          </li>
+        </ul>
+
+        <div className="add-task">
+          <button onClick={showModals}>Add Task</button>
+        </div>
       </div>
 
       {ProjectsData.map((items) => {
@@ -468,7 +773,7 @@ const ProjectList = () => {
                           <td className="text-start">
                             <span
                               onClick={() =>
-                                handleAddSubList(items._id,  taskItem._id)
+                                handleAddSubList(items._id, taskItem._id)
                               }
                             >
                               <svg
@@ -505,7 +810,13 @@ const ProjectList = () => {
                           <td className="text-start">
                             <span>
                               <button
-                                onClick={()=> handleDelete(items._id, taskItem, taskItem._id)}
+                                onClick={() =>
+                                  handleDelete(
+                                    items._id,
+                                    taskItem,
+                                    taskItem._id
+                                  )
+                                }
                                 style={{
                                   background: "none",
                                   border: "none",
@@ -670,205 +981,219 @@ const ProjectList = () => {
               </table>
 
               <Modal
-        title=""
-        open={modalOpened}
-        onOk={handleOk}
-        onCancel={handleCancel}
-      >
-        <div className="added-task">
-          <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-            <li class="nav-item" role="presentation">
-              <button
-                class="nav-link active"
-                id="pills-home-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#pills-home"
-                type="button"
-                role="tab"
-                aria-controls="pills-home"
-                aria-selected="true"
+                title=""
+                open={modalOpened}
+                onOk={handleOk}
+                onCancel={handleCancel}
               >
-                Task
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button
-                class="nav-link"
-                id="pills-profile-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#pills-profile"
-                type="button"
-                role="tab"
-                aria-controls="pills-profile"
-                aria-selected="false"
-              >
-                Doc
-              </button>
-            </li>
-          </ul>
+                <div className="added-task">
+                  <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                      <button
+                        class="nav-link active"
+                        id="pills-home-tab"
+                        data-bs-toggle="pill"
+                        data-bs-target="#pills-home"
+                        type="button"
+                        role="tab"
+                        aria-controls="pills-home"
+                        aria-selected="true"
+                      >
+                        Task
+                      </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button
+                        class="nav-link"
+                        id="pills-profile-tab"
+                        data-bs-toggle="pill"
+                        data-bs-target="#pills-profile"
+                        type="button"
+                        role="tab"
+                        aria-controls="pills-profile"
+                        aria-selected="false"
+                      >
+                        Doc
+                      </button>
+                    </li>
+                  </ul>
 
-          <div className="tab-content " id="pills-tabContent">
-            <div
-              className="tab-pane fade show active "
-              id="pills-home"
-              role="tabpanel"
-              aria-labelledby="pills-home-tab"
-              tabindex="0"
-            >
-              <Select
-                style={{ width: "70%", marginBottom: "25px" }}
-                placeholder="Enter Project Name"
-                onChange={(value) => {
-                  const selectedUser = projectsData.find(
-                    (user) => user._id === value
-                  );
-                  handleProject({
-                    name: selectedUser.name,
-                    id: selectedUser._id,
-                  });
-                }}
-                virtual={false}
-                dropdownStyle={{
-                  overflowY: "auto",
-                  scrollBehavior: "smooth",
-                }}
-              >
-                {ProjectsData.map((item) => (
-                  <Option key={item._id} value={item.projectName}>
-                    {item.name}
-                  </Option>
-                ))}
-              </Select>
-              <div className="d-flex gap-3 ">
-                <Col >
-                <Form.Item>
-                  <Select
-                    placeholder="Enter Assignee Name"
-                    onChange={(value) => {
-                      const selectedUser = userdata.find(
-                        (user) => user._id === value
-                      );
-                      handleAssignee({
-                        name: selectedUser.name,
-                        id: selectedUser._id,
-                      });
-                    }}
-                    virtual={false}
-                    dropdownStyle={{
-                      overflowY: "auto",
-                      scrollBehavior: "smooth",
-                    }}
-                  >
-                    {userdata.map((item) => (
-                      <Option key={item._id} value={item._id}>
-                        {item.name}
-                      </Option>
-                    ))}
-                  </Select>
-                  </Form.Item>
-                </Col>
-
-                <Col>
-                <Form.Item>
-                  <Input
-                    name="Task Name"
-                    type="text"
-                    value={newSubList.TaskName}
-                    onChange={handleChange}
-                    placeholder="Task Name"
-                  />
-                 </Form.Item>
-                </Col>
-              </div>
-
-              <Input.TextArea
-                name="comments"
-                type="date"
-                value={newSubList.comments}
-                onChange={handleChange}
-                placeholder="Comments"
-              />
-              <Form layout="vertical">
-                <Row gutter={16}>
-                  <Col span={11}>
-                    <Form.Item>
-                      <Input
-                        name="DeadLine"
-                        type="date"
-                        value={newSubList.DeadLine}
-                        onChange={handleChange}
-                        placeholder="DeadLine"
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col span={11}>
-                    <Form.Item>
+                  <div className="tab-content " id="pills-tabContent">
+                    <div
+                      className="tab-pane fade show active "
+                      id="pills-home"
+                      role="tabpanel"
+                      aria-labelledby="pills-home-tab"
+                      tabindex="0"
+                    >
                       <Select
-                        style={{ marginTop: "14px" }}
-                        placeholder="priority"
-                        //   value={newSubList.AsigneeName}
-                        onChange={handleSelectPriority}
+                        style={{ width: "70%", marginBottom: "25px" }}
+                        placeholder="Enter Project Name"
+                        onChange={(value) => {
+                          const selectedUser = projectsData.find(
+                            (user) => user._id === value
+                          );
+                          handleProject({
+                            name: selectedUser.name,
+                            id: selectedUser._id,
+                          });
+                        }}
                         virtual={false}
                         dropdownStyle={{
                           overflowY: "auto",
                           scrollBehavior: "smooth",
                         }}
                       >
-                        <Option value="Urgent" style={{ color: "red" }}>
-                          Urgent
-                        </Option>
-                        <Option value="High" style={{ color: "blue" }}>
-                          High
-                        </Option>
-                        <Option value="normal" style={{ color: "#FFD700" }}>
-                          normal
-                        </Option>
-                        <Option value="low" style={{ color: "green" }}>
-                          low
-                        </Option>
+                        {ProjectsData.map((item) => (
+                          <Option key={item._id} value={item.projectName}>
+                            {item.name}
+                          </Option>
+                        ))}
                       </Select>
-                    </Form.Item>
-                  </Col>
-                </Row>
-              </Form>
-            </div>
-            <div
-              className="tab-pane fade"
-              id="pills-profile"
-              role="tabpanel"
-              aria-labelledby="pills-profile-tab"
-              tabIndex="0"
-            >
-              <Form.Item>
-                <Input
-                  type="text"
-                  onChange={(e) => setDocsDatas(e.target.value)}
-                  placeholder="Add Doc Name"
-                />
-              </Form.Item>
-              <Form.Item>
-                <Input
-                  type="file"
-                  onChange={(e) => setdocss(e.target.files[0])}
-                  className="form-control"
-                  accept=".jpeg, .jpg, .png, .doc, .pdf"
-                />
-              </Form.Item>
-              <Button onClick={handleSubmit}>Upload</Button>
-            </div>
+                      <div className="d-flex gap-3 ">
+                        <Col>
+                          <Form.Item>
+                            <Select
+                              placeholder="Enter Assignee Name"
+                              onChange={(value) => {
+                                const selectedUser = userdata.find(
+                                  (user) => user._id === value
+                                );
+                                handleAssignee({
+                                  name: selectedUser.name,
+                                  id: selectedUser._id,
+                                });
+                              }}
+                              virtual={false}
+                              dropdownStyle={{
+                                overflowY: "auto",
+                                scrollBehavior: "smooth",
+                              }}
+                            >
+                              {userdata.map((item) => (
+                                <Option key={item._id} value={item._id}>
+                                  {item.name}
+                                </Option>
+                              ))}
+                            </Select>
+                          </Form.Item>
+                        </Col>
 
-            <div>
-      
-              {/* <h6>All Uploaded Docs </h6> */}
-             
-                  {/* <iframe src={`${import.meta.env.VITE_BACKEND_API}/${item.docs}`} width="100%" height="auto">
+                        <Col>
+                          <Form.Item>
+                            <Input
+                              name="Task Name"
+                              type="text"
+                              value={newSubList.TaskName}
+                              onChange={handleChange}
+                              placeholder="Task Name"
+                            />
+                          </Form.Item>
+                        </Col>
+                      </div>
+
+                      <Input.TextArea
+                        name="comments"
+                        type="date"
+                        value={newSubList.comments}
+                        onChange={handleChange}
+                        placeholder="Comments"
+                      />
+                      <Form layout="vertical">
+                        <Row gutter={16}>
+                          <Col span={11}>
+                            <Form.Item>
+                              <Input
+                                style={{ marginTop: "14px" }}
+
+                                name="DeadLine"
+                                type="date"
+                                value={newSubList.DeadLine}
+                                onChange={handleChange}
+                                placeholder="DeadLine"
+                              />
+                            </Form.Item>
+                          </Col>
+                          <Col span={11}>
+                            <Form.Item>
+                              <Select
+                                style={{ marginTop: "14px" }}
+                                placeholder="priority"
+                                //   value={newSubList.AsigneeName}
+                                onChange={handleSelectPriority}
+                                virtual={false}
+                                dropdownStyle={{
+                                  overflowY: "auto",
+                                  scrollBehavior: "smooth",
+                                }}
+                              >
+                                <Option value="Urgent" style={{ color: "red" }}>
+                                  Urgent
+                                </Option>
+                                <Option value="High" style={{ color: "blue" }}>
+                                  High
+                                </Option>
+                                <Option
+                                  value="normal"
+                                  style={{ color: "#FFD700" }}
+                                >
+                                  normal
+                                </Option>
+                                <Option value="low" style={{ color: "green" }}>
+                                  low
+                                </Option>
+                              </Select>
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                      </Form>
+                    </div>
+
+                    <div
+                      className="tab-pane fade"
+                      id="pills-profile"
+                      role="tabpanel"
+                      aria-labelledby="pills-profile-tab"
+                      tabIndex="0"
+                    >
+                     
+                      <Row>
+                        <Col span={11}>
+                        <Form.Item>
+                        <Input
+                          type="text"
+                          onChange={(e) => setDocsDatas(e.target.value)}
+                          placeholder="Add Doc Name"
+                        />
+                      </Form.Item>
+                     
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col span={11}>
+                       
+                      <Form.Item>
+                        <Input
+                          type="file"
+                          onChange={(e) => setdocss(e.target.files[0])}
+                          className="form-control"
+                          accept=".jpeg, .jpg, .png, .doc, .pdf"
+                        />
+                      </Form.Item>
+                        </Col>
+                      </Row>
+                      <Button onClick={handleSubmit}>Upload</Button>
+
+                    </div>
+
+                    {/* <h6>All Uploaded Docs </h6> */}
+
+                    {/* <iframe src={`${import.meta.env.VITE_BACKEND_API}/${item.docs}`} width="100%" height="auto">
                   <p>Your browser does not support iframes.</p>
                    </iframe> */}
-              
-            </div>
-          </div>
-        </div>
-      </Modal>
+                  </div>
+                </div>
+              </Modal>
             </div>
           </>
         );

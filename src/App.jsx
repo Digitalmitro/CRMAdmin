@@ -38,6 +38,7 @@ import Transfers from "./Components/Pages/Transfers";
 import ProjectSubMenu from './Components/Pages/ProjectSubMenu'
 import EmployeeViewDashboard from "./Components/Pages/Employee/EmployeeViewDashboard";
 import Doccs from './Components/Pages/docs'
+import Docs from './Components/Pages/docs'
 
 
 const MyContext = createContext()
@@ -92,6 +93,7 @@ function App() {
               <Route path="/smoMail" element={<SmoMail />} />
               <Route path="/basicwebMail" element={<BasicWebMail />} />
               <Route path="/doccuments/:id" element={<Doccs />} />
+              <Route path="/doccuments" element={<Docs />} />
               {/* import DmMail from "./Components/Mail/DmMail";
 import EcomMail from "./Components/Mail/EcomMail";
 import SeoMail from "./Components/Mail/SeoMail"; */}
