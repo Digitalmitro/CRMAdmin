@@ -34,7 +34,7 @@ const NavDrawer = ({ open, onClose }) => {
   const { styles } = useStyle();
   const token = useTheme();
 
-  const Profile = localStorage.getItem("user");
+  const Profile = localStorage.getItem("admin");
   const NewProfile = JSON.parse(Profile);
   const user_id = NewProfile?._id;
   const navigate = useNavigate();

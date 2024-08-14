@@ -32,7 +32,7 @@ import menuList from "../../../assets/material-symbols_list.png";
 
 const EmplyeeConcern = () => {
   const token = Cookies.get("token");
-  const Profile = localStorage.getItem("user");
+  const Profile = localStorage.getItem("admin");
   const NewProfile = JSON.parse(Profile);
   const user_id = NewProfile._id;
   const user_name = NewProfile.name;

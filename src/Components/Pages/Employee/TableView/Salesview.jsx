@@ -13,7 +13,7 @@ import { Stepper, Step, StepLabel, StepContent, TextField, Button } from "@mui/m
 const SalesView = () => {
     const { id } = useParams();
     const token = Cookies.get('token');
-    const Profile = localStorage.getItem("user");
+    const Profile = localStorage.getItem("admin");
     const NewProfile = JSON.parse(Profile);
     const user_id = NewProfile._id;
     console.log("NewProfile", NewProfile);

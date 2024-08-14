@@ -6,7 +6,7 @@ import { NavLink, useParams } from "react-router-dom";
 
 const ProjectList = () => {
   // const { id } = useParams();
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("admin"));
 
   const [modalOpened, setModalOpened] = useState(false);
   const [taskAssignees, setTaskAssignees] = useState([]);

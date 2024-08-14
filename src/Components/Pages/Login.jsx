@@ -24,12 +24,12 @@ const Login = () => {
     };
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API}/loginuser`,
+        `${import.meta.env.VITE_BACKEND_API}/loginadmin`,
         credentials
       );
       console.log(response.data);
       Cookies.set("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+      localStorage.setItem("admin", JSON.stringify(response.data.user));
       toast.success(response.data.status, {});
       setTimeout(() => {
        window.location.href="/"

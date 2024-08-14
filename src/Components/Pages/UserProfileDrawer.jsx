@@ -25,7 +25,7 @@ const useStyle = createStyles(({ token }) => ({
 const UserProfileDrawer = ({ open, onClose }) => {
   const { styles } = useStyle();
   const [form] = Form.useForm();
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("admin"));
   const [name, setName] = useState("");
   const [aliceName, setAliceName] = useState("");
   const [email, setEmail] = useState("");
@@ -142,7 +142,7 @@ const navigate = useNavigate()
   }, []);
 
   const handleLogout = async() => {
-    localStorage.removeItem("user");
+    localStorage.removeItem("admin");
     Cookies.remove("token");
     onClose()
     // await new Promise((resolve) => setTimeout(resolve, 100));

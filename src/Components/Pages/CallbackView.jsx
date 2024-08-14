@@ -14,7 +14,7 @@ const CallbackView = () => {
     const navigate = useNavigate();
     const token = Cookies.get('token');
     const { id } = useParams();
-    const Profile = localStorage.getItem("user");
+    const Profile = localStorage.getItem("admin");
     const NewProfile = JSON.parse(Profile);
     const user_id = NewProfile._id;
     const [isOpen, setIsOpen] = useState(true);
