@@ -403,9 +403,9 @@ const handleDel = (id) => {
                         <td>{res?.type}</td>
                         <td>{res?.email}</td>
                         <td>{res?.phone}</td>
-                        <td>{res.callback.length}</td>
-                        <td>{res.transfer.length}</td>
-                        <td>{res.sale.length}</td>
+                        <td>{res.callback?.length}</td>
+                        <td>{res.transfer?.length}</td>
+                        <td>{res.sale?.length}</td>
                         <td> {res.message}</td>
                       
 
