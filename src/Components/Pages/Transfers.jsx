@@ -90,6 +90,15 @@ const Transfers = () => {
     setData(res.data);
     filterAndSortResults(searchTerm, sortBy, res.data);
   };
+
+  const [night, setNight] = useState([]);
+  const getNight = async () => {
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`);
+    // const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/attendance`)
+
+    const filteredData = res.data.filter((e) => e.type === "Night");
+    setNight(filteredData);
+  };
   
 
   const filterAndSortResults = (searchTerm, sortBy, data) => {
@@ -166,6 +175,7 @@ const Transfers = () => {
 
   useEffect(() => {
     Getdata();
+    getNight()
   }, [searchTerm, sortBy]);
 
   return (
@@ -183,7 +193,7 @@ const Transfers = () => {
               onChange={handleEmployeeChange}
             >
               <option value="">Select Employee</option>
-              {data.map((res) => {
+              {night.map((res) => {
                 return (
                   <>
                     <option value={res._id}>{res.name}</option>
