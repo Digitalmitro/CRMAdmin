@@ -102,7 +102,7 @@ const Header = () => {
                 onClick={showDrawer}
                 // onClick={handleToggle}
               >
-                K
+                O
               </button>
               <span className="mt-1 ">
                 <IoIosArrowDown width={20} 

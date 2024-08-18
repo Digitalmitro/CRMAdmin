@@ -32,7 +32,7 @@ const Login = () => {
       localStorage.setItem("admin", JSON.stringify(response.data.user));
       toast.success(response.data.status, {});
       setTimeout(() => {
-       window.location.href="/"
+        window.location.href = "/";
       }, 1200);
     } catch (error) {
       toast.warning(error.response.data.status, {});
@@ -53,9 +53,9 @@ const Login = () => {
   return (
     <>
       <ToastContainer />
-      <div className="container signup loginzoom">
+      <div className="container signup loginzoom" style={{display: "flex", justifyContent: "center", alignItems: "center", height: "100vh"}}>
         <form class="form_main" action="">
-          <img src={logo} className="img-fluid" alt="" />
+          <img src={logo} style={{ width: "10rem" }} alt="" />
           {/* <p class="heading">ADMIN</p> */}
           <div class="inputContainer">
             <svg

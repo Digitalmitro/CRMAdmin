@@ -108,7 +108,7 @@ const navigate = useNavigate()
   };
 
   const data = {
-    name: "Kajal Gupta",
+    name: "Om Jaiswal",
     image: image1,
   };
 
