@@ -22,6 +22,7 @@ const EmpMsg = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const admin = JSON.parse(localStorage.getItem('admin'))
 
   const [formData, setFormData] = useState({
     name: decodeToken.name,
@@ -37,7 +38,7 @@ const EmpMsg = () => {
   useEffect(() => {
     if (selectedEmployee) {
       socket = io(ENDPOINT);
-      socket.emit("setup", { userId: selectedEmployee._id });
+      socket.emit("register", admin._id);
       socket.on("connected", () => setSocketConnected(true));
       socket.on("typing", () => setIsTyping(true));
       socket.on("stop typing", () => setIsTyping(false));
@@ -59,6 +60,7 @@ const EmpMsg = () => {
         name: formData.name,
         email: formData.email,
         senderId: userId,
+        receiverId: selectedEmployee._id,
         message: input,
         role: "admin",
         time: moment().format("h:mm:ss a"),
