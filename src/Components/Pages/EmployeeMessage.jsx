@@ -173,7 +173,7 @@ const EmpMsg = () => {
               <List.Item.Meta
                 avatar={<Avatar>{employee.name[0]}</Avatar>}
                 title={employee.name}
-                description={employee.email}
+                description={employee.lastMessage?? employee.email}
               />
             </List.Item>
           )}
