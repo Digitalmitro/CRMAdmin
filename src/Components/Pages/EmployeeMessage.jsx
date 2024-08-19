@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Input, Button } from "antd";
+import { Input, Button, Spin, List, Avatar } from "antd";
 import io from "socket.io-client";
 import Cookies from "cookies-js";
 import moment from "moment";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 const ENDPOINT = "http://localhost:3500"; // Update with your server endpoint
-let socket, selectedChatCompare;
+let socket;
 
 const EmpMsg = () => {
   const token = Cookies.get("token");
@@ -15,93 +15,105 @@ const EmpMsg = () => {
   const userId = decodeToken._id;
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [employees, setEmployees] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [socketConnected, setSocketConnected] = useState(false);
   const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     name: decodeToken.name,
     email: decodeToken.email,
     message: "",
     senderId: userId,
-
     date: moment().format("h:mm:ss a"),
     status: "",
-    user_id: userId,  
+    user_id: userId,
   });
 
+  // Establish socket connection only when an employee is selected
   useEffect(() => {
-    socket = io(ENDPOINT);
-    socket.emit("setup", { userId });
-    socket.on("connected", () => setSocketConnected(true));
-    socket.on("typing", () => setIsTyping(true));
-    socket.on("stop typing", () => setIsTyping(false));
+    if (selectedEmployee) {
+      socket = io(ENDPOINT);
+      socket.emit("setup", { userId: selectedEmployee._id });
+      socket.on("connected", () => setSocketConnected(true));
+      socket.on("typing", () => setIsTyping(true));
+      socket.on("stop typing", () => setIsTyping(false));
 
-    socket.on("chat message", (newMessage) => {
-      if (newMessage.senderId !== userId) {
+      socket.on("chat message", (newMessage) => {
         setMessages((prevMessages) => [...prevMessages, newMessage]);
-      } else {
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
-      }
-    });
+      });
 
-    return () => {
-      socket.off("chat message");
-    };
-  }, [userId]);
+      return () => {
+        socket.disconnect();
+        setSocketConnected(false);
+      };
+    }
+  }, [selectedEmployee]);
 
   const handleSendMessage = async () => {
     if (input.trim() !== "") {
       const newMessage = {
+        name: formData.name,
+        email: formData.email,
         senderId: userId,
         message: input,
+        role: "admin",
         time: moment().format("h:mm:ss a"),
+        userId: selectedEmployee._id,
       };
-      console.log("newMessage", newMessage)
 
-        if (Array.isArray(messages)) {
-          setMessages([...messages, newMessage]);
+      setMessages([...messages, newMessage]);
+      socket.emit("sendMsg", newMessage);
+      setInput("");
+    }
+  };
+
+  const getChatData = async (employeeId) => {
+    setLoading(true);
+    axios
+      .get(
+        `${import.meta.env.VITE_BACKEND_API}/message-user/${
+          employeeId || userId
+        }`
+      )
+      .then((res) => {
+        const chatData = res.data.chatData;
+
+        if (chatData.length > 0) {
+          setMessages(res.data.chatData[0].messages);
         } else {
-          setMessages([newMessage]);
+          setMessages([]);
         }
-      socket.emit("chat message", newMessage);
-  
-      try {
-      console.log("messages", messages)
+      })
+      .finally(() => {
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
-        await axios.post(
-          `${import.meta.env.VITE_BACKEND_API}/message`,
-          {
-            ...formData,
-            message: newMessage.message,
-            date: newMessage.time,
-          }
+  useEffect(() => {
+    if (selectedEmployee) {
+      getChatData(selectedEmployee._id);
+    }
+  }, [selectedEmployee]);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_API}/employees`
         );
-        getChatData();
-        window.scrollTo(0, document.body.scrollHeight);
-        setInput("");
+        setEmployees(res.data);
       } catch (err) {
         console.log(err);
       }
-    }
-  };
-  
-
-  const getChatData = async () => {
-    try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API}/message/${userId}`
-      );
-      const messagesFromServer = res.data.message; // Access the message array
-      setMessages(messagesFromServer);
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-
-  useEffect(() => {
-    getChatData();
+    };
+    fetchEmployees();
   }, []);
 
   const typingHandler = (e) => {
@@ -114,10 +126,10 @@ const EmpMsg = () => {
       socket.emit("typing", userId);
     }
     let lastTypingTime = new Date().getTime();
-    var timerLength = 3000;
+    const timerLength = 3000;
     setTimeout(() => {
-      var timeNow = new Date().getTime();
-      var timeDiff = timeNow - lastTypingTime;
+      const timeNow = new Date().getTime();
+      const timeDiff = timeNow - lastTypingTime;
       if (timeDiff >= timerLength && typing) {
         socket.emit("stop typing", userId);
         setTyping(false);
@@ -125,68 +137,209 @@ const EmpMsg = () => {
     }, timerLength);
   };
 
-  return (
-    <div className="sending-messages text-center" style={{ height: "80vh" }}>
-      <div
-        className="row all-messages mx-auto"
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "flex-end",
-          width: "100%",
-          maxHeight: "70vh",
-          overflowY: "scroll",
-          padding: "10px",
-        }}
-      >
-       {messages?.length === 0 ? (
-  <div>Loading...</div>
-) : (
-  messages?.map((item, index) => (
-    <div
-      key={index}
-      className={item.senderId === userId ? "right-msg" : "left-msg"}
-      style={{
-        background: "#d7997e",
-        padding: "10px",
-        borderRadius: "8px",
-        margin: "5px 0",
-        maxWidth: "60%",
-        alignSelf: item.senderId === userId ? "flex-end" : "flex-start",
-      }}
-    >
-      <p><strong>{formData.name}</strong></p>
-      <p>{item.message}</p>
-      <p style={{ fontSize: "0.8rem" }}>{item.time}</p>
-    </div>
-  ))
-)}
+  const filteredEmployees =
+    employees?.length > 0 && searchQuery
+      ? employees.filter((employee) =>
+          employee.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : employees;
 
-      </div>
-      <div className="fixed-bottom">
+  return (
+    <div className="chat-app" style={styles.chatApp}>
+      <div className="sidebar" style={styles.sidebar}>
         <Input
-          className="mx-auto"
-          type="text"
-          placeholder="Type your message here..."
-          value={input}
-          onChange={typingHandler}
-          onPressEnter={handleSendMessage}
-          style={{
-            width: "40%",
-            height: "6vh",
-            outline: "none",
-            padding: "1rem",
-            border: "none",
-            boxShadow: "0 0 8px #616161",
-          }}
+          placeholder="Search employee..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={styles.searchBar}
         />
-        {isTyping && <p>Typing...</p>}
-        <Button type="primary" onClick={handleSendMessage}>
-          Send
-        </Button>
+        <List
+          itemLayout="horizontal"
+          dataSource={filteredEmployees}
+          renderItem={(employee) => (
+            <List.Item
+              key={employee._id}
+              onClick={() => setSelectedEmployee(employee)}
+              style={{
+                ...styles.employeeItem,
+                backgroundColor:
+                  selectedEmployee?._id === employee._id
+                    ? "#e0e0e0"
+                    : "#ffffff",
+              }}
+            >
+              <List.Item.Meta
+                avatar={<Avatar>{employee.name[0]}</Avatar>}
+                title={employee.name}
+                description={employee.email}
+              />
+            </List.Item>
+          )}
+        />
+      </div>
+      <div className="chat-container" style={styles.chatContainer}>
+        {selectedEmployee ? (
+          <>
+            <div
+              className="messages-container"
+              style={styles.messagesContainer}
+            >
+              {loading ? (
+                <Spin tip="Loading..." style={styles.spinner} />
+              ) : (
+                messages?.map((item, index) => {
+                  console.log(item);
+                  return (
+                    <div
+                      key={index}
+                      className={
+                        item.role === "admin" ? "right-msg" : "left-msg"
+                      }
+                      style={{
+                        ...styles.messageBubble,
+                        alignSelf:
+                          item.role === "admin" ? "flex-end" : "flex-start",
+                        backgroundColor:
+                          item.role === "admin" ? "#b3e5fc" : "#c8e6c9",
+                      }}
+                    >
+                      <p style={styles.senderName}>
+                        <strong>{item.name}</strong>
+                      </p>
+                      <p style={styles.messageText}>{item.message}</p>
+                      <p style={styles.messageTime}>{item.time}</p>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+            <div className="input-container" style={styles.inputContainer}>
+              <Input
+                placeholder="Type your message here..."
+                value={input}
+                onChange={typingHandler}
+                onPressEnter={handleSendMessage}
+                style={styles.inputField}
+              />
+              {isTyping && <p style={styles.typingIndicator}>Typing...</p>}
+              <Button
+                type="primary"
+                onClick={handleSendMessage}
+                style={styles.sendButton}
+              >
+                Send
+              </Button>
+            </div>
+          </>
+        ) : (
+          <div style={styles.selectEmployeePlaceholder}>
+            <p>Select an employee to start chatting</p>
+          </div>
+        )}
       </div>
     </div>
   );
+};
+
+const styles = {
+  chatApp: {
+    display: "flex",
+    height: "100vh",
+    backgroundColor: "#f5f5f5",
+  },
+  sidebar: {
+    width: "300px",
+    padding: "20px",
+    backgroundColor: "#ffffff",
+    borderRight: "1px solid #e0e0e0",
+    display: "flex",
+    flexDirection: "column",
+    height: "100vh", // Fixed height for the sidebar
+    overflowY: "auto", // Enable scrolling
+  },
+  searchBar: {
+    marginBottom: "20px",
+    borderRadius: "8px",
+  },
+  employeeItem: {
+    padding: "10px",
+    borderRadius: "8px",
+    cursor: "pointer",
+    transition: "background-color 0.3s",
+  },
+  chatContainer: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    flexGrow: 1,
+    padding: "20px",
+    backgroundColor: "#f5f5f5",
+  },
+  messagesContainer: {
+    display: "flex",
+    flexDirection: "column",
+    overflowY: "auto",
+    padding: "10px",
+    marginBottom: "20px",
+    maxHeight: "80vh",
+  },
+  spinner: {
+    alignSelf: "center",
+  },
+  messageBubble: {
+    padding: "10px",
+    borderRadius: "8px",
+    margin: "5px 0",
+    maxWidth: "60%",
+  },
+  senderName: {
+    margin: 0,
+    fontSize: "0.9rem",
+    color: "#424242",
+  },
+  messageText: {
+    margin: "5px 0",
+    fontSize: "1rem",
+    color: "#424242",
+  },
+  messageTime: {
+    fontSize: "0.8rem",
+    color: "#757575",
+    textAlign: "right",
+    margin: 0,
+  },
+  inputContainer: {
+    display: "flex",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderRadius: "8px",
+    padding: "10px",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+  },
+  inputField: {
+    flexGrow: 1,
+    border: "none",
+    outline: "none",
+    padding: "10px",
+    fontSize: "1rem",
+    borderRadius: "8px",
+  },
+  sendButton: {
+    marginLeft: "10px",
+  },
+  typingIndicator: {
+    fontSize: "0.8rem",
+    color: "#757575",
+    marginLeft: "10px",
+  },
+  selectEmployeePlaceholder: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100%",
+    fontSize: "1.2rem",
+    color: "#757575",
+  },
 };
 
 export default EmpMsg;
