@@ -48,9 +48,9 @@ const CallbackTable = () => {
   const token = Cookies.get("token");
   const Profile = localStorage.getItem("admin");
   const NewProfile = JSON.parse(Profile);
-  const user_id = NewProfile._id;
-  const user_name = NewProfile.name;
-  const aliceName = NewProfile.aliceName;
+  const user_id = NewProfile?._id;
+  const user_name = NewProfile?.name;
+  const aliceName = NewProfile?.aliceName;
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("Date");
   const [data, setData] = useState([]);
@@ -119,7 +119,7 @@ const CallbackTable = () => {
       });
 
     const noti = {
-      message: `${NewProfile.name} created a transfer: ${userData.name}`,
+      message: `${NewProfile?.name} created a transfer: ${userData.name}`,
       currentDate: moment().format("MMMM Do YYYY, h:mm:ss a"),
     };
     await axios.post(`${import.meta.env.VITE_BACKEND_API}/notification`, noti);

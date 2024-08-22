@@ -52,7 +52,7 @@ const EmployeeViewDashboard = () => {
         setData1(ress.data.transfer);
         setData2(resss.data.sale);
         setData3(ressss.data.attendance);
-        setNote(nots.data?.notes?.notes);
+        setNote(nots?.data?.notes?.notes);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);

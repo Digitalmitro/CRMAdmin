@@ -360,24 +360,24 @@ const EmplyeeActivity = () => {
                 {filteredData?.map((res, index) => {
                   return (
                     <>
-                      <tr key={res._id}>
-                      <td>{res.employeeName}</td>
-                        <td>{res.name}</td>
-                        <td>{res.email}</td>
-                        <td>{res.phone}</td>
-                        <td>{res.calldate}</td>
-                        <td>{res.domainName}</td>
-                        <td>{res.country}</td>
-                        <td>{res.address}</td>
-                        <td>{res.comments}</td>
-                        <td>{res.buget}</td>
-                        <td>{res.createdDate}</td>
+                      <tr key={res?._id}>
+                      <td>{res?.employeeName}</td>
+                        <td>{res?.name}</td>
+                        <td>{res?.email}</td>
+                        <td>{res?.phone}</td>
+                        <td>{res?.calldate}</td>
+                        <td>{res?.domainName}</td>
+                        <td>{res?.country}</td>
+                        <td>{res?.address}</td>
+                        <td>{res?.comments}</td>
+                        <td>{res?.buget}</td>
+                        <td>{res?.createdDate}</td>
                         <td>
                         <button
                             className="buttonFilled"
                             style={{ fontSize: "0.8rem" }}
                             onClick={() =>
-                              navigate(`/salesview/${res._id}`)
+                              navigate(`/salesview/${res?._id}`)
                             }
                           >
                             View

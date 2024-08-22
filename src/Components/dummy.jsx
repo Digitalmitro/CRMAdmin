@@ -7,7 +7,7 @@ import moment from "moment";
 import { jwtDecode } from "jwt-decode";
 
 const socket = io("http://localhost:3500");
-
+// dummy data 
 const EmpMsg = () => {
   const token = Cookies.get("token");
   const decodeToken = token && jwtDecode(token);
@@ -234,6 +234,732 @@ const EmpMsg = () => {
 };
 
 export default EmpMsg;
+
+
+
+
+
+
+
+
+const Sidebar = () => {
+  const context = useContext(MyContext);
+  const navigate = useNavigate();
+
+  const [isSidebarModalOpen, setIsSidebarModalOpen] = useState(false);
+  const [projectsName, setProjectsName] = useState('');
+  const [projects, setProjects] = useState([]);
+
+  const [activeProject, setActiveProject] = useState(null);
+  const [projectsData, setProjectsData] = useState([]);
+
+  const [isProjectsMenuOpen, setIsProjectsMenuOpen] = useState(true);
+
+  // ------
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
+  const [transferTo, setTransfer] = useState('')
+  const [domainName, setDomain] = useState('')
+  const [address, setAddress] = useState('')
+  const [country, setCountry] = useState('USA')
+  const [zipcode, setZip] = useState('')
+  const [comments, setComments] = useState('')
+  const [buget, setBuget] = useState('')
+  const [calldate, setCalldate] = useState('')
+  // ------------
+
+  console.log('hello',projectsData)
+
+  const showSidebarModal = () => {
+    setIsSidebarModalOpen(true);
+  };
+  console.log('toggleworking',context.toggleSidebar)
+
+ const handleSidebarOk = async () => {
+    let payload = {
+      projectName : projectsName
+    }
+    try {
+  
+      // Post the project name to the backend API
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_API}/projects`, payload);
+      // Update the local state with the new project data from the backend
+     message.success("Project created")
+    } catch (error) {
+      console.error('Error adding project:', error);
+    }
+
+   
+    setProjects([...projects, projectsName]);
+  
+    // Close the modal and reset the project name input
+    setIsSidebarModalOpen(false);
+    setProjectsName("");
+  };
+
+  const handleSidebarCancel = () => {
+    setIsSidebarModalOpen(false);
+  };
+
+  
+  const getProjectsData = async() => {
+    try{
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_API}/projects`);
+       console.log("respo", response)
+       setProjectsData(response.data)
+    }catch(err){
+        console.log(err)
+    }
+  }
+
+  const handleProjectClick = (projectid,name) => {
+    setActiveProject(projectid);
+    context.setBreadcrumbs([{ label: "Projects", path: '/' }, { label: name, path: `/projects/${projectid}` }]);
+    navigate(`/projects/${projectid}`);
+  };
+
+  const handleProjectsToggle = () => {
+    setIsProjectsMenuOpen(!isProjectsMenuOpen);
+  };
+
+  const handleClick = (index, path, label) => {
+    context.setActiveButton(index);
+    context.setBreadcrumbs([{ label: index === 0 ? "" : "Dashboard", path: '/' },
+    { label, path }]);
+    navigate(path);
+  };
+
+  useEffect(()=>{
+    getProjectsData()
+  },[])
+
+  return (
+    <div className="sidebar ">
+      <div className="hide-ham" style={{ height: '30px', display: 'flex', justifyContent: 'right' }}>
+        <Button
+        
+          className="rounded-circle1"
+          onClick={() => {
+            context.setToggleSidebar(!context.toggleSidebar);
+          }}
+        >
+          {/* */}
+          <div style={{ fontSize: '45px', paddingLeft: '25px', marginBottom: "10px" }}> 
+             <svg viewBox="0 0 24 24" width="25px" height="30px" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M11 5V19M6 8H8M6 11H8M6 14H8M6.2 19H17.8C18.9201 19 19.4802 19 19.908 18.782C20.2843 18.5903 20.5903 18.2843 20.782 17.908C21 17.4802 21 16.9201 21 15.8V8.2C21 7.0799 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V15.8C3 16.9201 3 17.4802 3.21799 17.908C3.40973 18.2843 3.71569 18.5903 4.09202 18.782C4.51984 19 5.07989 19 6.2 19Z" stroke="#000000" stroke-width="1.08" stroke-linecap="round" stroke-linejoin="round" color="#4e4c4c" ></path> </g></svg></div>
+        </Button>
+      </div>
+      <ul>
+        <li  >
+          <Button style={{ color: "#555151" }}
+            className={`custom-button  ${context.activeButton === 0 ? 'active' : ''}`}
+            onClick={() => handleClick(0, '/', 'Dashboard')}
+          >
+        
+            Home
+          </Button>
+        </li>
+        <li>
+          <Button
+            style={{ color: "#555151" }}
+            className={`custom-button ${context.activeButton === 1 ? 'active' : ''}`}
+            onClick={() => handleClick(1, '/attendance', 'Attendance')}
+          >
+          
+            Attendance
+          </Button>
+        </li>
+
+        <li>
+          <Button style={{ color: "#555151" }}
+            className={`custom-button ${context.activeButton === 2 ? 'active' : ''}`}
+            onClick={() => handleClick(2, '/project-lists', 'Projects')}
+          >
+           
+            
+            Projects <span style={{ display: "flex", justifyContent: "center", alignItems: "center", marginLeftLeft: "12rem", fontSize: "1.1rem", width: "8vw" }} onClick={showSidebarModal}>     </span>
+          </Button>
+         
+        </li>
+          <li  >
+          {isProjectsMenuOpen && (
+          
+              projectsData.map((project, index) => (
+                <li key={index} style={{display:"flex",gap:"10px",marginTop:" 3px"}}>
+                  <NavLink style={{display:"flex",gap:"10px",width:"16vw",padding:"4px",paddingLeft:"15px",fontSize:"0.9rem",color:"#2a2e34"}}
+                    to={`/projects/${project._id}`}
+                    className={context.activeButton === 2?activeProject === project : 'submenu-active' ? 'remove':""} //final
+                    onClick={() => handleProjectClick(project._id, project.projectName)}
+                  >
+                 {project.projectName}
+                  </NavLink>
+                </li>
+              ))
+          )}
+        
+
+
+          
+          </li>
+
+        <Modal title="Add Project" visible={isSidebarModalOpen} onOk={handleSidebarOk} onCancel={handleSidebarCancel}>
+          <Form layout="vertical">
+            <Form.Item label="Project Name" required>
+              <Input value={projectsName} onChange={(e) => setProjectsName(e.target.value)} />
+            </Form.Item>
+          </Form>
+        </Modal>
+        <li>
+          <Button style={{ color: "#555151" }}
+            className={`custom-button ${context.activeButton === 3 ? 'active' : ''}`}
+            onClick={() => handleClick(3, '/callbacks', 'Callbacks')}
+          >
+           
+            Callbacks
+          </Button>
+        </li>
+
+        <li>
+          <Button style={{ color: "#555151" }}
+            className={`custom-button ${context.activeButton === 4 ? 'active' : ''}`}
+            onClick={() => handleClick(4, '/transfers', 'Transfers')}
+          >
+           
+            Transfers
+          </Button>
+        </li>
+
+        <li>
+          <Button style={{ color: "#555151" }}
+            className={`custom-button ${context.activeButton === 5 ? 'active' : ''}`}
+            onClick={() => handleClick(5, '/employee-sales', 'Sales')}
+          >
+            
+            Sales
+          </Button>
+        </li>
+
+        <li>
+          <Button style={{ color: "#555151" }}
+            className={`custom-button ${context.activeButton === 6 ? 'active' : ''}`}
+            onClick={() => handleClick(6, '/employee-notes', 'Notes')}
+          >
+          
+            Notes
+          </Button>
+        </li>
+        <li>
+          <Button style={{ color: "#555151" }}
+            className={`custom-button ${context.activeButton === 7 ? 'active' : ''}`}
+            onClick={() => handleClick(7, '/employee-msg', 'Messages')}
+          >
+          
+            Send Messages
+          </Button>
+        </li>
+        {/* Add other buttons similarly */}
+      </ul>
+    </div>
+  );
+};
+
+
+const UserProfileDrawer = ({ open, onClose }) => {
+  const { styles } = useStyle();
+  const [form] = Form.useForm();
+  const user = JSON.parse(localStorage.getItem("user"));
+  const navigate = useNavigate()
+  
+  const [name, setName] = useState("");
+  const [aliceName, setAliceName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [type, setType] = useState("Day");
+  const [isToggle, setIsToggle] = useState(false);
+  const [activeButton, setActiveButton] = useState(0);
+
+  const [EmployeeData, setEmployeeData] = useState([]);
+  const [EmployeeTasks, setEmployeeTasks] = useState([]);
+
+  console.log("user", user);
+  console.log("employeData", EmployeeData);
+  const handleSubmit = async () => {
+    console.log("Backend API URL:", import.meta.env.VITE_BACKEND_API);
+    try {
+      console.log("hello22");
+
+      await form.validateFields();
+      console.log("hello");
+      const payload = {
+        name,
+        aliceName,
+        email,
+        phone,
+        password,
+        type,
+      };
+      console.log("payload", payload);
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_API}/registeruser`,
+        payload
+      );
+
+      console.log("res", res);
+      toast.success(res.data, {});
+      setName("");
+      setAliceName("");
+      setEmail("");
+      setPhone("");
+      setPassword("");
+      onClose();
+    } catch (error) {
+      if (error.response) {
+        toast.warning(error.response.data, {});
+      } else {
+        console.log("Validation failed:", error);
+      }
+    }
+  };
+
+  const handleLogout = async() => {
+    localStorage.removeItem("user");
+    Cookies.remove("token");
+    onClose()
+    // await new Promise((resolve) => setTimeout(resolve, 100));
+    navigate("/Login");
+    window.location.reload()
+  };
+
+  // antd Styling
+  const classNames = {
+    body: styles["my-drawer-body"],
+    mask: styles["my-drawer-mask"],
+    header: styles["my-drawer-header"],
+    footer: styles["my-drawer-footer"],
+    content: styles["my-drawer-content"],
+  };
+  const drawerStyles = {};
+
+  const emailValidator = (_, value) => {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!value || emailPattern.test(value)) {
+      return Promise.resolve();
+    }
+    toast.error("Please enter a valid email address.");
+    return Promise.reject(new Error("Please enter a valid email address."));
+  };
+
+  const minLengthValidator = (minLength) => (_, value) => {
+    if (!value || value.length >= minLength) {
+      return Promise.resolve();
+    }
+    toast.error(`Minimum length should be ${minLength} characters.`);
+    return Promise.reject(
+      new Error(`Minimum length should be ${minLength} characters.`)
+    );
+  };
+
+  const data = {
+    name: "Kajal Gupta",
+    image: image1,
+  };
+
+  const getEmployeeTaskData = async () => {
+    console.log("user._id");
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_API}/tasks/${user._id}`
+      );
+      setEmployeeData(response.data);
+      const assignedTasks = response.data.reduce((tasks, project) => {
+        const userTasks = project.tasks.filter(
+          (task) => task.assigneeId === user._id
+        );
+        return tasks.concat(userTasks);
+      }, []);
+      console.log("assignedTasks", assignedTasks);
+      setEmployeeTasks(assignedTasks);
+    } catch (err) {
+      console.log("catch error ", err);
+    }
+  };
+
+  console.log("employeData", EmployeeData);
+  const handleToggle = () => {
+    setIsToggle(!isToggle);
+  };
+
+  useEffect(() => {
+    getEmployeeTaskData();
+  }, []);
+
+  return (
+    <div className="drawerPage">
+      <Drawer
+        title={
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div style={{ display: "flex" }}>
+              <div
+                className="profileBtn d-flex"
+                style={{
+                  background: "#efe9e9",
+                  padding: "7px",
+                  width: "42px",
+                  height: "42px",
+                  borderRadius: "20px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <button
+                  className="rounded-circle1"
+                  style={{
+                    width: "35px !important",
+                    padding: "10px",
+                    height: "30px",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "#bba399",
+                    color: "#fff",
+                    border: "none",
+                  }}
+                  onClick={handleToggle}
+                >
+                  {user?.name && user.name.charAt(0).toUpperCase()}
+                </button>
+              </div>
+              <div
+                className="d-flex align-items-center gap-1"
+                style={{ height: "50px" }}
+              >
+                <h6
+                  style={{
+                    fontSize: "1rem",
+                    opacity: "0.99",
+                    paddingLeft: "5px",
+                  }}
+                  className="mt-2 mx-auto"
+                >
+                  {user?.name && user.name.toUpperCase()}
+                </h6>
+              </div>
+            </div>
+            <div
+              className="logout-btn "
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Button
+               
+              className="custom-btn btn-5"
+              
+              onClick={() =>  handleLogout()}
+              >Logout</Button>
+            </div>
+          </div>
+        }
+        width={650}
+        onClose={onClose}
+        open={open}
+        classNames={classNames}
+        styles={drawerStyles}
+        bodyStyle={{
+          paddingBottom: 80,
+        }}
+      >
+        <div className="projectDrawer">
+          <Form form={form} layout="vertical">
+            <ul
+              class="nav nav-pills nav-underline"
+              id="pills-tab1"
+              role="tablist"
+            >
+              <li class="nav-item " role="presentation">
+                <button
+                  class="nav-link active nav-underline px-3"
+                  id="pills-activity"
+                  data-bs-toggle="pill"
+                  data-bs-target="#pills-activity-home"
+                  type="button"
+                  role="tab"
+                  aria-controls="pills-home"
+                  aria-selected="true"
+                >
+                  Activity
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link px-3"
+                  id="pills-mywork"
+                  data-bs-toggle="pill"
+                  data-bs-target="#pills-mywork-home"
+                  type="button"
+                  role="tab"
+                  aria-controls="pills-contact"
+                  aria-selected="false"
+                >
+                  My Work
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link px-3"
+                  id="pills-assignedwork"
+                  data-bs-toggle="pill"
+                  data-bs-target="#pills-assignedwork-home"
+                  type="button"
+                  role="tab"
+                  aria-controls="pills-contact"
+                  aria-selected="false"
+                >
+                  {" "}
+                  Newly Assigned Task
+                </button>
+              </li>
+            </ul>
+            <div
+              style={{ borderBottom: "1px solid #ddd9d9", paddingTop: "3px " }}
+            ></div>
+
+            <div className="tab-content all-projects" id="pills-tabContent">
+              <div
+                className="tab-pane fade show active table-responsive"
+                id="pills-activity-home"
+                role="tabpanel"
+                aria-labelledby="pills-activity-home"
+                tabindex="0"
+              >
+                <div>
+                  <div
+                    className="d-flex justify-content-start gap-4 mx-5 mt-4"
+                    style={{ flexDirection: "column" }}
+                  >
+                    {EmployeeData?.map((itemData, i) => {
+                      return (
+                        <>
+                          <div>
+                            <p
+                              style={{
+                                fontSize: "0.9rem",
+                                letterSpacing: "0.6px",
+                                color: "#2b2828",
+                              }}
+                            >
+                              Project Name : {itemData.projectName}
+                            </p>
+                          </div>
+                          {EmployeeTasks.map((itemTask) => {
+                            return (
+                              <div
+                                className="all-project-list"
+                                style={{
+                                  border: "1px solid #ccc",
+                                  padding: "10px",
+                                  lineHeight: "20px",
+                                  color: "gray",
+                                  fontSize: "0.8rem",
+                                  height: "auto",
+                                  borderRadius: "6px",
+                                  boxShadow: "0 0 7px #b4b2b2",
+                                }}
+                              >
+                                <p>
+                                  {" "}
+                                  <span style={{ paddingRight: "5px" }}>
+                                    <svg
+                                      width="12px"
+                                      height="12px"
+                                      viewBox="0 0 16 16"
+                                      version="1.1"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      xmlns:xlink="http://www.w3.org/1999/xlink"
+                                      fill="#000000"
+                                    >
+                                      <g
+                                        id="SVGRepo_bgCarrier"
+                                        stroke-width="0"
+                                      ></g>
+                                      <g
+                                        id="SVGRepo_tracerCarrier"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                      ></g>
+                                      <g id="SVGRepo_iconCarrier">
+                                        {" "}
+                                        <path
+                                          fill="#87909E"
+                                          d="M8 4c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4z"
+                                        ></path>{" "}
+                                        <path
+                                          fill="#87909E"
+                                          d="M8 1c3.9 0 7 3.1 7 7s-3.1 7-7 7-7-3.1-7-7 3.1-7 7-7zM8 0c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8v0z"
+                                        ></path>{" "}
+                                      </g>
+                                    </svg>{" "}
+                                  </span>{" "}
+                                  {itemTask.taskname || "Task Name"}
+                                </p>
+
+                                <p>
+                                  {" "}
+                                 
+                                  {itemTask.assigneeName || "Assignee"}
+                                </p>
+                                <p>
+                                  {" "}
+                                
+                                  Deadline: {itemTask.deadline}
+                                </p>
+
+                                <p>
+                                  {" "}
+                                
+                                  Priority: {itemTask.priority}
+                                </p>
+
+                                <p>
+                                  {" "}
+                                 
+                                  Status: {itemTask.status}
+                                </p>
+                              </div>
+                            );
+                          })}
+                        </>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+              <div
+                className="tab-pane fade"
+                id="pills-mywork-home"
+                role="tabpanel"
+                aria-labelledby="pills-mywork-tab"
+              >
+                <div className="my-5">
+                  <div className="d-flex justify-content-start gap-4 mx-5 mt-4">
+                    <ul
+                      class="nav nav-pills mb-3"
+                      id="pills-tab"
+                      role="tablist"
+                    >
+                      <li class="nav-item" role="presentation">
+                        <button
+                          class="nav-link active"
+                          id="pills-home-tab"
+                          data-bs-toggle="pill"
+                          data-bs-target="#pills-home"
+                          type="button"
+                          role="tab"
+                          aria-controls="pills-home"
+                          aria-selected="true"
+                        >
+                          Todays Work
+                        </button>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <button
+                          class="nav-link"
+                          id="pills-profile-tab"
+                          data-bs-toggle="pill"
+                          data-bs-target="#pills-profile"
+                          type="button"
+                          role="tab"
+                          aria-controls="pills-profile"
+                          aria-selected="false"
+                        >
+                          Due Work
+                        </button>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <button
+                          class="nav-link"
+                          id="pills-contact-tab"
+                          data-bs-toggle="pill"
+                          data-bs-target="#pills-contact"
+                          type="button"
+                          role="tab"
+                          aria-controls="pills-contact"
+                          aria-selected="false"
+                        >
+                          Next
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="tab-pane fade"
+                id="pills-assignedwork-home"
+                role="tabpanel"
+                aria-labelledby="pills-assignedwork-tab"
+              >
+                <div className="my-5">
+                  <div className="d-flex justify-content-start gap-4 mx-3 mt-4">
+                    <ul
+                      class="nav nav-pills mb-3"
+                      id="pills-tab"
+                      role="tablist"
+                    >
+                      <li class="nav-item" role="presentation">
+                        <button
+                          class="nav-link active"
+                          id="pills-home-tab"
+                          data-bs-toggle="pill"
+                          data-bs-target="#pills-home"
+                          type="button"
+                          role="tab"
+                          aria-controls="pills-home"
+                          aria-selected="true"
+                        >
+                          All New Projects
+                        </button>
+                      </li>
+               
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="fixed-bottom d-flex justify-content-end mx-5">
+              <Space className="text-center d-flex  my-4 gap-4">
+                <Button
+                  onClick={handleSubmit}
+                  className="buttonFilled"
+                  type="primary"
+                >
+                  Submit
+                </Button>
+                <Button className="buttonLine" type="button" onClick={onClose}>
+                  Cancel
+                </Button>
+              </Space>
+            </div>
+          </Form>
+        </div>
+      </Drawer>
+    </div>
+  );
+};
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -565,92 +1291,16 @@ const ProjectList = () => {
               }}
             >
               <h6 style={{ fontWeight: "300", fontSize: "0.9rem" }}>
-                <span style={{ paddingRight: "5px" }}>
-                  <svg
-                    width="12px"
-                    height="12px"
-                    viewBox="0 0 16 16"
-                    version="1.1"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="#000000"
-                  >
-                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                    <g
-                      id="SVGRepo_tracerCarrier"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    ></g>
-                    <g id="SVGRepo_iconCarrier">
-                      <path
-                        fill="#87909E"
-                        d="M8 4c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4z"
-                      ></path>
-                      <path
-                        fill="#87909E"
-                        d="M8 1c3.9 0 7 3.1 7 7s-3.1 7-7 7-7-3.1-7-7 3.1-7 7-7zM8 0c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8v0z"
-                      ></path>
-                    </g>
-                  </svg>
-                </span>
+              
                 {task.taskname || "task "}
               </h6>
               <p style={{ paddingTop: "10px" }}>
-                <span style={{ paddingRight: "5px" }}>
-                  <svg
-                    fill="#000000"
-                    height="12px"
-                    width="12px"
-                    version="1.1"
-                    id="Layer_1"
-                    xmlns="http://www.w3.org/2000/svg"
-                    xmlnsXlink="http://www.w3.org/1999/xlink"
-                    viewBox="0 0 456.368 456.368"
-                    xmlSpace="preserve"
-                  >
-                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                    <g
-                      id="SVGRepo_tracerCarrier"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    ></g>
-                    <g id="SVGRepo_iconCarrier">
-                      <g>
-                        <g>
-                          <g>
-                            <path d="M324.194,220.526c-6.172,7.772-13.106,14.947-21.07,21.423c45.459,26.076,76.149,75.1,76.149,131.158 c0,30.29-66.367,54.018-151.09,54.018s-151.09-23.728-151.09-54.018c0-56.058,30.69-105.082,76.149-131.158 c-7.963-6.476-14.897-13.65-21.07-21.423c-50.624,31.969-84.322,88.41-84.322,152.581c0,19.439,10.644,46.53,61.355,65.201 c31.632,11.647,73.886,18.06,118.979,18.06c45.093,0,87.347-6.413,118.979-18.06c50.71-18.671,61.355-45.762,61.355-65.201 C408.516,308.936,374.818,252.495,324.194,220.526z"></path>
-                            <path d="M228.182,239.795c56.833,0,100.597-54.936,100.597-119.897C328.779,54.907,284.993,0,228.182,0 c-56.833,0-100.597,54.936-100.597,119.897C127.585,184.888,171.372,239.795,228.182,239.795z M228.182,29.243 c39.344,0,71.354,40.667,71.354,90.654s-32.01,90.654-71.354,90.654s-71.354-40.667-71.354-90.654S188.838,29.243,228.182,29.243 z"></path>
-                          </g>
-                        </g>
-                      </g>
-                    </g>
-                  </svg>
-                </span>
+              
                 {task.assigneeName || "kjl gpt"}
               </p>
 
               <p>
-                <span style={{ paddingRight: "3px" }}>
-                  <svg
-                    height="12px"
-                    width="12px"
-                    fill="#000000"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                    <g
-                      id="SVGRepo_tracerCarrier"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    ></g>
-                    <g id="SVGRepo_iconCarrier">
-                      <path
-                        d="M6,22H18a3,3,0,0,0,3-3V7a2,2,0,0,0-2-2H17V3a1,1,0,0,0-2,0V5H9V3A1,1,0,0,0,7,3V5H5A2,2,0,0,0,3,7V19A3,3,0,0,0,6,22ZM5,12.5a.5.5,0,0,1,.5-.5h13a.5.5,0,0,1,.5.5V19a1,1,0,0,1-1,1H6a1,1,0,0,1-1-1Z"
-                        fill="#5b5757"
-                      ></path>
-                    </g>
-                  </svg>
-                </span>
+              
                 {task.DeadLine || "01-01-24"}
               </p>
               <p

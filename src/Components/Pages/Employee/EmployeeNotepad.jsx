@@ -54,8 +54,8 @@ const EmplyeeActivity = () => {
           const res = await axios.get(
             `${import.meta.env.VITE_BACKEND_API}/notepad/${id}`
           );
-          setUser(res.data.name);
-          setAllNotes(res.data.notes.notes);
+          setUser(res?.data?.name);
+          setAllNotes(res?.data.notes.notes);
         } catch (error) {
           console.log(error);
         }

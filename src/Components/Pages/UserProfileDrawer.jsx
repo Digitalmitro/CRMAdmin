@@ -43,10 +43,8 @@ const navigate = useNavigate()
   const handleSubmit = async () => {
     console.log("Backend API URL:", import.meta.env.VITE_BACKEND_API);
     try {
-      console.log("hello22");
 
       await form.validateFields();
-      console.log("hello");
       const payload = {
         name,
         aliceName,

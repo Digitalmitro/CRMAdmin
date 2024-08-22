@@ -30,9 +30,9 @@ const EmplyeeActivity = () => {
   const token = Cookies.get("token");
   const Profile = localStorage.getItem("admin");
   const NewProfile = JSON.parse(Profile);
-  const user_id = NewProfile._id;
-  const user_name = NewProfile.name;
-  const aliceName = NewProfile.aliceName;
+  const user_id = NewProfile?._id;
+  const user_name = NewProfile?.name;
+  const aliceName = NewProfile?.aliceName;
 
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -205,7 +205,7 @@ const handleDel = (id) => {
     <>
       <div className="employee-project-container container my-4">
       <CustomDrawer open={open} onClose={onClose} onSubmit={handleSubmit} />
-        <div  className="d-flex justify-content-between">
+        <div  className=" filterPanel d-flex justify-content-between">
         <div className="d-flex align-items-end gap-3 ">
             <div className="inputborder">
               <select
@@ -242,7 +242,7 @@ const handleDel = (id) => {
                 value={searchTerm}
                 onChange={handleChange}
               />
-          <div className="d-flex  align-items-end justify-content-end">
+          <div className=" empData d-flex  align-items-end justify-content-end">
            
             <button className="empbuttonDowload px-2" onClick={downloadExcel}>
             <PiDownloadSimpleBold
@@ -250,7 +250,7 @@ const handleDel = (id) => {
             Employee Data
             </button>
             <div className="emp-holidays-btn d-flex col justify-content-end">
-            <button className="emp-select-month mx-2"
+            <button className=" createEmp emp-select-month mx-2"
              style={{
               width:"180px",
             }}
@@ -261,6 +261,8 @@ const handleDel = (id) => {
             </div>
            
           </div>
+
+
         </div>
         <hr />
         <div className="project-title my-2">

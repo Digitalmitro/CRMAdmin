@@ -34,9 +34,9 @@ const EmplyeeConcern = () => {
   const token = Cookies.get("token");
   const Profile = localStorage.getItem("admin");
   const NewProfile = JSON.parse(Profile);
-  const user_id = NewProfile._id;
-  const user_name = NewProfile.name;
-  const aliceName = NewProfile.aliceName;
+  const user_id = NewProfile?._id;
+  const user_name = NewProfile?.name;
+  const aliceName = NewProfile?.aliceName;
 
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -68,7 +68,6 @@ const EmplyeeConcern = () => {
     setIsModalOpen(false);
   };
 
-
   const handleEmployeeChange = (event) => {
     setSelectedEmployee(event.target.value);
     console.log(event.target.value);
@@ -89,11 +88,11 @@ const EmplyeeConcern = () => {
   };
 
   const getData = async () => {
-    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/message`);
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/concern`);
     setData(res.data);
     setFilteredData(res.data);
   };
-
+  console.log("concern", data);
   const handleMonthChange = (event) => {
     setSelectedMonth(event.target.value);
   };
@@ -119,11 +118,11 @@ const EmplyeeConcern = () => {
     // Filter data based on search term and selected date
     const filtered = data.filter((item) => {
       const matchSearchTerm =
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.message.toLowerCase().includes(searchTerm.toLowerCase());
+        item?.name?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+        item?.email?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+        item?.message?.toLowerCase().includes(searchTerm?.toLowerCase());
 
-      const matchSelectedDate = !selectedDate || item.date === selectedDate;
+      const matchSelectedDate = !selectedDate || item?.date === selectedDate;
 
       return matchSearchTerm && matchSelectedDate;
     });
@@ -135,7 +134,7 @@ const EmplyeeConcern = () => {
     try {
       console.log(id, event.target.name);
       const { data } = await axios.put(
-        `${import.meta.env.VITE_BACKEND_API}/messageUpdate/${id}`,
+        `${import.meta.env.VITE_BACKEND_API}/concern/${id}`,
         {
           status: event.target.name,
         }
@@ -150,83 +149,82 @@ const EmplyeeConcern = () => {
   return (
     <>
       <div className="employee-project-container container py-4">
-        <div className="d-flex gap-3 mx-1">
-       
-       <div className=" emp-select-month ">
-       <select
-              
-              style={{
-                width: "124px",
-                height: "30px",
-                paddingRight: "12px",
-                overflow: "hidden",
-                // border:"1px solid black"
-              }}
-              onChange={handleEmployeeChange}
-            >
-              <option value="">Select Employee</option>
-              {data.map((res) => {
-                return (
-                  <>
-                    <option value={res._id}>{res.name}</option>
-                  </>
-                );
-              })}
-          </select>
-        </div>
-          <div className="emp-select-date">
-            <input
-              onChange={(e) => setDate(e.target.value)}
-              style={{
-                width: "130px",
-                height: "35px",
-                fontSize: "0.9rem",
-                paddingRight: "12px",
-                paddingBottom: "10px",
-                paddingTop: "8px",
-                paddingLeft: "15px",
-                background: "#FF560E",
-                borderRadius: "6px",
-                // color: "#fff",
-              }}
-              type="date"
-            />
+        <div className="filterConcern d-flex gap-3 mx-1">
+          <div className=" d-flex gap-3 mx-1">
+            <div className="emp-select-month ">
+              <select
+                style={{
+                  width: "124px",
+                  height: "30px",
+                  paddingRight: "12px",
+                  overflow: "hidden",
+                  // border:"1px solid black"
+                }}
+                onChange={handleEmployeeChange}
+              >
+                <option value="">Select Employee</option>
+                {data.map((res) => {
+                  return (
+                    <>
+                      <option value={res._id}>{res.name}</option>
+                    </>
+                  );
+                })}
+              </select>
+            </div>
+            <div className="emp-select-date">
+              <input
+                onChange={(e) => setDate(e.target.value)}
+                style={{
+                  width: "130px",
+                  height: "35px",
+                  fontSize: "0.9rem",
+                  paddingRight: "12px",
+                  paddingBottom: "10px",
+                  paddingTop: "8px",
+                  paddingLeft: "15px",
+                  background: "#FF560E",
+                  borderRadius: "6px",
+                  // color: "#fff",
+                }}
+                type="date"
+              />
 
-            {/* for search */}
-            <input
-              value={searchTerm}
-              onChange={handleSearchChange}
-              placeholder="search..."
-              className="search shadow"
-              style={{
-                marginLeft: "10px",
-                border: "none",
-                borderBottom: "1px solid coral",
-              }}
-            />
-          </div>
-          <input
+              {/* for search */}
+              <input
                 value={searchTerm}
                 onChange={handleSearchChange}
                 placeholder="search..."
-                className="search shadow mx-3"
+                className="search searchInput shadow"
                 style={{
                   marginLeft: "10px",
                   border: "none",
                   borderBottom: "1px solid coral",
-                  borderRadius:"10px",
-                  padding:"0 20px"
                 }}
               />
+            </div>
+          </div>
+
+          <input
+            value={searchTerm}
+            onChange={handleSearchChange}
+            placeholder="search..."
+            className="search shadow mx-3"
+            style={{
+              marginLeft: "10px",
+              border: "none",
+              borderBottom: "1px solid coral",
+              borderRadius: "10px",
+              padding: "0 20px",
+            }}
+          />
         </div>
-      
+
         <hr />
         <div className="">
           <div className="allproject d-flex gap-5 align-items-end ">
             <h6>Employee Concern</h6>
-          
           </div>
-          
         </div>
         <div class="tab-content table-cont " id="pills-tabContent">
           <div
@@ -343,28 +341,25 @@ const EmplyeeConcern = () => {
                         <td>{res?.name}</td>
                         <td>{res?.email}</td>
                         <td>{res?.date}</td>
-                        <td> {res.message}</td>
-                        <td> {res.status}</td>
-                        
+                        <td> {res?.message}</td>
+                        <td> {res?.status}</td>
 
                         <td class="d-flex gap-1">
-                        <button
-                          className="buttonFilled"
-                          onClick={(e) => handleStatus(res._id, e)}
-                          name="Approved"
-                        >
-                          Approved
-                        </button>
-                        <button
-                          className="buttondeny"
-                          onClick={(e) => handleStatus(res._id, e)}
-                          name="Denied"
-                        >
-                          Deny
-                        </button>
-                      </td>
-
-
+                          <button
+                            className="buttonFilled"
+                            onClick={(e) => handleStatus(res._id, e)}
+                            name="Approved"
+                          >
+                            Approved
+                          </button>
+                          <button
+                            className="buttondeny"
+                            onClick={(e) => handleStatus(res._id, e)}
+                            name="Denied"
+                          >
+                            Deny
+                          </button>
+                        </td>
                       </tr>
                     </>
                   );

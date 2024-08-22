@@ -15,12 +15,20 @@ import UserProfileDrawer from "./UserProfileDrawer";
 
 // import Sidebar from './Sidebar';
 const Header = () => {
+
+  const Profile = localStorage.getItem('admin')
+  const NewProfile = JSON.parse(Profile)
+  const name = NewProfile?.name
+  // const email = NewProfile?.email
+  // const user_id = NewProfile?._id
+
+
   const [isToggle, setIsToggle] = useState(false);
-  const [activeButton, setActiveButton] = useState(0);
+  const [activeButton, setProfileActiveButton] = useState(0);
   const [open, setOpen] = useState(false);
 
   const handleClick = (index) => {
-    setActiveButton(index);
+    setProfileActiveButton(index);
   };
 
   const handleToggle = () => {
@@ -102,7 +110,7 @@ const Header = () => {
                 onClick={showDrawer}
                 // onClick={handleToggle}
               >
-                O
+                { name?.charAt(0).toUpperCase()}
               </button>
               <span className="mt-1 ">
                 <IoIosArrowDown width={20} 
@@ -112,45 +120,6 @@ const Header = () => {
               </span>
             </div>
 
-            {/* <div
-              className={`${isToggle ? "showDetails" : "hideDetails"}`}
-              style={{ marginTop: "10rem" }}
-            >
-              <Button
-                className={`custom-button ${
-                  activeButton === 0 ? "active" : ""
-                }`}
-                onClick={() => handleClick(0)}
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: "30px",
-                  marginBottom: "10px ",
-                  paddingTop: "18px",
-                  width: "7rem",
-                }}
-              >
-                <h6 style={{ fontSize: "0.7rem", color: "#222" }}>Login</h6>
-              </Button>
-              <Button
-                className={`custom-button ${
-                  activeButton === 1 ? "active" : ""
-                }`}
-                onClick={() => handleClick(1)}
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: "30px",
-                  marginBottom: "10px ",
-                  paddingTop: "18px",
-                  width: "7rem",
-                }}
-              >
-                <h6 style={{ fontSize: "0.7rem", color: "#222" }}>Logout</h6>
-              </Button>
-            </div> */}
           </div>
         </div>
         <UserProfileDrawer open={open} onClose={onClose} onSubmit={handleSubmit} />

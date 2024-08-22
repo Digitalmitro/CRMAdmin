@@ -19,36 +19,15 @@
   height: 7vh;
   border-bottom: 1px solid rgb(219, 209, 209);
 
-}
-.main{
+}.main{
   overflow-x: hidden;
 }
-
 .part2 .rounded-circle1 {
   color: #222 !important;
   min-width: 40px !important;
   width: 40px !important;
   height: 40px;
   font-size: 30px;
-}
-
-
-.notification .line{
-  height: .2rem;
-  left: 0;
-  background-color: coral;
-  width: 2.5rem;
-  /* margin-top: -2px; */
-}
-
-.notificationText p{
-  font-weight: 600px;
-  font-size: .8rem;
-  color: black;
-}
-
-.notificationText .timer{
-  margin-top: -9px;
 }
 
 .main .sidebar-wrapper {
@@ -64,18 +43,21 @@
   overflow-y: auto;
   overflow-x: hidden;
   position: fixed;
-  top: 7vh;
+  top: 8vh;
   left: 0;
   background: #F7F8F9;
   padding-bottom: 100px;
   transition: all 0.3s ease-in-out;
   border-right: 1px solid rgb(219, 209, 209);
+
+
 }
 
 .main .main-content {
 width: 100%;
   padding: 8px;
- 
+  /* border: 2px solid red; */
+  /* height: 100vh; */
   transition: all 0.4s ease-in-out;
 }
 
@@ -94,7 +76,7 @@ width: 100%;
 }
 
 .main .sidebar-wrapper.toggle .sidebar {
-  width: 52px !important;
+  width: 46px !important;
   ;
 }
 
@@ -154,8 +136,10 @@ width: 100%;
   justify-content: center;
   width: 25px;
   height: 25px;
-  transition:"all 0.4s ease-in-out";
-  margin-right:6px;
+  transition:"all 0.4s ease-in-out"
+}
+.main .sidebar-wrapper .sidebar ul button span{
+  padding-right: .3rem;
 }
 
 .main .sidebar-wrapper .sidebar ul button .icon svg {
@@ -321,8 +305,6 @@ margin: 3px;
 
 
 @media screen and (max-width:900px) {
-
-
   .gridtext{
     display: flex;
     flex-direction: column;
@@ -338,19 +320,50 @@ margin: 3px;
 }
 @media screen and (max-width:768px) {
   .hide-ham{
-    display: none !important;
+    /* display: none !important; */
    
   }
   .main .sidebar-wrapper .sidebar {
-    width: 10%;
+    width: 40%;
   }
   .hide-sidebar{
-    width: 10%;
+    width: 40%;
   }
   .bread-crumb{
       padding-top: 0.8rem;
   }
  
+  /* sales section */
+  
+  .project-title {
+    /* flex-direction: column; */
+    display: flex;
+
+    width: 100%;
+    justify-content: flex-start !important;
+    gap:2px;
+  }
+
+  .cool{
+    justify-content: flex-start !important;
+  }
+  .fliterSection{
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+  }
+  .emp-select-month select{
+    width: 90px !important;
+  }
+  .empbuttonDowload{
+    /* margin-left: 28%; */
+    width: 50%  !important;
+    align-self: self-end !important;
+  }
+
+  .  {
+    height: 39px !important;
+  }
 }
 /* ---------------Attendance.css------------------- */
 .attendance-container {
@@ -479,6 +492,12 @@ margin: 3px;
   font-size: 0.7rem;
   color: #707070;
 }
+
+select{
+
+  font-size: .8rem;
+}
+
 
 
 
@@ -1761,6 +1780,192 @@ font-size: 0.8rem;
 }
 
 
+
 /* chat message  */
+
+
+
+
+/* media Queries */
+
+/* Hide the original sidebar on mobile view */
+
+@media screen and (max-width:900px) {
+
+
+  .gridtext{
+    display: flex;
+    flex-direction: column;
+    align-items: start !important;
+    justify-content: start !important;
+  }
+  .dashboardhome h5, .dashboardhome h6{
+  font-size:15px;
+  }
+  .hr-breadcum{
+    margin-left: -5px ;
+  }
+
+}
+@media screen and (max-width:768px) {
+  
+  .hide-ham{
+    display: none !important;
+   
+  }
+  .main .sidebar-wrapper .sidebar {
+    width: 10%;
+  }
+  .hide-sidebar{
+    width: 10%;
+  }
+  .bread-crumb{
+      padding-top: 0.8rem;
+  }
+  .row1{
+    display: flex;
+    justify-content: space-between;
+  }
+  .main .main-content {
+    padding: 0px;
+  }
+  .emp-card{
+    width: 300px !important;
+  }
+ .emp-card h6 {
+  font-size: 0.8rem !important;
+ }
+
+ .drawerPage{
+  padding: 2px;
+  width: 100% !important;
+}
+
+
+/* employee filter*/
+
+.emp-select-months-year {
+  width: 90% !important;
+  font-size: 0.8rem !important;
+  /* border: 2px solid red; */
+
+}
+.emp-select-month,.emp-select-date {
+  width: 135px !important;
+  padding: 0 !important;
+  z-index: 1 !important;
+  
+} 
+
+.project-list-container{
+  /* display: flex; */
+  width: 90%;
+  flex-direction: column !important;
+  justify-content: center;
+  align-items: center;
+}
+.list-1{
+  max-height: 250px;
+
+}
+
+.projects-list-heading ul {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two columns */
+  grid-template-rows: auto auto;  /* Two rows */
+  justify-items: stretch;
+  align-items: stretch; 
+  row-gap: 15px;
+  column-gap: 1px;
+}
+
+.add-task button {
+margin: 3px ;
+margin-left: 2.8rem;
+padding: 2px;
+
+}
+
+  .projects-list-heading{
+      /* align-items: end; */
+      width: 120%;
+    }        
+.projects-list-heading ul li:first-child {
+  grid-column: 1 / 3;
+}
+
+.projects-list-heading{
+  flex-direction: column;
+}
+.filter-selected{
+width: 100px;
+}
+ .list-of-days{
+width: 30% ;
+
+}
+.list-of-days button{
+  padding:0px 10px;
+ 
+}
+.emp-notepad {
+  width: 90%;
+}
+.project-title{
+  width: 80%;
+}
+
+.filterPanel{
+  /* border: 1px solid green; */
+  display: grid !important;
+  grid-template-rows: 1fr 1fr;
+  gap: 15px;
+}
+
+.filterPanel input{
+  width: 80%  !important;
+}
+
+
+/* employee concern  */
+
+
+
+.filterConcern {
+ flex-direction: column;
+ gap: 20px;
+}
+
+/*  */
+
+.AttenDance .allproject h6{
+ font-size: 15px !important;
+}
+.empBtn{
+ font-size: 10px !important;
+
+}
+.empbuttonDowload, .emp-select-month, .emp-select-date {
+  font-size: .7rem;
+}
+.chat-app{
+  flex-direction: column;
+}
+.chat-app .sidebar{
+  height: 200px;
+}
+
+.chat-container{
+  width: 90%;
+  height: 70vh;
+}
+
+/* .message-container{
+  max-height: calc(-250px + 100vh);
+} */
+
+
+
+}
 
 

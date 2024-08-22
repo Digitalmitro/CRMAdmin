@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { Input, Button, Spin, List, Avatar } from "antd";
 import io from "socket.io-client";
@@ -13,6 +13,9 @@ const EmpMsg = () => {
   const token = Cookies.get("token");
   const decodeToken = token && jwtDecode(token);
   const userId = decodeToken._id;
+
+  const messagesEndRef = useRef(null); 
+
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [employees, setEmployees] = useState([]);
@@ -33,6 +36,17 @@ const EmpMsg = () => {
     status: "",
     user_id: userId,
   });
+
+
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+  useEffect(() => {
+    scrollToBottom(); // Scroll to bottom on page load or when messages change
+  }, [messages]);
+
 
   // Establish socket connection only when an employee is selected
   useEffect(() => {
@@ -192,6 +206,7 @@ const EmpMsg = () => {
                 messages?.map((item, index) => {
                   console.log(item);
                   return (
+                    <> 
                     <div
                       key={index}
                       className={
@@ -211,6 +226,8 @@ const EmpMsg = () => {
                       <p style={styles.messageText}>{item.message}</p>
                       <p style={styles.messageTime}>{item.time}</p>
                     </div>
+                    <div ref={messagesEndRef} /> 
+                    </>
                   );
                 })
               )}
@@ -246,7 +263,7 @@ const EmpMsg = () => {
 const styles = {
   chatApp: {
     display: "flex",
-    height: "100vh",
+    height: "80vh !important",
     backgroundColor: "#f5f5f5",
   },
   sidebar: {
@@ -256,8 +273,8 @@ const styles = {
     borderRight: "1px solid #e0e0e0",
     display: "flex",
     flexDirection: "column",
-    height: "100vh", // Fixed height for the sidebar
-    overflowY: "auto", // Enable scrolling
+    height: "80vh !important",
+    overflowY: "auto", 
   },
   searchBar: {
     marginBottom: "20px",
@@ -274,16 +291,20 @@ const styles = {
     flexDirection: "column",
     justifyContent: "space-between",
     flexGrow: 1,
+
     padding: "20px",
     backgroundColor: "#f5f5f5",
+    height:"80vh",
   },
   messagesContainer: {
     display: "flex",
     flexDirection: "column",
     overflowY: "auto",
+    overflowX:"hidden",
     padding: "10px",
+      scrollbarWidth: "thin",
     marginBottom: "20px",
-    maxHeight: "80vh",
+    maxHeight:  "calc(100vh - 150px)",
   },
   spinner: {
     alignSelf: "center",
@@ -296,16 +317,16 @@ const styles = {
   },
   senderName: {
     margin: 0,
-    fontSize: "0.9rem",
+    fontSize: "0.8rem",
     color: "#424242",
   },
   messageText: {
-    margin: "5px 0",
-    fontSize: "1rem",
+    margin: "2px 0",
+    fontSize: ".9rem",
     color: "#424242",
   },
   messageTime: {
-    fontSize: "0.8rem",
+    fontSize: "0.7rem",
     color: "#757575",
     textAlign: "right",
     margin: 0,
@@ -315,8 +336,10 @@ const styles = {
     alignItems: "center",
     backgroundColor: "#ffffff",
     borderRadius: "8px",
-    padding: "10px",
+    padding: "5px 10px",
+    position: "sticky",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+    bottom: 0,
   },
   inputField: {
     flexGrow: 1,

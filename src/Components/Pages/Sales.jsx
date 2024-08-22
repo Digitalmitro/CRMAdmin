@@ -182,7 +182,7 @@ const Sales = () => {
   return (
     <>
       <div className="employee-project-container container my-4">
-        <div className="d-flex justify-content-between align-items-end">
+        <div className=" fliterSection d-flex justify-content-between align-items-end">
           <div className="emp-select-months-year align-items-end">
             <div className="emp-select-month">
               <select

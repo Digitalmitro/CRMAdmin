@@ -336,8 +336,8 @@ const Attendance = () => {
 
        
         <hr />
-        <div className="" style={{marginBottom:"-10px"}}>
-         <div className="d-flex justify-content-between">
+        <div className=" " style={{marginBottom:"-10px"}}>
+         <div className=" AttenDance  d-flex justify-content-between">
          <div className="allproject">
             <h6
             style={{fontSize:"19px"}}>Today's Attendance</h6>
