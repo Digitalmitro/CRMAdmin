@@ -52,6 +52,8 @@ const EmplyeeConcern = () => {
   const [isOpen, setIsOpen] = useState(true);
   const [filteredData, setFilteredData] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
+  const [EmployeeNames, setEmployeeNames] = useState([]);
+  const [SelectedEmployee, setSelectedEmployee] = useState([]);
 
   const showDrawers = () => {
     setOpen(true);
@@ -73,33 +75,39 @@ const EmplyeeConcern = () => {
     console.log(event.target.value);
   };
 
-  useEffect(() => {
-    getData();
-
+  useEffect(()=>{
     if (token) {
       // Use the <Navigate /> component to redirect
     } else {
       return navigate("/Login");
     }
-  }, [searchTerm, sortBy, token]);
+  }), [token]
+  useEffect(() => {
+    const timeoutRef = setTimeout(() => {
+      getData();
 
-  const refreshData = () => {
-    getData(); // Refresh data function
-  };
+    }, 500)
+    return () => {
+      clearTimeout(timeoutRef)
+    }
+   
+  }, [searchTerm, sortBy]);
+
+ 
 
   const getData = async () => {
     const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/concern`);
     setData(res.data);
     setFilteredData(res.data);
+    const uniqueNames = [...new Set(res.data.map((item) => item.name))];
+    console.log('unique names', uniqueNames)
+    setEmployeeNames(uniqueNames);
   };
   console.log("concern", data);
   const handleMonthChange = (event) => {
     setSelectedMonth(event.target.value);
   };
 
-  useEffect(() => {
-    getData();
-  }, [searchTerm, sortBy, shiftType]);
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -163,10 +171,10 @@ const EmplyeeConcern = () => {
                 onChange={handleEmployeeChange}
               >
                 <option value="">Select Employee</option>
-                {data.map((res) => {
+                {EmployeeNames?.map((res) => {
                   return (
                     <>
-                      <option value={res._id}>{res.name}</option>
+                      <option value={res}>{res}</option>
                     </>
                   );
                 })}

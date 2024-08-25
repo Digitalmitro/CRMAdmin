@@ -99,7 +99,13 @@ const EmployeeTransfer = () => {
       };
     
       useEffect(() => {
-        Getdata();
+        const timeoutRef = setTimeout(() => {
+          Getdata();
+ 
+        }, 500)
+        return () => {
+          clearTimeout(timeoutRef)
+        }
       }, [searchTerm, sortBy]);
       const handleChange = (event) => {
         setSearchTerm(event.target.value);

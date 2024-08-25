@@ -42,6 +42,16 @@ const Sales = () => {
   const [selectedResult, setSelectedResult] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+
+  useEffect(()=>{
+    const timeoutRef = setTimeout(() => {
+      Getdata();
+
+    }, 500)
+    return () => {
+      clearTimeout(timeoutRef)
+    }
+  },[searchTerm, sortBy])
   // ant desgin Drawer
   const showDrawer = () => {
     setOpen(true);
@@ -85,8 +95,6 @@ const Sales = () => {
     const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`);
     // const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/attendance`)
 
-    const filteredData = res.data.filter((e) => e.type === "Night");
-    setNight(filteredData);
   };
   const Getdata = async () => {
     const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/allsale`);
@@ -96,15 +104,14 @@ const Sales = () => {
     console.log("data", res.data);
     setData(res.data);
     filterAndSortResults(searchTerm, sortBy, res.data);
+    
+    const filteredData = res.data.filter((e) => e.type === "Night");
+    setNight(filteredData);
     // setData1(ress.data.transfer);
     // setData2(resss.data.sale);
     // setData3(ressss.data.attendance);
   };
 
-  useEffect(() => {
-    Getdata();
-    getNight();
-  }, [searchTerm, sortBy]);
 
   const filterAndSortResults = (searchTerm, sortBy, data) => {
     let filteredResults = data.filter((item) =>
@@ -182,93 +189,9 @@ const Sales = () => {
   return (
     <>
       <div className="employee-project-container container my-4">
-        <div className=" fliterSection d-flex justify-content-between align-items-end">
+        <div className=" filterPanel d-flex justify-content-between align-items-end">
           <div className="emp-select-months-year align-items-end">
-            <div className="emp-select-month">
-              <select
-                style={{
-                  width: "124px",
-                  height: "30px",
-                  paddingRight: "12px",
-                  overflow: "hidden",
-                }}
-                onChange={handleMonthChange}
-              >
-                <option value="">Select Month</option>
-                <option value="Jan">Jan</option>
-                <option value="Feb">Feb</option>
-                <option value="Mar">Mar</option>
-                <option value="Apr">Apr</option>
-                <option value="May">May</option>
-                <option value="Jun">Jun</option>
-                <option value="Jul">July</option>
-                <option value="Aug">Aug</option>
-                <option value="Sep">Sep</option>
-                <option value="Oct">Oct</option>
-                <option value="Nov">Nov</option>
-                <option value="Dec">Dec</option>
-              </select>
-            </div>
-            <div className="emp-select-date">
-              <input
-                onChange={(e) => setDate(e.target.value)}
-                style={{
-                  width: "130px",
-                  height: "35px",
-                  fontSize: "0.8rem",
-                  paddingRight: "12px",
-                  paddingBottom: "10px",
-                  paddingTop: "8px",
-                  paddingLeft: "15px",
-                  borderRadius: "6px",
-                }}
-                type="date"
-              />
-            </div>
-            <select
-              className="emp-select-month"
-              name="sortBy"
-              id="sortBy"
-              value={sortBy}
-              style={{ fontSize: "0.8rem",}}
-              onChange={handleSortChange}
-            >
-              <option value="">SortBy</option>
-              <option value="Date">Date</option>
-              <option value="Name">Name</option>
-            </select>
-           
-          </div>
-          <div className=" ">
-            <input
-              style={{
-                border: "none",
-                borderBottom: "1px solid coral",
-                borderRadius: "10px",
-              }}
-              className=" px-3"
-              type="text"
-              placeholder="search"
-              value={searchTerm}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="d-flex  align-items-end justify-content-end mx-2 ">
-            <button className="empbuttonDowload px-3" onClick={downloadExcel}    style={{ fontSize: "0.8rem",}}>
-              <PiDownloadSimpleBold style={{ marginRight: "5px",     fontSize:"0.8rem",
-                height: "35px",
-
-               }} /> Sales Data
-            </button>
-          </div>
-        </div>
-        <hr />
-        <div className="project-title row my-2 ">
-          <div className="allproject col">
-            <h6>Sales Activity</h6>
-          </div>
-
-          <div className=" cool d-flex col justify-content-end  ">
+          
             <select
               className=" emp-select-month "
               style={{
@@ -287,6 +210,76 @@ const Sales = () => {
                 );
               })}
             </select>
+            <div className="emp-select-month">
+           
+           <select
+             style={{
+               width: "124px",
+               height: "30px",
+               paddingRight: "12px",
+               overflow: "hidden",
+             }}
+             onChange={handleMonthChange}
+           >
+             <option value="">Select Month</option>
+             <option value="Jan">Jan</option>
+             <option value="Feb">Feb</option>
+             <option value="Mar">Mar</option>
+             <option value="Apr">Apr</option>
+             <option value="May">May</option>
+             <option value="Jun">Jun</option>
+             <option value="Jul">July</option>
+             <option value="Aug">Aug</option>
+             <option value="Sep">Sep</option>
+             <option value="Oct">Oct</option>
+             <option value="Nov">Nov</option>
+             <option value="Dec">Dec</option>
+           </select>
+         </div>
+            <select
+              className="emp-select-month"
+              name="sortBy"
+              id="sortBy"
+              value={sortBy}
+              style={{ fontSize: "0.8rem",}}
+              onChange={handleSortChange}
+            >
+              <option value="">SortBy</option>
+              <option value="Date">Date</option>
+              <option value="Name">Name</option>
+            </select>
+           
+          </div>
+         
+          <div className="d-flex  align-items-end justify-content-end mx-2 gap-3">
+          <input
+              style={{
+                border: "none",
+                borderBottom: "1px solid coral",
+                borderRadius: "10px",
+              }}
+              className=" px-3"
+              type="text"
+              placeholder="search"
+              value={searchTerm}
+              onChange={handleChange}
+            />
+            <button className="empbuttonDowload px-3" onClick={downloadExcel}    style={{ fontSize: "0.8rem",}}>
+              <PiDownloadSimpleBold style={{ marginRight: "5px",
+              
+
+               }} /> Sales Data
+            </button>
+          </div>
+        </div>
+        <hr />
+        <div className="project-title row my-2 ">
+          <div className="allproject col">
+            <h6>Sales Activity</h6>
+          </div>
+
+          <div className=" cool d-flex col justify-content-end  ">
+          
           </div>
         </div>
         <div class="tab-content table-cont " id="pills-tabContent">

@@ -304,7 +304,7 @@ margin: 3px;
 }
 
 
-@media screen and (max-width:900px) {
+@media screen and (max-width:1024px) {
   .gridtext{
     display: flex;
     flex-direction: column;
@@ -316,6 +316,13 @@ margin: 3px;
   }
   .hr-breadcum{
     margin-left: -5px ;
+  }
+  .chat-app .sidebar{
+    padding : 5px !important;
+  }
+
+  .ant-list-items{
+    padding: 2px;
   }
 }
 @media screen and (max-width:768px) {
@@ -917,8 +924,8 @@ tbody tr {
   display: flex;
   align-items: center;
   justify-content: center;
- 
-
+ font-size: 14px;
+white-space: nowrap;
 }
 
 .emp-select-month select {
@@ -985,7 +992,7 @@ tbody tr {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-left: 4px;
+  padding:1px  6px;
   /* color:#fff !important; */
   
 }
@@ -1805,7 +1812,18 @@ font-size: 0.8rem;
   .hr-breadcum{
     margin-left: -5px ;
   }
+  .filterPanel{
+    /* border: 1px solid green; */
+    
+    zoom: 0.7;
+  }
+  .projects-list-heading{
+    zoom: 0.8;
 
+  }
+  .empbuttonDowload{
+font-size: 14px;
+  }
 }
 @media screen and (max-width:768px) {
   
@@ -1877,8 +1895,11 @@ font-size: 0.8rem;
   align-items: stretch; 
   row-gap: 15px;
   column-gap: 1px;
+  width: 80%;
 }
-
+.projects-list-heading ul button{
+  width: 80% !important;
+}
 .add-task button {
 margin: 3px ;
 margin-left: 2.8rem;
@@ -1920,6 +1941,7 @@ width: 30% ;
   display: grid !important;
   grid-template-rows: 1fr 1fr;
   gap: 15px;
+  /* zoom: 0.7; */
 }
 
 .filterPanel input{
@@ -1953,6 +1975,7 @@ width: 30% ;
 }
 .chat-app .sidebar{
   height: 200px;
+  width: 100% !important;
 }
 
 .chat-container{
@@ -1963,6 +1986,9 @@ width: 30% ;
 /* .message-container{
   max-height: calc(-250px + 100vh);
 } */
+.filterCallback{
+  zoom: 0.7;
+}
 
 
 

@@ -10,7 +10,7 @@ import { useNavigate, useParams } from "react-router-dom";
 function UpdateEmployee() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [data, setData] = useState(null); // Initialized as null
+  const [data, setData] = useState(null); 
 
   const handleData = async () => {
     try {
@@ -22,8 +22,16 @@ function UpdateEmployee() {
       console.error("Error fetching data:", error);
     }
   }
+
   useEffect(() => {
-    handleData();
+    const timeoutRef = setTimeout(() => {
+      handleData();
+
+    }, 500)
+    return () => {
+      clearTimeout(timeoutRef)
+    }
+
   }, []);
 
   const handleUpdate = async (values) => {

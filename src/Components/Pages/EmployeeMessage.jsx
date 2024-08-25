@@ -263,18 +263,20 @@ const EmpMsg = () => {
 const styles = {
   chatApp: {
     display: "flex",
-    height: "80vh !important",
+    height: "80vh",
+    // overflow:"hidden",
     backgroundColor: "#f5f5f5",
   },
   sidebar: {
-    width: "300px",
+    width: "30%",
     padding: "20px",
     backgroundColor: "#ffffff",
     borderRight: "1px solid #e0e0e0",
     display: "flex",
     flexDirection: "column",
-    height: "80vh !important",
-    overflowY: "auto", 
+    height: "80vh ",
+    overflowY: "auto !important", 
+    scrollbarWidth: "thin",
   },
   searchBar: {
     marginBottom: "20px",
@@ -294,7 +296,7 @@ const styles = {
 
     padding: "20px",
     backgroundColor: "#f5f5f5",
-    height:"80vh",
+    // height:"80vh",
   },
   messagesContainer: {
     display: "flex",
@@ -304,7 +306,8 @@ const styles = {
     padding: "10px",
       scrollbarWidth: "thin",
     marginBottom: "20px",
-    maxHeight:  "calc(100vh - 150px)",
+    // maxHeight:  "calc(100vh - 150px)",
+    maxHeight:  "80vh",
   },
   spinner: {
     alignSelf: "center",
@@ -345,7 +348,7 @@ const styles = {
     flexGrow: 1,
     border: "none",
     outline: "none",
-    padding: "10px",
+    padding: ".4rem",
     fontSize: "1rem",
     borderRadius: "8px",
   },

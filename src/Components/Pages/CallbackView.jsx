@@ -70,6 +70,9 @@ const CallbackView = () => {
         setData(res.data);
     };
 
+
+
+    
     useEffect(() => {
         getData();
         if (token) {

@@ -48,6 +48,15 @@ const EmplyeeActivity = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedResult, setSelectedResult] = useState(null);
 
+  useEffect(() => {
+    if (token) {
+      // Fetch initial data
+      Getdata();
+    } else {
+      navigate("/Login");
+    }
+  }, [token]);
+
   const showModal = (result) => {
     setSelectedResult(result);
     setIsModalOpen(true);
@@ -80,24 +89,24 @@ const EmplyeeActivity = () => {
   const getNight = async () => {
     const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`);
 
-    const filteredData = res.data.filter((e) => e.type === "Night");
-    setNight(filteredData);
+   
   };
+
 
   const [userData, setUserData] = useState({});
 
   useEffect(() => {
+   const timeoutRef =  setTimeout(() => {
     Getdata();
-    getNight();
-    if (token) {
-      // Use the <Navigate /> component to redirect
-    } else {
-      return navigate("/Login");
-    }
+    },500)
+
+    // getNight();
+  return ()=> {
+    clearTimeout(timeoutRef)
+  }
   }, [searchTerm, sortBy, token]);
 
   const refreshData = () => {
-    Getdata(); // Refresh data function
   };
 
   const [isOpen, setIsOpen] = useState(true);
@@ -109,6 +118,8 @@ const EmplyeeActivity = () => {
     const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`);
     setData(res.data.reverse());
     filterAndSortResults(searchTerm, sortBy, shiftType, res.data);
+    const filteredData = res.data.filter((e) => e.type === "Night");
+    setNight(filteredData);
   };
   console.log(data);
 
@@ -132,9 +143,6 @@ const handleDel = (id) => {
   });
 };
 
-  useEffect(() => {
-    Getdata();
-  }, [searchTerm, sortBy, shiftType]); // Include shiftType in the dependencies
 
   const handleChange = (event) => {
     setSearchTerm(event.target.value);

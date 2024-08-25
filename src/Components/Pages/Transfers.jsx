@@ -48,6 +48,7 @@ const Transfers = () => {
   const [selectedEmployee, setSelectedEmployee] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("");
   const [selectedResult, setSelectedResult] = useState(null);
+  const [night, setNight] = useState([]);
 
   const [date, setDate] = useState("");
 
@@ -85,21 +86,14 @@ const Transfers = () => {
     const res = await axios.get(
       `${import.meta.env.VITE_BACKEND_API}/alltransfer`
     );
-
+    const filteredData = res.data.filter((e) => e.type === "Night");
+    setNight(filteredData);
     console.log("transfer data data", res.data);
     setData(res.data);
     filterAndSortResults(searchTerm, sortBy, res.data);
   };
 
-  const [night, setNight] = useState([]);
-  const getNight = async () => {
-    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`);
-    // const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/attendance`)
 
-    const filteredData = res.data.filter((e) => e.type === "Night");
-    setNight(filteredData);
-  };
-  
 
   const filterAndSortResults = (searchTerm, sortBy, data) => {
     let filteredResults = data.filter((item) =>
@@ -174,14 +168,19 @@ const Transfers = () => {
   console.log(filteredData);
 
   useEffect(() => {
-    Getdata();
-    getNight()
+    const timeoutRef = setTimeout(() => {
+      Getdata();
+
+    }, 500)
+    return () => {
+      clearTimeout(timeoutRef)
+    }
   }, [searchTerm, sortBy]);
 
   return (
     <>
       <div className="employee-project-container container py-4">
-      <div  className="d-flex justify-content-between align-items-end">
+      <div  className=" filterPanel d-flex justify-content-between align-items-end">
           <div className="emp-select-months-year">
           <select
               className=" emp-select-month "
@@ -262,13 +261,13 @@ const Transfers = () => {
                 }}
               />
           <div className="d-flex align-items-end justify-content-end">
-          <div className="">
+          {/* <div className=""> */}
           <button className="empbuttonDowload mx-2" onClick={downloadExcel}
           style={{fontSize:"0.8rem",}}>
             <PiDownloadSimpleBold
             style={{marginRight:"5px", }}/> Transfer Data
             </button>
-          </div>
+          {/* </div> */}
             
           </div>
 

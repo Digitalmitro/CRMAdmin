@@ -103,7 +103,13 @@ const EmplyeeActivity = () => {
       };
     
       useEffect(() => {
-        Getdata();
+        const timeoutRef = setTimeout(() => {
+          Getdata();
+ 
+        }, 500)
+        return () => {
+          clearTimeout(timeoutRef)
+        }
       }, [searchTerm, sortBy]);
 
       const handleChange = (event) => {
@@ -188,16 +194,8 @@ const EmplyeeActivity = () => {
       <div className="employee-project-container container my-4">
       <CustomDrawer open={open} onClose={onClose} onSubmit={handleSubmit} />
         <div  className="d-flex justify-content-between">
-        <div className="d-flex align-items-end gap-3 mt-3">
-        <div className="d-flex  align-items-end justify-content-end">
-           
-       <div>
-       <button className=" empbuttonDowload col px-2" onClick={downloadExcel}
-       style={{fontSize:"13px"}}>
-           <PiDownloadSimpleBold style={{ marginRight: "5px" }} />Employee Sales Data
-           </button>
-       </div>
-         </div>
+        <div className="  d-flex align-items-end gap-3 mt-3">
+       
          <div className="emp-select-month col">
               <select className=""
                 style={{

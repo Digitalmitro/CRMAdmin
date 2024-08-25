@@ -57,28 +57,42 @@ const CallbackTable = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState("");
   const [date, setDate] = useState("");
+  const [night, setNight] = useState([]);
+
+
+  useEffect(()=> {
+    if (token) {
+      // Use the <Navigate /> component to redirect
+    } else {
+      return navigate("/Login");
+    }
+  },[token])
+
 
   // Function to handle the change in the select input
   const handleMonthChange = (event) => {
     setSelectedMonth(event.target.value);
   };
   console.log("USER_ID", user_id);
+
   const Getdata = async () => {
     const res = await axios.get(
       `${import.meta.env.VITE_BACKEND_API}/allcallback`
     );
     setData(res.data.reverse());
+    const filteredData = res.data.filter((e) => e.type === "Night");
+    setNight(filteredData);
     // filterAndSortResults(searchTerm, sortBy, res.data.callback)
     console.log(res.data);
   };
   console.log(data);
-  const [night, setNight] = useState([]);
+
+
   const getNight = async () => {
     const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`);
     // const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/attendance`)
 
-    const filteredData = res.data.filter((e) => e.type === "Night");
-    setNight(filteredData);
+   
   };
   const handleDel = async (id) => {
     console.log("IsDeleted")
@@ -125,15 +139,17 @@ const CallbackTable = () => {
     await axios.post(`${import.meta.env.VITE_BACKEND_API}/notification`, noti);
   };
   useEffect(() => {
-    Getdata();
-    getNight();
-    if (token) {
-      // Use the <Navigate /> component to redirect
-    } else {
-      return navigate("/Login");
-    }
-  }, [searchTerm, sortBy, token]);
+    const timeoutRef = setTimeout(() => {
+      Getdata();
 
+    }, 500)
+    return () => {
+      clearTimeout(timeoutRef)
+    }
+   
+  }, [searchTerm, sortBy]);
+
+ 
   const refreshData = () => {
     Getdata(); // Refresh data function
   };
@@ -224,7 +240,7 @@ const CallbackTable = () => {
   return (
     <>
       <div className="employee-project-container container py-4">
-        <div className="d-flex justify-content-between align-items-end">
+        <div className=" filterPanel d-flex justify-content-between align-items-end">
           <div className="emp-select-months-year">
           <select
               className="emp-select-month "
@@ -290,6 +306,9 @@ const CallbackTable = () => {
             </div>
           
           </div>
+         
+             
+          <div className="d-flex  gap-2 ">
           <input
                 value={searchTerm}
                 onChange={handleSearchChange}
@@ -301,13 +320,11 @@ const CallbackTable = () => {
                   borderRadius:"10px",
                 }}
               />
-             
-          <div className="d-flex  align-items-end justify-content-end">
-        
             <button className="empbuttonDowload px-4" onClick={downloadExcel}
             style={{fontSize: "0.8rem",}}>
             <PiDownloadSimpleBold
-            style={{marginRight:"5px"}}/>
+            style={{marginRight:"5px"}}
+            />
             
                Callback Data
             </button>
