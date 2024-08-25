@@ -162,7 +162,7 @@ const EmpMsg = () => {
 
   return (
     <div className="chat-app" style={styles.chatApp}>
-      <div className="sidebar" style={styles.sidebar}>
+      <div className="chatSidebar" style={styles.chatSidebar}>
         <Input
           placeholder="Search employee..."
           value={searchQuery}
@@ -267,14 +267,14 @@ const styles = {
     // overflow:"hidden",
     backgroundColor: "#f5f5f5",
   },
-  sidebar: {
+  chatSidebar: {
     width: "30%",
     padding: "20px",
     backgroundColor: "#ffffff",
     borderRight: "1px solid #e0e0e0",
     display: "flex",
     flexDirection: "column",
-    height: "80vh ",
+    height: "76vh ",
     overflowY: "auto !important", 
     scrollbarWidth: "thin",
   },

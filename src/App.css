@@ -142,6 +142,9 @@ width: 100%;
   padding-right: .3rem;
 }
 
+
+
+
 .main .sidebar-wrapper .sidebar ul button .icon svg {
   color: #000000;
   font-size: 22px;
@@ -317,7 +320,7 @@ margin: 3px;
   .hr-breadcum{
     margin-left: -5px ;
   }
-  .chat-app .sidebar{
+  .chat-app .chatSidebar{
     padding : 5px !important;
   }
 
@@ -1973,7 +1976,7 @@ width: 30% ;
 .chat-app{
   flex-direction: column;
 }
-.chat-app .sidebar{
+.chat-app .chatSidebar{
   height: 200px;
   width: 100% !important;
 }

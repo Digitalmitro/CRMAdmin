@@ -149,10 +149,7 @@ const CallbackTable = () => {
    
   }, [searchTerm, sortBy]);
 
- 
-  const refreshData = () => {
-    Getdata(); // Refresh data function
-  };
+
 
   // Function to handle search term change
   const handleSearchChange = (event) => {
@@ -218,6 +215,8 @@ const CallbackTable = () => {
   const filteredData = data?.filter((entry) => {
     // Check if the entry's name includes the search term
     const nameIncludesSearchTerm = entry.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase()) || entry.employeeName
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
 

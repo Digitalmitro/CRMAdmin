@@ -98,7 +98,7 @@ const EmplyeeConcern = () => {
   const getData = async () => {
     const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/concern`);
     setData(res.data);
-    setFilteredData(res.data);
+    setFilteredData(res.data.reverse());
     const uniqueNames = [...new Set(res.data.map((item) => item.name))];
     console.log('unique names', uniqueNames)
     setEmployeeNames(uniqueNames);
@@ -123,20 +123,31 @@ const EmplyeeConcern = () => {
 
   useEffect(() => {
     window.scrollTo(0, document.body.scrollHeight);
+    console.log("Filtering data with: ", {
+      searchTerm,
+      selectedDate,
+      SelectedEmployee,
+    });
+  
     // Filter data based on search term and selected date
     const filtered = data.filter((item) => {
       const matchSearchTerm =
         item?.name?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
         item?.email?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
         item?.message?.toLowerCase().includes(searchTerm?.toLowerCase());
+       
+        const matchSelectedEmployee =
+        !SelectedEmployee.length || SelectedEmployee.includes(item?.name); 
+        
+        // formating the table Date intothe selected Date using moment
+        const itemDateFormatted = moment(item?.date, "MMMM Do YYYY, h:mm:ss a").format("YYYY-MM-DD");
+        const matchSelectedDate = !selectedDate || itemDateFormatted === selectedDate;
 
-      const matchSelectedDate = !selectedDate || item?.date === selectedDate;
-
-      return matchSearchTerm && matchSelectedDate;
+      return matchSearchTerm && matchSelectedEmployee && matchSelectedDate;
     });
 
     setFilteredData(filtered);
-  }, [searchTerm, data]);
+  }, [searchTerm, data, selectedDate, SelectedEmployee]);
 
   async function handleStatus(id, event) {
     try {
@@ -182,7 +193,7 @@ const EmplyeeConcern = () => {
             </div>
             <div className="emp-select-date">
               <input
-                onChange={(e) => setDate(e.target.value)}
+                onChange={(e) => setSelectedDate(e.target.value)}
                 style={{
                   width: "130px",
                   height: "35px",

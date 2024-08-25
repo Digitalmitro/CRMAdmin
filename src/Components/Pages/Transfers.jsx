@@ -3,6 +3,7 @@ import { FaListUl } from "react-icons/fa";
 import { FaFilter } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
 import { DatePicker, Space } from "antd";
+import * as XLSX from "xlsx";
 // import messageIcon from "../../../assets/messageIcon.png";
 // import Delete from "../../../assets/Vectorss.png";
 // import CallableDrawer from "./CallbackDrawer"
@@ -136,7 +137,7 @@ const Transfers = () => {
     const url = URL.createObjectURL(excelBlob);
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", "callBack.xlsx");
+    link.setAttribute("download", "transfers.xlsx");
     document.body.appendChild(link);
 
     // Trigger the download
@@ -159,7 +160,7 @@ const Transfers = () => {
       selectedEmployee !== "" ? entry.user_id === selectedEmployee : true;
     const searchMatches =
       searchTerm !== ""
-        ? Object.values(entry).some((value) =>
+        ? Object.values(entry).concat(entry.employeeName).some((value) =>
             value.toString().toLowerCase().includes(searchTerm.toLowerCase())
           )
         : true;

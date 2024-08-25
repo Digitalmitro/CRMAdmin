@@ -104,7 +104,7 @@ const EmplyeeActivity = () => {
   return ()=> {
     clearTimeout(timeoutRef)
   }
-  }, [searchTerm, sortBy, token]);
+  }, [searchTerm, sortBy, shiftType]);
 
   const refreshData = () => {
   };
@@ -118,8 +118,8 @@ const EmplyeeActivity = () => {
     const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`);
     setData(res.data.reverse());
     filterAndSortResults(searchTerm, sortBy, shiftType, res.data);
-    const filteredData = res.data.filter((e) => e.type === "Night");
-    setNight(filteredData);
+    // const filteredData = res.data.filter((e) => e.type === "Night");
+    setNight(res.data);
   };
   console.log(data);
 

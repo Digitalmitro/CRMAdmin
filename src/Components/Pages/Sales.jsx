@@ -91,44 +91,44 @@ const Sales = () => {
     setSortBy(event.target.value);
   };
   const [night, setNight] = useState([]);
+
   const getNight = async () => {
     const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`);
     // const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/attendance`)
-
+    // const filteredData = res.data.map((e) =>e.name);
+    setNight(res.data);
   };
   const Getdata = async () => {
     const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/allsale`);
     // const ress = await axios.get(`${import.meta.env.VITE_BACKEND_API}/transfer-user/${id}`);
     // const resss = await axios.get(`${import.meta.env.VITE_BACKEND_API}/sale-user/${id}`);
     // const ressss = await axios.get(`${import.meta.env.VITE_BACKEND_API}/attendance/${id}`);
+    
     console.log("data", res.data);
-    setData(res.data);
+    setData(res.data.reverse());
     filterAndSortResults(searchTerm, sortBy, res.data);
     
-    const filteredData = res.data.filter((e) => e.type === "Night");
-    setNight(filteredData);
+    
     // setData1(ress.data.transfer);
     // setData2(resss.data.sale);
     // setData3(ressss.data.attendance);
   };
 
+useEffect(()=> {
+  getNight()
+},[])
+console.log("night", night)
+  // const filterAndSortResults = (searchTerm, sortBy, data) => {
+  
+  //   if (sortBy === "Date") {
+  //     filteredResults.sort((a, b) => new Date(a.date) - new Date(b.date));
+  //   } else if (sortBy === "Name") {
+  //     filteredResults.sort((a, b) => a.name.localeCompare(b.name));
+  //   }
 
-  const filterAndSortResults = (searchTerm, sortBy, data) => {
-    let filteredResults = data.filter((item) =>
-      Object.values(item)
-        .join(" ")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-    );
+  //   setSearchResults(filteredResults);
+  // };
 
-    if (sortBy === "Date") {
-      filteredResults.sort((a, b) => new Date(a.date) - new Date(b.date));
-    } else if (sortBy === "Name") {
-      filteredResults.sort((a, b) => a.name.localeCompare(b.name));
-    }
-
-    setSearchResults(filteredResults);
-  };
   const downloadExcel = () => {
     if (filteredData?.length === 0) {
       console.error("No data to download");
@@ -154,7 +154,7 @@ const Sales = () => {
     const url = URL.createObjectURL(excelBlob);
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", "callBack.xlsx");
+    link.setAttribute("download", "Sales.xlsx");
     document.body.appendChild(link);
 
     // Trigger the download
@@ -167,22 +167,72 @@ const Sales = () => {
 
   // Filter the data based on the selected month and date
   const filteredData = data?.filter((entry) => {
+
     const dateMatches =
       date !== ""
         ? entry.createdDate === moment(date).format("MMM Do YY")
         : true;
-    const monthMatches =
-      selectedMonth !== "" ? entry.createdDate.includes(selectedMonth) : true;
+   
+     const monthMatches =
+        selectedMonth !== "" ? entry.createdDate.includes(selectedMonth) : true;
     const employeeMatches =
       selectedEmployee !== "" ? entry.user_id === selectedEmployee : true;
-    const searchMatches =
+   
+      const searchMatches =
       searchTerm !== ""
         ? Object.values(entry).some((value) =>
             value.toString().toLowerCase().includes(searchTerm.toLowerCase())
           )
         : true;
+
+        
     return dateMatches && monthMatches && employeeMatches && searchMatches;
   });
+
+
+  const filterAndSortData = () => {
+    // Filter by search term
+    let filteredResults = data?.filter((item) => {
+      // Match search term
+      const searchMatches =
+        !searchTerm ||
+        Object.values(item)
+          .join(" ")
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
+  
+      // Match employee
+      const employeeMatches =
+        !selectedEmployee || item.user_id === selectedEmployee;
+  
+      // Match date
+      const dateMatches =
+        !date || moment(item.createdDate).format("YYYY-MM-DD") === moment(date).format("YYYY-MM-DD");
+  
+      // Match month
+      const monthMatches =
+        !selectedMonth ||
+        moment(item.createdDate, "MMMM Do YYYY, h:mm:ss a").format("MMM") === selectedMonth;
+  
+      return searchMatches && employeeMatches && dateMatches && monthMatches;
+    });
+  
+    // Sort results
+    if (sortBy === "Date") {
+      filteredResults.sort(
+        (a, b) => new Date(a.createdDate) - new Date(b.createdDate)
+      );
+    } else if (sortBy === "Name") {
+      filteredResults.sort((a, b) => a.name.localeCompare(b.name));
+    }
+  
+    setSearchResults(filteredResults);
+  };
+  
+  useEffect(() => {
+    filterAndSortData();
+  }, [searchTerm, sortBy, selectedEmployee, selectedMonth, date, data]);
+  
 
   console.log(filteredData);
 

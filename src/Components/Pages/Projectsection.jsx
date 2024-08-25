@@ -18,14 +18,14 @@ const ProjectList = () => {
   const [docss, setdocss] = useState([]);
   const [docsDatas, setDocsDatas] = useState("");
 
-  const [ProjectsData, setprojectsData] = useState([]);
-  const [EmployeeTasks, setEmployeeTasks] = useState([]);
+  const [projectsData, setprojectsData] = useState([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [userdata, setUserData] = useState([]);
   const [projectName, setProjectsName] = useState("");
   const [projectListId, setProjectListId] = useState("");
   const [taskListId, setTaskListId] = useState("");
   const [selectedTask, setSelectedTask] = useState([]);
+  const [filterProjectsData, setfilterProjectsData] = useState([]);
 
   const [newSubList, setNewSubList] = useState({
     TaskName: "",
@@ -39,6 +39,18 @@ const ProjectList = () => {
   });
 
   console.log("assignees", taskAssignees);
+
+
+  useEffect(() => {
+    getProjectsData()
+  }, []);  
+
+  useEffect(() => {
+    getUsersData();
+    getAllAssigneeData();
+  }, [projectsData]);
+
+
 
   const showModals = () => {
     setModalOpened(true);
@@ -56,8 +68,8 @@ const ProjectList = () => {
     setModalIsOpen(true);
   };
   const handleSaveSubList = async () => {
-    console.log("newSubList", newSubList);
-    console.log("projectsname", projectName);
+    // console.log("newSubList", newSubList);
+    // console.log("projectsname", projectName);
     try {
       const newTaskData = {};
       newSubList.TaskName && (newTaskData.taskname = newSubList.TaskName);
@@ -67,8 +79,7 @@ const ProjectList = () => {
       newSubList.DeadLine && (newTaskData.deadline = newSubList.DeadLine);
       newSubList.comments && (newTaskData.comments = newSubList.comments);
       newSubList.priority && (newTaskData.priority = newSubList.priority);
-
-      console.log("newTaskData", newTaskData);
+      // console.log("newTaskData", newTaskData);
 
       projectName &&
         (await axios.put(
@@ -83,10 +94,6 @@ const ProjectList = () => {
           newTaskData
         );
       }
-
-      // Call getProjectsData to refresh the data
-      // await getProjectsData();
-      // Reset modal and newSubList state
       setModalIsOpen(false);
       getEmployeeTaskData();
       setNewSubList({
@@ -104,7 +111,7 @@ const ProjectList = () => {
     }
   };
   const handleDelete = async (projectId, taskItem, taskId) => {
-    console.log(projectId, taskId, taskItem);
+    // console.log(projectId, taskId, taskItem);
     console.log(
       `${
         import.meta.env.VITE_BACKEND_API
@@ -127,10 +134,7 @@ const ProjectList = () => {
       console.log("Action canceled.");
     }
   };
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setNewSubList({ ...newSubList, [name]: value });
-  };
+
 
   const getProjectsData = async () => {
     console.log("user._id");
@@ -139,14 +143,12 @@ const ProjectList = () => {
         `${import.meta.env.VITE_BACKEND_API}/projects`
       );
       setprojectsData(response.data);
+      setfilterProjectsData(response.data)
     } catch (err) {
       console.log("catch error ", err);
     }
   };
-  console.log("ProjectsData", ProjectsData);
-  useEffect(() => {
-    getProjectsData();
-  }, []);
+ 
 
   const handleSelectChange = (selectedUser) => {
     console.log("Selected user:", selectedUser);
@@ -156,39 +158,43 @@ const ProjectList = () => {
       AsigneeId: selectedUser.id,
     }));
   };
-  console.log("");
   const handleSelectPriority = (value) => {
     console.log("hello");
     setNewSubList((prev) => ({ ...prev, priority: value }));
     console.log("newSubList", newSubList);
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNewSubList({ ...newSubList, [name]: value });
+  };
   const getAllTaskname = async (selectedTaskName) => {
     try {
-      // Fetch project data
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API}/projects`
-      );
-      console.log("response", response.data);
-
-      const ProjectKaname = response.data.map((item) => item.projectName);
-      const taskName = response.data.flatMap((project) =>
+      const ProjectKaname = projectsData.map((item) => item.projectName);
+      const taskName = projectsData.flatMap((project) =>
         project.tasks.map((task) => task.taskname)
       );
       console.log("taskss", taskName);
       setTaskNames(ProjectKaname);
       setProjectsName(ProjectKaname);
+
       // Update state with the new task data
-      setData(newData);
-      setSelectedTask(filteredTasks);
+      // setData(newData);
+      // setSelectedTask(filteredTasks);
     } catch (error) {
       console.error("Error fetching project data:", error);
     }
   };
 
-  console.log("taskNames", taskNames);
+  console.log("taskNames", projectsData);
   const handleTaskNameChange = (event) => {
+    console.log('event', event.target.value)
     setSelectedTaskName(event.target.value);
+    const StoredProject = projectsData
+
+    const filterData = event.target.value !== "" ? StoredProject.filter((project) => project.projectName === event.target.value ): true
+
+    filterData.length>=0 && setfilterProjectsData(filterData)
   };
 
   const handleFilterClick = () => {
@@ -196,9 +202,9 @@ const ProjectList = () => {
   };
 
   const clearFilter = () => {
-    setSelectedTaskName("");
-    setSelectedTask([]);
-    setSelectedAssigneeId(null);
+   setfilterProjectsData(projectsData)
+   setShowAssignees(!showAssignees);
+
   };
 
   const getUsersData = async () => {
@@ -207,125 +213,26 @@ const ProjectList = () => {
     setUserData(res.data);
   };
 
-  const handleMeModeToggle = async () => {
-    try {
-      // Toggle the mode here (if needed, e.g., toggle a state value for Me Mode)
-      setMeMode((prevMode) => !prevMode);
-
-      // Fetch tasks assigned to the logged-in user
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API}/tasks/${user._id}`
-      );
-      const fetchedTasks = response.data;
-
-      // Flatten and filter tasks assigned to the logged-in user
-      let tasks = fetchedTasks.reduce((tasks, project) => {
-        const userTasks = project.tasks.filter(
-          (task) => task.assigneeId === user._id
-        );
-        return tasks.concat(userTasks);
-      }, []);
-
-      // Categorize tasks based on their status
-      const categorizeTask = (task) => {
-        if (task.status === "Completed") return "list3";
-        if (task.status === "In Progress") return "list2";
-        return "list1";
-      };
-
-      // Initialize a new data structure for the DragDropContext
-      const newData = { ...initialData };
-      tasks.forEach((task) => {
-        const listId = categorizeTask(task);
-
-        const subList = {
-          id: task._id,
-          content: (
-            <div
-              key={task._id}
-              style={{
-                fontSize: "0.8rem",
-                fontWeight: "300",
-                lineHeight: "10px",
-                letterSpacing: "0.7px",
-              }}
-            >
-              <h6 style={{ fontWeight: "300", fontSize: "0.9rem" }}>
-                <span style={{ paddingRight: "5px" }}>{/* SVG Icon */}</span>
-                {task.taskname || "Task"}
-              </h6>
-              <p style={{ paddingTop: "10px" }}>
-                <span style={{ paddingRight: "5px" }}>{/* SVG Icon */}</span>
-                {task.assigneeName || "Assignee"}
-              </p>
-              <p>
-                <span style={{ paddingRight: "3px" }}>{/* SVG Icon */}</span>
-                {task.DeadLine || "01-01-24"}
-              </p>
-              <p
-                style={{ color: task.priority === "pending" ? "red" : "green" }}
-              >
-                {/* Priority SVG Icon */}
-                {task.priority || "Priority"}
-              </p>
-              <p className="d-flex align-items-start gap-1">
-                <span style={{ paddingRight: "5px" }}>{/* SVG Icon */}</span>
-                <textarea
-                  rows="4"
-                  readOnly={true}
-                  cols="25"
-                  placeholder={task.comments || "Comments"}
-                  style={{ border: "none" }}
-                ></textarea>
-              </p>
-            </div>
-          ),
-        };
-
-        newData.lists = newData.lists.map((list) =>
-          list.id === listId
-            ? { ...list, items: [...list.items, subList] }
-            : list
-        );
-      });
-
-      // Update the state with the new data
-      setData(newData);
-      setTaskList(tasks); // Optionally, you can also update a separate task list state
-    } catch (error) {
-      console.error("Error fetching project data:", error);
-    }
-  };
   const getAllAssigneeData = async () => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API}/projects`
-      );
-
+     
+      const StoredData = projectsData
       // Extract assignee names and IDs
-      const assigneeData = response.data.flatMap((project) =>
+      const assigneeData = StoredData.flatMap((project) =>
         project.tasks.map((task) => ({
           assigneeName: task.assigneeName,
           assigneeId: task.assigneeId,
         }))
       );
 
-      console.log("response.data", assigneeData);
-
-      // Create a Set to track unique assignee IDs and corresponding names
       const uniqueAssignees = new Map();
-
       assigneeData.forEach(({ assigneeId, assigneeName }) => {
         if (!uniqueAssignees.has(assigneeId)) {
           uniqueAssignees.set(assigneeId, assigneeName);
         }
       });
-
       // Extract unique assignee names from the Map
       const uniqueAssigneeNames = Array.from(uniqueAssignees.values());
-
-      console.log("uniqueAssigneeNames", uniqueAssigneeNames);
-
       // Update state with the unique assignee names
       setTaskAssignees(uniqueAssigneeNames);
     } catch (error) {
@@ -333,6 +240,7 @@ const ProjectList = () => {
     }
   };
 
+  // docs post
   const handleSubmit = async () => {
     const formData = new FormData();
     docsDatas.trim() !== "" && formData.append("docsName", docsDatas);
@@ -359,25 +267,35 @@ const ProjectList = () => {
   const handleToggles = () => {
     setShowAssignees(!showAssignees);
   };
+
+
   const resetFilter = () => {
     window.location.reload();
   };
 
   const showAssigneeTask = (assigneeName) => {
-    const assigneeTask = projectsData.tasks.find(
-      (task) => task.assigneeName === assigneeName
+    const StoredData = projectsData
+    const filteredProjects = StoredData.filter(project => 
+      project.tasks.some(task => task.assigneeName === assigneeName)
     );
+  
+    // Extract the tasks that match the assigneeName from the filtered projects
+    const assigneeTasks = filteredProjects.flatMap(project => 
+      project.tasks.filter(task => task.assigneeName === assigneeName)
+    );
+  
+    console.log("Filtered Projects with matching AssigneeName", filteredProjects);
+    console.log("Tasks assigned to the given AssigneeName", assigneeTasks);
 
-    if (assigneeTask) {
-      setSelectedAssigneeId(assigneeTask.assigneeId);
+
+    if (assigneeTasks) {
+      setSelectedAssigneeId(assigneeTasks.assigneeId);
     }
-    setprojectsData(assigneeTask);
+    setfilterProjectsData(filteredProjects);
+    setShowAssignees(!showAssignees);
+
   };
 
-  useEffect(() => {
-    getUsersData();
-    getAllAssigneeData();
-  }, []);
 
   return (
     <>
@@ -408,7 +326,7 @@ const ProjectList = () => {
                 onChange={handleTaskNameChange}
                 value={selectedTaskName}
               >
-                <option value="">Select Task Name</option>
+                <option value="">Select Projects Name</option>
                 {taskNames.map((name, index) => (
                   <option
                     className="options"
@@ -421,98 +339,8 @@ const ProjectList = () => {
                 ))}
               </select>
             </button>
-
-            {/* {taskNames.length > 0 && (
-    <select onChange={(e) => setSelectedTask(e.target.value)}>
-      <option value="">Select Task</option>
-      {taskNames.map((taskname, index) => (
-        <option key={index} value={taskname}>
-          {taskname}
-        </option>
-      ))}
-    </select>
-  )} */}
-
-            {/* {showFilter ? (
-        <ul className="list-group list-group-flush dropdown my-2">
-            <button style={{background:"#5f55ed",width:"160px",color:"#fff"}} onClick={clearFilter} className="mx-auto">Clear Filter</button>
-          
-          {taskAssignees.map((name, index) => (
-            <li
-              key={index}
-              className="list-group-item"
-              onClick={() => showAssigneeTask(name)}
-            >
-              {name}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        ""
-      )} */}
-
-            {/* {isSearchVisible && (
-                  <input
-                    type="text"
-                    placeholder="Search by task name..."
-                    onChange={handleSearchChange}
-                  />
-                )} */}
           </li>
 
-          {/* <li>
-              <button>
-                <span style={{ paddingRight: "5px" }}>
-                  <svg
-                    viewBox="0 0 24 24"
-                    width="15px"
-                    height="20px"
-                    fill="#616161"
-                    xmlns="http://www.w3.org/2000/svg"
-                    stroke="#616161"
-                  >
-                    <path
-                      d="M13 12H21M13 8H21M13 16H21M6 7V17M6 17L3 14M6 17L9 14"
-                      stroke="#616161"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    ></path>
-                  </svg>
-                </span>
-                Sort
-              </button>
-            </li> */}
-          {/* <li>
-              <button onClick={handleMeModeToggle}>
-                <span style={{ paddingRight: "5px" }}>
-                  <svg
-                    width="15px"
-                    height="20px"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    stroke="#616161"
-                  >
-                    <path
-                      d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z"
-                      stroke="#616161"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    ></path>
-                    <path
-                      d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z"
-                      stroke="#616161"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    ></path>
-                  </svg>
-                </span>
-                Me mode
-              </button>
-            </li> */}
           <li style={{ position: "relative" }}>
             <button id="emp-assignee" onClick={handleToggles}>
               <span style={{ paddingRight: "5px" }}>
@@ -620,11 +448,11 @@ const ProjectList = () => {
         </div>
       </div>
 
-      {ProjectsData.map((items) => {
+      {filterProjectsData?.map((items) => {
         return (
           <>
             <div className="task-list-container">
-              <p style={{ fontSize: "1.1rem" }}>{items.projectName}</p>
+              <p style={{ fontSize: "1.1rem" }}>{items?.projectName}</p>
               <table
                 class="table table-bordered"
                 style={{ border: "1px solid #eee8e8" }}
@@ -643,7 +471,7 @@ const ProjectList = () => {
                     <th scope="col">Delete</th>
                   </tr>
                 </thead>
-                {items.tasks.map((taskItem) => {
+                {items?.tasks.map((taskItem) => {
                   return (
                     <>
                       <tbody className="text-start tbody ">
@@ -980,17 +808,23 @@ const ProjectList = () => {
                 </Modal>
               </table>
 
-              <Modal
+           
+            </div>
+            <Modal
                 title=""
                 open={modalOpened}
                 onOk={handleOk}
                 onCancel={handleCancel}
               >
                 <div className="added-task">
-                  <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-                    <li class="nav-item" role="presentation">
+                  <ul
+                    className="nav nav-pills mb-3"
+                    id="pills-tab"
+                    role="tablist"
+                  >
+                    <li className="nav-item" role="presentation">
                       <button
-                        class="nav-link active"
+                        className="nav-link active"
                         id="pills-home-tab"
                         data-bs-toggle="pill"
                         data-bs-target="#pills-home"
@@ -998,13 +832,14 @@ const ProjectList = () => {
                         role="tab"
                         aria-controls="pills-home"
                         aria-selected="true"
+                        // tabIndex='0'
                       >
                         Task
                       </button>
                     </li>
-                    <li class="nav-item" role="presentation">
+                    <li className="nav-item" role="presentation">
                       <button
-                        class="nav-link"
+                        className="nav-link"
                         id="pills-profile-tab"
                         data-bs-toggle="pill"
                         data-bs-target="#pills-profile"
@@ -1012,194 +847,197 @@ const ProjectList = () => {
                         role="tab"
                         aria-controls="pills-profile"
                         aria-selected="false"
+                        // tabIndex='1'
+
                       >
                         Doc
                       </button>
                     </li>
                   </ul>
 
-                  <div className="tab-content " id="pills-tabContent">
-                    <div
-                      className="tab-pane fade show active "
-                      id="pills-home"
-                      role="tabpanel"
-                      aria-labelledby="pills-home-tab"
-                      tabindex="0"
-                    >
-                      <Select
-                        style={{ width: "70%", marginBottom: "25px" }}
-                        placeholder="Enter Project Name"
-                        onChange={(value) => {
-                          const selectedUser = projectsData.find(
-                            (user) => user._id === value
-                          );
-                          handleProject({
-                            name: selectedUser.name,
-                            id: selectedUser._id,
-                          });
-                        }}
-                        virtual={false}
-                        dropdownStyle={{
-                          overflowY: "auto",
-                          scrollBehavior: "smooth",
-                        }}
+                  <div className="tab-content" id="pills-tabContent">
+                  
+                      <div
+                        className="tab-pane fade show active task-name"
+                        id="pills-home"
+                        role="tabpanel"
+                        aria-labelledby="pills-home-tab"
+                        tabindex="0"
                       >
-                        {ProjectsData.map((item) => (
-                          <Option key={item._id} value={item.projectName}>
-                            {item.name}
-                          </Option>
-                        ))}
-                      </Select>
-                      <div className="d-flex gap-3 ">
-                        <Col>
-                          <Form.Item>
-                            <Select
-                              placeholder="Enter Assignee Name"
-                              onChange={(value) => {
-                                const selectedUser = userdata.find(
-                                  (user) => user._id === value
-                                );
-                                handleAssignee({
-                                  name: selectedUser.name,
-                                  id: selectedUser._id,
-                                });
-                              }}
-                              virtual={false}
-                              dropdownStyle={{
-                                overflowY: "auto",
-                                scrollBehavior: "smooth",
-                              }}
-                            >
-                              {userdata.map((item) => (
-                                <Option key={item._id} value={item._id}>
-                                  {item.name}
-                                </Option>
-                              ))}
-                            </Select>
-                          </Form.Item>
-                        </Col>
-
-                        <Col>
-                          <Form.Item>
-                            <Input
-                              name="Task Name"
-                              type="text"
-                              value={newSubList.TaskName}
-                              onChange={handleChange}
-                              placeholder="Task Name"
-                            />
-                          </Form.Item>
-                        </Col>
-                      </div>
-
-                      <Input.TextArea
-                        name="comments"
-                        type="date"
-                        value={newSubList.comments}
-                        onChange={handleChange}
-                        placeholder="Comments"
-                      />
-                      <Form layout="vertical">
-                        <Row gutter={16}>
-                          <Col span={11}>
-                            <Form.Item>
-                              <Input
-                                style={{ marginTop: "14px" }}
-
-                                name="DeadLine"
-                                type="date"
-                                value={newSubList.DeadLine}
-                                onChange={handleChange}
-                                placeholder="DeadLine"
-                              />
-                            </Form.Item>
-                          </Col>
-                          <Col span={11}>
+                        <Select
+                          style={{ width: "70%", marginBottom: "25px" }}
+                          placeholder="Enter Project Name"
+                          onChange={(value) => {
+                            const selectedUser = projectsData.find(
+                              (user) => user._id === value
+                            );
+                            handleProject({
+                              name: selectedUser.name,
+                              id: selectedUser._id,
+                            });
+                          }}
+                          virtual={false}
+                          dropdownStyle={{
+                            overflowY: "auto",
+                            scrollBehavior: "smooth",
+                          }}
+                        >
+                          {projectsData.map((item) => (
+                            <Option key={item._id} value={item.projectName}>
+                              {item.name}
+                            </Option>
+                          ))}
+                        </Select>
+                        <div className="d-flex gap-3 ">
+                          <Col>
                             <Form.Item>
                               <Select
-                                style={{ marginTop: "14px" }}
-                                placeholder="priority"
-                                //   value={newSubList.AsigneeName}
-                                onChange={handleSelectPriority}
+                                placeholder="Enter Assignee Name"
+                                onChange={(value) => {
+                                  const selectedUser = userdata.find(
+                                    (user) => user._id === value
+                                  );
+                                  handleAssignee({
+                                    name: selectedUser.name,
+                                    id: selectedUser._id,
+                                  });
+                                }}
                                 virtual={false}
                                 dropdownStyle={{
                                   overflowY: "auto",
                                   scrollBehavior: "smooth",
                                 }}
                               >
-                                <Option value="Urgent" style={{ color: "red" }}>
-                                  Urgent
-                                </Option>
-                                <Option value="High" style={{ color: "blue" }}>
-                                  High
-                                </Option>
-                                <Option
-                                  value="normal"
-                                  style={{ color: "#FFD700" }}
-                                >
-                                  normal
-                                </Option>
-                                <Option value="low" style={{ color: "green" }}>
-                                  low
-                                </Option>
+                                {userdata.map((item) => (
+                                  <Option key={item._id} value={item._id}>
+                                    {item.name}
+                                  </Option>
+                                ))}
                               </Select>
                             </Form.Item>
                           </Col>
+
+                          <Col>
+                            <Form.Item>
+                              <Input
+                                name="Task Name"
+                                type="text"
+                                value={newSubList.TaskName}
+                                onChange={handleChange}
+                                placeholder="Task Name"
+                              />
+                            </Form.Item>
+                          </Col>
+                        </div>
+
+                        <Input.TextArea
+                          name="comments"
+                          type="date"
+                          value={newSubList.comments}
+                          onChange={handleChange}
+                          placeholder="Comments"
+                        />
+                        <Form layout="vertical">
+                          <Row gutter={16}>
+                            <Col span={11}>
+                              <Form.Item>
+                                <Input
+                                  style={{ marginTop: "14px" }}
+                                  name="DeadLine"
+                                  type="date"
+                                  value={newSubList.DeadLine}
+                                  onChange={handleChange}
+                                  placeholder="DeadLine"
+                                />
+                              </Form.Item>
+                            </Col>
+                            <Col span={11}>
+                              <Form.Item>
+                                <Select
+                                  style={{ marginTop: "14px" }}
+                                  placeholder="priority"
+                                  //   value={newSubList.AsigneeName}
+                                  onChange={handleSelectPriority}
+                                  virtual={false}
+                                  dropdownStyle={{
+                                    overflowY: "auto",
+                                    scrollBehavior: "smooth",
+                                  }}
+                                >
+                                  <Option
+                                    value="Urgent"
+                                    style={{ color: "red" }}
+                                  >
+                                    Urgent
+                                  </Option>
+                                  <Option
+                                    value="High"
+                                    style={{ color: "blue" }}
+                                  >
+                                    High
+                                  </Option>
+                                  <Option
+                                    value="normal"
+                                    style={{ color: "#FFD700" }}
+                                  >
+                                    normal
+                                  </Option>
+                                  <Option
+                                    value="low"
+                                    style={{ color: "green" }}
+                                  >
+                                    low
+                                  </Option>
+                                </Select>
+                              </Form.Item>
+                            </Col>
+                          </Row>
+                        </Form>
+                      </div>
+                  
+                   
+                    
+                      <div
+                        className="tab-pane fade"
+                        id="pills-profile"
+                        role="tabpanel"
+                        aria-labelledby="pills-profile-tab"
+                        tabIndex="0"
+                      >
+                        <Row>
+                          <Col span={11}>
+                            <Form.Item>
+                              <Input
+                                type="text"
+                                onChange={(e) => setDocsDatas(e.target.value)}
+                                placeholder="Add Doc Name"
+                              />
+                            </Form.Item>
+                          </Col>
                         </Row>
-                      </Form>
-                    </div>
-
-                    <div
-                      className="tab-pane fade"
-                      id="pills-profile"
-                      role="tabpanel"
-                      aria-labelledby="pills-profile-tab"
-                      tabIndex="0"
-                    >
-                     
-                      <Row>
-                        <Col span={11}>
-                        <Form.Item>
-                        <Input
-                          type="text"
-                          onChange={(e) => setDocsDatas(e.target.value)}
-                          placeholder="Add Doc Name"
-                        />
-                      </Form.Item>
-                     
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col span={11}>
-                       
-                      <Form.Item>
-                        <Input
-                          type="file"
-                          onChange={(e) => setdocss(e.target.files[0])}
-                          className="form-control"
-                          accept=".jpeg, .jpg, .png, .doc, .pdf"
-                        />
-                      </Form.Item>
-                        </Col>
-                      </Row>
-                      <Button onClick={handleSubmit}>Upload</Button>
-
-                    </div>
-
-                    {/* <h6>All Uploaded Docs </h6> */}
-
-                    {/* <iframe src={`${import.meta.env.VITE_BACKEND_API}/${item.docs}`} width="100%" height="auto">
-                  <p>Your browser does not support iframes.</p>
-                   </iframe> */}
+                        <Row>
+                          <Col span={11}>
+                            <Form.Item>
+                              <Input
+                                type="file"
+                                onChange={(e) => setdocss(e.target.files[0])}
+                                className="form-control"
+                                accept=".jpeg, .jpg, .png, .doc, .pdf"
+                              />
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                        <Button onClick={handleSubmit}>Upload</Button>
+                      </div>
+                
                   </div>
                 </div>
               </Modal>
-            </div>
           </>
         );
       })}
     </>
-  );
+  )
 };
 
 export default ProjectList;
