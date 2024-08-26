@@ -3,7 +3,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Modal, Button, Input, Form, Row, Col, Select } from "antd";
 import axios from "axios";
 import { NavLink, useParams } from "react-router-dom";
-
+import {message} from 'antd'
 const initialData = {
   lists: [
     { id: "list1", title: "Pending", items: [] },
@@ -49,7 +49,11 @@ const ProjectList = () => {
 
   const [docss, setdocss] = useState([]);
 
-  const [docsDatas, setDocsDatas] = useState("");
+  const [docsData, setDocsData] = useState({
+    assigneeName: "",
+    projectName: "",
+    docName: "",
+  });
   const [uploadedDocs, setUploadedDocs] = useState();
 
   // const [isSearchVisible, setIsSearchVisible] = useState(false);
@@ -72,11 +76,17 @@ const ProjectList = () => {
 
   const handleSubmit = async () => {
     const formData = new FormData();
-    docsDatas.trim() !== "" && formData.append("docsName", docsDatas);
+
+   
+    docsData.assigneeName.trim() !== "" && formData.append("assigneeName", docsData.assigneeName);
+    docsData.projectName.trim() !== "" && formData.append("projectName", docsData.projectName);
+    docsData.docName.trim() !== "" && formData.append("docsName", docsData.docName);
+
+
     if (docss) {
       formData.append("docs", docss);
     }
-    console.log("docs", docsDatas, docss);
+    console.log("docs", docsData, docss);
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_API}/docs`,
@@ -88,7 +98,7 @@ const ProjectList = () => {
         }
       );
       console.log("response", response); // Log the response from the server
-      // message.success("docs uploaded successfully");
+      message.success("docs uploaded successfully");
     } catch (err) {
       console.log(err);
     }
@@ -1630,7 +1640,7 @@ const ProjectList = () => {
       <Modal
         title=""
         open={modalOpened}
-        onOk={handleOk}
+        // onOk={handleOk}
         onCancel={handleCancel}
       >
         <div className="added-task">
@@ -1799,13 +1809,42 @@ const ProjectList = () => {
               aria-labelledby="pills-profile-tab"
               tabIndex="0"
             >
+             <Form.Item>
+                <Input
+                  type="text"
+                  onChange={(e) => setDocsData(prevState => ({
+                    ...prevState,
+                    assigneeName: e.target.value,
+                  }))}
+                  placeholder="Add Assignee Name"
+                  value={docsData.assigneeName}
+                />
+              </Form.Item>
+              
               <Form.Item>
                 <Input
                   type="text"
-                  onChange={(e) => setDocsDatas(e.target.value)}
-                  placeholder="Add Doc Name"
+                  onChange={(e) => setDocsData(prevState => ({
+                    ...prevState,
+                    projectName: e.target.value,
+                  }))}
+                  placeholder="Add project Name"
+                  value={docsData.taskName}
                 />
               </Form.Item>
+
+              <Form.Item>
+                <Input
+                  type="text"
+                  onChange={(e) => setDocsData(prevState => ({
+                    ...prevState,
+                    docName: e.target.value,
+                  }))}
+                  placeholder="Add Doc Name"
+                  value={docsData.docName}
+                />
+              </Form.Item>
+
               <Form.Item>
                 <Input
                   type="file"

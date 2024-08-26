@@ -92,17 +92,7 @@ const Doccs = () => {
           },
         }
       );
-      // toast.success('🦄 Wow so easy!', {
-      //   position: "top-right",
-      //   autoClose: 5000,
-      //   hideProgressBar: false,
-      //   closeOnClick: true,
-      //   pauseOnHover: true,
-      //   draggable: true,
-      //   progress: undefined,
-      //   theme: "light",
-      //   transition: Bounce,
-      //   });
+   
       window.location.reload()
       // Handle successful response
     } catch (err) {
@@ -113,7 +103,7 @@ const Doccs = () => {
   const getAllDocs = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_BACKEND_API}/docs`);
-      setDocuments(response.data);
+      setDocuments(response.data.reverse());
     } catch (error) {
       console.log(error);
     }
@@ -122,7 +112,7 @@ const Doccs = () => {
   const getProjectsData = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_BACKEND_API}/projects`);
-      setProjectsData(response.data);
+      setProjectsData(response.data.reverse());
     } catch (err) {
       console.log(err);
     }
@@ -132,7 +122,7 @@ const Doccs = () => {
   const getUsersData = async () => {
     const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`);
 
-    setUserData(res.data);
+    setUserData(res.data.reverse());
   };
 
   useEffect(() => {
@@ -161,8 +151,8 @@ const Doccs = () => {
         <thead>
           <tr>
             <th scope="col">Document Name</th>
+            <th scope="col">Project Name</th>
             <th scope="col">Assignee Name</th>
-            <th scope="col">Task Name</th>
           </tr>
         </thead>
         <tbody>
@@ -179,8 +169,8 @@ const Doccs = () => {
                   <span style={{ marginLeft: "8px" }}><a
                   href={`${import.meta.env.VITE_BACKEND_API}/${doc.docs}`}  > {doc.docsName || 'Unknown Document'}</a></span>
                 </td>
-                <td>Assignee {index + 1}</td>
-                <td>Task {index + 1}</td>
+                <td>{doc?.projectName || ""}</td>
+                <td>{doc?.assigneeName || ""}</td>
               </tr>
             );
           })}
