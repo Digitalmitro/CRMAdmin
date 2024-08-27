@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { Modal, Button, Input, Form, Row, Col, Select, message } from "antd";
+import { Modal, Button, Input, Form, Row, Col, Select, message, Spin } from "antd";
 import axios from "axios";
 import { NavLink, useParams } from "react-router-dom";
 
@@ -26,6 +26,7 @@ const ProjectList = () => {
   const [taskListId, setTaskListId] = useState("");
   const [selectedTask, setSelectedTask] = useState([]);
   const [filterProjectsData, setfilterProjectsData] = useState([]);
+  const [loader, setloader] = useState(true);
 
   const [newSubList, setNewSubList] = useState({
     TaskName: "",
@@ -144,6 +145,8 @@ const ProjectList = () => {
       );
       setprojectsData(response.data);
       setfilterProjectsData(response.data)
+    setloader(false)
+      
     } catch (err) {
       console.log("catch error ", err);
     }
@@ -447,8 +450,8 @@ const ProjectList = () => {
           <button onClick={showModals}>Add Task</button>
         </div>
       </div>
-
-      {filterProjectsData?.map((items) => {
+      {loader ?     <Spin tip="loading..." style={styles.spinner} /> :
+    (filterProjectsData?.map((items) => {
         return (
           <>
             <div className="task-list-container">
@@ -1035,9 +1038,25 @@ const ProjectList = () => {
               </Modal>
           </>
         );
-      })}
+      }))
+
+    }
     </>
   )
 };
 
 export default ProjectList;
+
+
+
+
+const styles = {
+
+  spinner: {
+    display:"flex",
+    alignSelf: "center",
+    justifyContent: "center",
+    margin: "4rem",
+
+  },
+}

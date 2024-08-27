@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { FaListUl } from "react-icons/fa";
 import { FaFilter } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
-import { DatePicker, Space } from "antd";
+import { DatePicker, Space, Spin } from "antd";
 import messageIcon from "../../../assets/messageIcon.png";
 import Delete from "../../../assets/Vectorss.png";
 // import CallableDrawer from "./CallbackDrawer"
@@ -31,7 +31,7 @@ import filter from "../../../assets/mdi_filter.png";
 import menuList from "../../../assets/material-symbols_list.png";
 
 const EmplyeeConcern = () => {
-  const token = Cookies.get("token");
+  const Admintoken = Cookies.get("Admintoken");
   const Profile = localStorage.getItem("admin");
   const NewProfile = JSON.parse(Profile);
   const user_id = NewProfile?._id;
@@ -54,6 +54,7 @@ const EmplyeeConcern = () => {
   const [selectedDate, setSelectedDate] = useState("");
   const [EmployeeNames, setEmployeeNames] = useState([]);
   const [SelectedEmployee, setSelectedEmployee] = useState([]);
+  const [loader, setloader] = useState(true);
 
   const showDrawers = () => {
     setOpen(true);
@@ -76,21 +77,19 @@ const EmplyeeConcern = () => {
   };
 
   useEffect(()=>{
-    if (token) {
+    if (Admintoken) {
       // Use the <Navigate /> component to redirect
     } else {
       return navigate("/Login");
     }
-  }), [token]
+  }), [Admintoken]
   useEffect(() => {
     const timeoutRef = setTimeout(() => {
       getData();
-
     }, 500)
     return () => {
       clearTimeout(timeoutRef)
     }
-   
   }, [searchTerm, sortBy]);
 
  
@@ -102,6 +101,8 @@ const EmplyeeConcern = () => {
     const uniqueNames = [...new Set(res.data.map((item) => item.name))];
     console.log('unique names', uniqueNames)
     setEmployeeNames(uniqueNames);
+    setloader(false)
+
   };
   console.log("concern", data);
   const handleMonthChange = (event) => {
@@ -167,7 +168,7 @@ const EmplyeeConcern = () => {
 
   return (
     <>
-      <div className="employee-project-container container py-4">
+  <div className="employee-project-container container py-4">
         <div className="filterConcern d-flex gap-3 mx-1">
           <div className=" d-flex gap-3 mx-1">
             <div className="emp-select-month ">
@@ -352,11 +353,12 @@ const EmplyeeConcern = () => {
                   </button>
                 </div>
               </Modal>
+              {loader ?     <Spin tip="loading..." style={styles.spinner} /> :
               <tbody>
                 {filteredData?.map((res, index) => {
                   return (
                     <>
-                      <tr key={res._id}>
+                      <tr key={res?._id}>
                         <td>{res?.name}</td>
                         <td>{res?.email}</td>
                         <td>{res?.date}</td>
@@ -366,14 +368,14 @@ const EmplyeeConcern = () => {
                         <td class="d-flex gap-1">
                           <button
                             className="buttonFilled"
-                            onClick={(e) => handleStatus(res._id, e)}
+                            onClick={(e) => handleStatus(res?._id, e)}
                             name="Approved"
                           >
                             Approved
                           </button>
                           <button
                             className="buttondeny"
-                            onClick={(e) => handleStatus(res._id, e)}
+                            onClick={(e) => handleStatus(res?._id, e)}
                             name="Denied"
                           >
                             Deny
@@ -384,6 +386,7 @@ const EmplyeeConcern = () => {
                   );
                 })}
               </tbody>
+}
             </table>
           </div>
           {/* <CallableDrawer open={open} onClose={handleSubmit} refreshData={refreshData} /> */}
@@ -394,3 +397,15 @@ const EmplyeeConcern = () => {
 };
 
 export default EmplyeeConcern;
+
+
+
+const styles = {
+
+  spinner: {
+    display:"flex",
+    alignSelf: "center",
+    justifyContent: "center",
+    margin: "4rem",
+  },
+}

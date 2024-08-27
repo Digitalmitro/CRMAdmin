@@ -12,7 +12,7 @@ import { Stepper, Step, StepLabel, StepContent, TextField, Button } from "@mui/m
 
 const SalesView = () => {
     const { id } = useParams();
-    const token = Cookies.get('token');
+    const Admintoken = Cookies.get('Admintoken');
     const Profile = localStorage.getItem("admin");
     const NewProfile = JSON.parse(Profile);
     const user_id = NewProfile?._id;
@@ -45,12 +45,12 @@ const SalesView = () => {
     
     useEffect(() => {
       getData();
-      if (token) {
+      if (Admintoken) {
           // Use the <Navigate /> component to redirect
       } else {
           return navigate("/Login");
       }
-    }, [token]);
+    }, [Admintoken]);
     
     const showModal = () => {
       setIsModalVisible(true);

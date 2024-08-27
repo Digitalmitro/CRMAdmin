@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { FaListUl } from "react-icons/fa";
 import { FaFilter } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
-import { DatePicker, Space } from "antd";
+import { DatePicker, Space, Spin } from "antd";
 import messageIcon from "../../assets/messageIcon.png";
 import Delete from "../../assets/Vectorss.png";
 // import CallableDrawer from "./CallbackDrawer"
@@ -41,6 +41,7 @@ const Sales = () => {
   const [date, setDate] = useState("");
   const [selectedResult, setSelectedResult] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loader, setloader] = useState(true);
 
 
   useEffect(()=>{
@@ -75,20 +76,20 @@ const Sales = () => {
   };
 
   const handleChange = (event) => {
-    setSearchTerm(event.target.value);
+    setSearchTerm(event?.target.value);
   };
   const handleMonthChange = (event) => {
-    setSelectedMonth(event.target.value);
+    setSelectedMonth(event?.target.value);
   };
   const handleEmployeeChange = (event) => {
-    setSelectedEmployee(event.target.value);
-    console.log(event.target.value);
+    setSelectedEmployee(event?.target.value);
+    console.log(event?.target.value);
   };
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
   const handleSortChange = (event) => {
-    setSortBy(event.target.value);
+    setSortBy(event?.target.value);
   };
   const [night, setNight] = useState([]);
 
@@ -96,38 +97,22 @@ const Sales = () => {
     const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`);
     // const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/attendance`)
     // const filteredData = res.data.map((e) =>e.name);
-    setNight(res.data);
+    setNight(res?.data);
   };
   const Getdata = async () => {
     const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/allsale`);
-    // const ress = await axios.get(`${import.meta.env.VITE_BACKEND_API}/transfer-user/${id}`);
-    // const resss = await axios.get(`${import.meta.env.VITE_BACKEND_API}/sale-user/${id}`);
-    // const ressss = await axios.get(`${import.meta.env.VITE_BACKEND_API}/attendance/${id}`);
+
+    console.log("data", res?.data);
+    setData(res?.data.reverse());
+    setloader(false)
+    // filterAndSortResults(searchTerm, sortBy, res.data);
     
-    console.log("data", res.data);
-    setData(res.data.reverse());
-    filterAndSortResults(searchTerm, sortBy, res.data);
-    
-    
-    // setData1(ress.data.transfer);
-    // setData2(resss.data.sale);
-    // setData3(ressss.data.attendance);
   };
 
 useEffect(()=> {
   getNight()
 },[])
 console.log("night", night)
-  // const filterAndSortResults = (searchTerm, sortBy, data) => {
-  
-  //   if (sortBy === "Date") {
-  //     filteredResults.sort((a, b) => new Date(a.date) - new Date(b.date));
-  //   } else if (sortBy === "Name") {
-  //     filteredResults.sort((a, b) => a.name.localeCompare(b.name));
-  //   }
-
-  //   setSearchResults(filteredResults);
-  // };
 
   const downloadExcel = () => {
     if (filteredData?.length === 0) {
@@ -199,20 +184,20 @@ console.log("night", night)
         Object.values(item)
           .join(" ")
           .toLowerCase()
-          .includes(searchTerm.toLowerCase());
+          .includes(searchTerm?.toLowerCase());
   
       // Match employee
       const employeeMatches =
-        !selectedEmployee || item.user_id === selectedEmployee;
+        !selectedEmployee || item?.user_id === selectedEmployee;
   
       // Match date
       const dateMatches =
-        !date || moment(item.createdDate).format("YYYY-MM-DD") === moment(date).format("YYYY-MM-DD");
+        !date || moment(item?.createdDate).format("YYYY-MM-DD") === moment(date).format("YYYY-MM-DD");
   
       // Match month
       const monthMatches =
         !selectedMonth ||
-        moment(item.createdDate, "MMMM Do YYYY, h:mm:ss a").format("MMM") === selectedMonth;
+        moment(item?.createdDate, "MMMM Do YYYY, h:mm:ss a").format("MMM") === selectedMonth;
   
       return searchMatches && employeeMatches && dateMatches && monthMatches;
     });
@@ -220,10 +205,10 @@ console.log("night", night)
     // Sort results
     if (sortBy === "Date") {
       filteredResults.sort(
-        (a, b) => new Date(a.createdDate) - new Date(b.createdDate)
+        (a, b) => new Date(a?.createdDate) - new Date(b?.createdDate)
       );
     } else if (sortBy === "Name") {
-      filteredResults.sort((a, b) => a.name.localeCompare(b.name));
+      filteredResults.sort((a, b) => a?.name.localeCompare(b?.name));
     }
   
     setSearchResults(filteredResults);
@@ -255,7 +240,7 @@ console.log("night", night)
               {night.map((res) => {
                 return (
                   <>
-                    <option value={res._id}>{res.name}</option>
+                    <option value={res?._id}>{res?.name}</option>
                   </>
                 );
               })}
@@ -446,28 +431,31 @@ console.log("night", night)
                   </button>
                 </div>
               </Modal>
+
+              {loader ? <>     <Spin tip="loading..." style={styles.spinner} /> </>:
+
               <tbody>
                 {searchResults?.map((res, index) => {
                   return (
                     <>
-                      <tr key={res._id}>
-                        <td>{res.employeeName}</td>
-                        <td>{res.name}</td>
-                        <td>{res.email}</td>
-                        <td>{res.phone}</td>
-                        <td>{res.calldate}</td>
-                        <td>{res.domainName}</td>
-                        <td>{res.country}</td>
-                        <td>{res.address}</td>
-                        <td>{res.comments}</td>
-                        <td>{res.buget}</td>
-                        <td>{res.createdDate}</td>
+                      <tr key={res?._id}>
+                        <td>{res?.employeeName}</td>
+                        <td>{res?.name}</td>
+                        <td>{res?.email}</td>
+                        <td>{res?.phone}</td>
+                        <td>{res?.calldate}</td>
+                        <td>{res?.domainName}</td>
+                        <td>{res?.country}</td>
+                        <td>{res?.address}</td>
+                        <td>{res?.comments}</td>
+                        <td>{res?.buget}</td>
+                        <td>{res?.createdDate}</td>
                         <td>
                           {" "}
                           <button
                             className="buttonFilled"
                             style={{ fontSize: "0.8rem" }}
-                            onClick={() => navigate(`/salesview/${res._id}`)}
+                            onClick={() => navigate(`/salesview/${res?._id}`)}
                           >
                             View
                           </button>
@@ -477,6 +465,7 @@ console.log("night", night)
                   );
                 })}
               </tbody>
+}
             </table>
           </div>
           {/* <CallableDrawer open={open} onClose={handleSubmit} refreshData={refreshData} /> */}
@@ -487,3 +476,16 @@ console.log("night", night)
 };
 
 export default Sales;
+
+
+
+const styles = {
+
+  spinner: {
+    display:"flex",
+    alignSelf: "center",
+    justifyContent: "center",
+    margin: "4rem",
+
+  },
+}

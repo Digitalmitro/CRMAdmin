@@ -1,7 +1,7 @@
 // src/components/CustomDrawer.js
 
 import React, { useState } from "react";
-import { Drawer, Button, Form, Input, Row, Col, Select, Space } from "antd";
+import { Drawer, Button, Form, Input, Row, Col, Select, Space, message } from "antd";
 import axios from "axios";
 import { toast } from "react-toastify";
 // import "../Projects/Projects.css";
@@ -29,12 +29,9 @@ const CustomDrawer = ({ open, onClose }) => {
   const [type, setType] = useState("Day");
 
   const handleSubmit = async () => {
-    console.log("Backend API URL:", import.meta.env.VITE_BACKEND_API);
     try {
-      console.log("hello22");
 
       await form.validateFields();
-      console.log("hello");
       const payload = {
         name,
         aliceName,
@@ -43,14 +40,14 @@ const CustomDrawer = ({ open, onClose }) => {
         password,
         type,
       };
-      console.log("payload", payload);
       const res = await axios.post(
         `${import.meta.env.VITE_BACKEND_API}/registeruser`,
         payload
       );
 
       console.log("res", res);
-      toast.success(res.data, {});
+      // toast.success(res.data, {});
+      message.success(res.data, {});
       setName("");
       setAliceName("");
       setEmail("");

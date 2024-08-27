@@ -12,7 +12,7 @@ import { Stepper, Step, StepLabel, StepContent, TextField, Button } from "@mui/m
 
 const CallbackView = () => {
     const navigate = useNavigate();
-    const token = Cookies.get('token');
+    const Admintoken = Cookies.get('Admintoken');
     const { id } = useParams();
     const Profile = localStorage.getItem("admin");
     const NewProfile = JSON.parse(Profile);
@@ -75,12 +75,12 @@ const CallbackView = () => {
     
     useEffect(() => {
         getData();
-        if (token) {
+        if (Admintoken) {
             // Use the <Navigate /> component to redirect
         } else {
             return navigate("/Login");
         }
-    }, [token]);
+    }, [Admintoken]);
 
     const handleUpdate = async (e) => {
         e.preventDefault();

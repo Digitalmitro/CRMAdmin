@@ -11,7 +11,7 @@ import logo from "../../assets/logo.png";
 const Login = () => {
   const navigate = useNavigate();
 
-  const token = Cookies.get("token");
+  const Admintoken = Cookies.get("Admintoken");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,28 +27,28 @@ const Login = () => {
         `${import.meta.env.VITE_BACKEND_API}/loginadmin`,
         credentials
       );
-      console.log(response.data);
-      Cookies.set("token", response.data.token);
-      localStorage.setItem("admin", JSON.stringify(response.data.user));
-      toast.success(response.data.status, {});
+      console.log(response?.data);
+      Cookies.set("Admintoken", response?.data.token);
+      localStorage.setItem("admin", JSON.stringify(response?.data.user));
+      toast.success(response?.data.status, {});
       setTimeout(() => {
         window.location.href = "/";
       }, 1200);
     } catch (error) {
-      toast.warning(error.response.data.status, {});
+      toast.warning(error?.response?.data.status, {});
+      toast.warning("login unsuccessful");
     }
-    if (token) {
+    if (Admintoken) {
       return <Navigate to="/" />;
     }
   };
   useEffect(() => {
-    if (token) {
-      // Use the <Navigate /> component to redirect
+    if (Admintoken) {
       return navigate("/");
     } else {
       return navigate("/Login");
     }
-  }, [token]);
+  }, [Admintoken]);
 
   return (
     <>

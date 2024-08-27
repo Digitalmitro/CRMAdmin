@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { FaListUl } from "react-icons/fa";
 import { FaFilter } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
-import { DatePicker, Space } from "antd";
+import { DatePicker, Space,Spin } from "antd";
 import messageIcon from "../../../assets/messageIcon.png";
 import Delete from "../../../assets/Vectorss.png";
 // import CallableDrawer from "./CallbackDrawer"
@@ -27,12 +27,13 @@ import { PiDownloadSimpleBold } from "react-icons/pi";
 
 const EmplyeeActivity = () => {
 
-  const token = Cookies.get("token");
+  const Admintoken = Cookies.get("Admintoken");
   const Profile = localStorage.getItem("admin");
   const NewProfile = JSON.parse(Profile);
   const user_id = NewProfile?._id;
   const user_name = NewProfile?.name;
   const aliceName = NewProfile?.aliceName;
+  const [loader, setloader] = useState(true);
 
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -48,14 +49,15 @@ const EmplyeeActivity = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedResult, setSelectedResult] = useState(null);
 
-  useEffect(() => {
-    if (token) {
-      // Fetch initial data
-      Getdata();
-    } else {
-      navigate("/Login");
-    }
-  }, [token]);
+  // useEffect(() => {
+  //   if (Admintoken) {
+  //     // Fetch initial data
+  //     console.log(Admintoken)
+  //   } else {
+  //     toast.success('you are not login please login')
+  //     navigate("/Login");
+  //   }
+  // }, [Admintoken]);
 
   const showModal = (result) => {
     setSelectedResult(result);
@@ -119,9 +121,11 @@ const EmplyeeActivity = () => {
     setData(res.data.reverse());
     filterAndSortResults(searchTerm, sortBy, shiftType, res.data);
     // const filteredData = res.data.filter((e) => e.type === "Night");
+    setloader(false)
+
     setNight(res.data);
   };
-  console.log(data);
+  // console.log(data);
 
 const handleDel = (id) => {
   Modal.confirm({
@@ -131,7 +135,8 @@ const handleDel = (id) => {
     cancelText: "No",
     onOk: async () => {
       try {
-        await axios.delete(`${import.meta.env.VITE_BACKEND_API}/alluser/${id}`);
+       const resp = await axios.delete(`${import.meta.env.VITE_BACKEND_API}/alluser/${id}`);
+        console.log("resp", resp)
         Getdata();
       } catch (error) {
         console.log(error);
@@ -157,20 +162,20 @@ const handleDel = (id) => {
   };
 
   const filterAndSortResults = (searchTerm, sortBy, shiftType, data) => {
-    let filteredResults = data.filter((item) => {
+    let filteredResults = data?.filter((item) => {
       const matchesSearchTerm = Object.values(item)
         .join(" ")
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
       const matchesShiftType =
-        shiftType === "" || item.type.toLowerCase() === shiftType.toLowerCase();
+        shiftType === "" || item?.type.toLowerCase() === shiftType?.toLowerCase();
       return matchesSearchTerm && matchesShiftType;
     });
 
     if (sortBy === "Date") {
-      filteredResults.sort((a, b) => new Date(a.date) - new Date(b.date));
+      filteredResults.sort((a, b) => new Date(a?.date) - new Date(b?.date));
     } else if (sortBy === "Name") {
-      filteredResults.sort((a, b) => a.name.localeCompare(b.name));
+      filteredResults.sort((a, b) => a?.name.localeCompare(b?.name));
     }
 
     setSearchResults(filteredResults);
@@ -403,6 +408,7 @@ const handleDel = (id) => {
                   </button>
                 </div>
               </Modal>
+              {loader ?     <Spin tip="loading..." style={styles.spinner} /> :
               <tbody>
                 {searchResults?.map((res, index) => {
                   return (
@@ -495,6 +501,7 @@ const handleDel = (id) => {
                   );
                 })}
               </tbody>
+}
             </table>
           </div>
         </div>
@@ -504,3 +511,15 @@ const handleDel = (id) => {
 };
 
 export default EmplyeeActivity;
+
+
+
+const styles = {
+
+  spinner: {
+    display:"flex",
+    alignSelf: "center",
+    justifyContent: "center",
+    margin: "4rem",
+  },
+}

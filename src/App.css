@@ -322,6 +322,7 @@ margin: 3px;
   }
   .chat-app .chatSidebar{
     padding : 5px !important;
+    
   }
 
   .ant-list-items{
@@ -1789,7 +1790,12 @@ font-size: 0.8rem;
   padding-left: 20px;
 }
 
-
+.chatSidebar {
+ 
+  height: 80vh ;
+  overflow:hidden auto ; 
+  scrollbar-width: thin;
+}
 
 /* chat message  */
 
@@ -1977,7 +1983,8 @@ width: 30% ;
   flex-direction: column;
 }
 .chat-app .chatSidebar{
-  height: 200px;
+  height: 200px ;
+  overflow-y: auto;
   width: 100% !important;
 }
 

@@ -37,7 +37,7 @@ const useStyle = createStyles(() => ({
 const CallbackDrawer = ({open,onClose,refreshData}) => {
     const { styles } = useStyle();
     const navigate = useNavigate()
-const token = Cookies.get('token')
+const Admintoken = Cookies.get('Admintoken')
 const [isOpen, setIsOpen] = useState(true)
 const [name, setName] = useState('')
 const [email, setEmail] = useState('')
@@ -113,12 +113,12 @@ const handelSubmit = async (e) => {
     }
 }
 useEffect(() => {
-    if (token) {
+    if (Admintoken) {
         // Use the <Navigate /> component to redirect
     } else {
         return navigate('/Login')
     }
-}, [country, token])
+}, [country, Admintoken])
     // const token = useTheme();
 
 

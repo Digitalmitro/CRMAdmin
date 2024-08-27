@@ -141,7 +141,7 @@ const navigate = useNavigate()
 
   const handleLogout = async() => {
     localStorage.removeItem("admin");
-    Cookies.remove("token");
+    Cookies.remove("Admintoken");
     onClose()
     // await new Promise((resolve) => setTimeout(resolve, 100));
     navigate("/Login");

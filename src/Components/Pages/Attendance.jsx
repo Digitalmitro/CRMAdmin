@@ -7,7 +7,7 @@ import * as XLSX from "xlsx";
 import moment from 'moment'
 import { Modal } from 'antd'
 import { useNavigate, useParams } from "react-router-dom";
-import { DatePicker, Space } from 'antd';
+import { DatePicker, Space , Spin} from 'antd';
 import axios from "axios"
 // import "./Projects/Projects.css";
 import downArrow from "../../assets/bxs_down-arrow.png";
@@ -19,7 +19,7 @@ import { BsThreeDots } from "react-icons/bs";
 import { PiDownloadSimpleBold } from "react-icons/pi";
 
 const Attendance = () => {
-  const token = Cookies.get('token')
+  const Admintoken = Cookies.get('Admintoken')
   const Profile = localStorage.getItem('user')
   const NewProfile = JSON.parse(Profile)
   const name = NewProfile?.name
@@ -30,6 +30,7 @@ const Attendance = () => {
   const [data, setData] = useState([])
   const [selectedResult, setSelectedResult] = useState(null);
 
+  const [loader, setloader] = useState(true);
 
 
   const getAttData = async () => {
@@ -95,38 +96,7 @@ const Attendance = () => {
     setIsModalOpen(false);
   };
 
-  // console.log("attdata", data);
-
-  // useEffect(() => {
-  //   getAttData()
-  //   getIp()
-  //   const getLocation = () => {
-  //     if (navigator.geolocation) {
-  //       navigator.geolocation.getCurrentPosition(
-  //         (position) => {
-  //           setLatitude(position.coords.latitude)
-  //           setLongitude(position.coords.longitude)
-  //           setLocationPermission(true)
-  //         },
-  //         (error) => {
-  //           console.log('Error getting location:', error)
-  //         },
-  //       )
-  //     } else {
-  //       console.log('Geolocation is not supported by this browser.')
-  //     }
-  //   }
-
-  //   getLocation()
-  //   if (punchin && punchOut) {
-  //     setTimeDifferenceMinutes(calculateTimeDifference(punchin, punchOut))
-  //   }
-  //   if (token) {
-  //     // Use the <Navigate /> component to redirect
-  //   } else {
-  //     return navigate('/Login')
-  //   }
-  // }, [token, punchin, punchOut, currentDate, timeDifferenceMinutes, userIP])
+ 
 
   const calculateTimeDifference = (time1, time2) => {
     const format = 'hh:mm:ss A'
@@ -222,6 +192,7 @@ const Attendance = () => {
     const ressss = await axios.get(`${import.meta.env.VITE_BACKEND_API}/attendance`)
 
     setData3(ressss.data)
+    setloader(false)
   }
   const filteredDataAll = data3.filter((e) => e.currentDate === moment().format('MMM Do YY'))
   console.log('test', filteredDataAll)
@@ -333,9 +304,6 @@ const Attendance = () => {
     <div className="attendance-container">
     
     <div className="employee-project-container container py-4">
-     
-
-       
         <hr />
         <div className=" " style={{marginBottom:"-10px"}}>
          <div className=" AttenDance  d-flex justify-content-between">
@@ -362,9 +330,6 @@ const Attendance = () => {
               justifyContent: "flex-end",
             }}
           >
-            
-           
-          
           </div>
         </div>
         <div class="tab-content table-cont " id="pills-tabContent">
@@ -478,6 +443,7 @@ const Attendance = () => {
                   </button>
                 </div>
               </Modal>
+              {loader ? <>     <Spin tip="loading..." style={styles.spinner} /> </>:
               <tbody>
                 {mergedDataByUserId?.map((res, index) => {
                   return (
@@ -511,6 +477,7 @@ const Attendance = () => {
                   );
                 })}
               </tbody>
+}
             </table>
           </div>
         
@@ -523,3 +490,17 @@ const Attendance = () => {
 };
 
 export default Attendance;
+
+
+
+
+const styles = {
+
+  spinner: {
+    display:"flex",
+    alignSelf: "center",
+    justifyContent: "center",
+    margin: "4rem",
+
+  },
+}

@@ -47,7 +47,7 @@ function App() {
   const [toggleSidebar, setToggleSidebar] = useState(false);
   const [activeButton,setActiveButton]=useState(0)
 
-  const token = Cookies.get("token");
+  const Admintoken = Cookies.get("Admintoken");
 
 
   const value = {
@@ -63,7 +63,7 @@ function App() {
   return (
    <>
     <MyContext.Provider value={value}>
-    {token ? (
+    {Admintoken ? (
        <>
         <Header />
         <div className="main d-flex">
@@ -73,7 +73,8 @@ function App() {
           <div className={`main-content ${toggleSidebar === true ? "toggle" : ""}`} style={{marginTop:"4rem",marginLeft:"-2rem"}}>
             <BreadcrumbsComponent breadcrumbs={breadcrumbs}  />
             <Routes>
-              <Route path={"/"} element={token ? <Dashboard /> : <Navigate to="/Login"/>} />
+              <Route path={"/"} element={Admintoken ? <Dashboard /> : <Login/>} />
+              {/* <Route path={"/"} element={Admintoken ? <Dashboard /> : <Navigate to="/Login"/>} /> */}
               <Route path={"/inbox"} element={<Inbox />} />
               <Route path="/attendance" element={<Attendance />} />
               <Route path="/employeeview/attendance/:id" element={<EmployeeAttendance />} />
@@ -94,10 +95,7 @@ function App() {
               <Route path="/basicwebMail" element={<BasicWebMail />} />
               <Route path="/doccuments/:id" element={<Doccs />} />
               <Route path="/doccuments" element={<Docs />} />
-              {/* import DmMail from "./Components/Mail/DmMail";
-import EcomMail from "./Components/Mail/EcomMail";
-import SeoMail from "./Components/Mail/SeoMail"; */}
-{/* import SmoMail from "./Components/Mail/SmoMail"; */}
+            
 
 
 
@@ -114,7 +112,7 @@ import SeoMail from "./Components/Mail/SeoMail"; */}
               <Route path="/transferview/:id" element={<TransferView />} />
               <Route path="/transfers" element={<Transfers />} />
               <Route path="/projects/:id" element={<ProjectSubMenu />} />
-              <Route path="*" element={<Navigate to="/Login" replace />} />
+              {/* <Route path="*" element={<Navigate to="/Login" replace />} /> */}
 
             </Routes>
           </div>

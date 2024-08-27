@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { FaListUl } from "react-icons/fa";
 import { FaFilter } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
-import { DatePicker, Space } from "antd";
+import { DatePicker, Space , Spin} from "antd";
 import messageIcon from "../../assets/messageIcon.png";
 import Delete from "../../assets/Vectorss.png";
 import CallableDrawer from "./CallbackDrawer";
@@ -45,7 +45,7 @@ const CallbackTable = () => {
     onClose();
   };
 
-  const token = Cookies.get("token");
+  const Admintoken = Cookies.get("Admintoken");
   const Profile = localStorage.getItem("admin");
   const NewProfile = JSON.parse(Profile);
   const user_id = NewProfile?._id;
@@ -58,16 +58,15 @@ const CallbackTable = () => {
   const [selectedMonth, setSelectedMonth] = useState("");
   const [date, setDate] = useState("");
   const [night, setNight] = useState([]);
+  const [loader, setloader] = useState(true);
 
-
-  useEffect(()=> {
-    if (token) {
+  useEffect(() => {
+    if (Admintoken) {
       // Use the <Navigate /> component to redirect
     } else {
       return navigate("/Login");
     }
-  },[token])
-
+  }, [Admintoken]);
 
   // Function to handle the change in the select input
   const handleMonthChange = (event) => {
@@ -79,23 +78,21 @@ const CallbackTable = () => {
     const res = await axios.get(
       `${import.meta.env.VITE_BACKEND_API}/allcallback`
     );
-    setData(res.data.reverse());
-    const filteredData = res.data.filter((e) => e.type === "Night");
+    setData(res?.data.reverse());
+    const filteredData = res?.data.filter((e) => e.type === "Night");
     setNight(filteredData);
-    // filterAndSortResults(searchTerm, sortBy, res.data.callback)
-    console.log(res.data);
+    setloader(false)
+    // filterAndSortResults(searchTerm, sortBy, res?.data.callback)
+    console.log(res?.data);
   };
   console.log(data);
-
 
   const getNight = async () => {
     const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`);
     // const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/attendance`)
-
-   
   };
   const handleDel = async (id) => {
-    console.log("IsDeleted")
+    console.log("IsDeleted");
     // try {
     //   await axios.delete(
     //     `${import.meta.env.VITE_BACKEND_API}/callback-1/${id}`
@@ -114,11 +111,11 @@ const CallbackTable = () => {
       .post(`${import.meta.env.VITE_BACKEND_API}/transfer`, userData)
       .then((response) => {
         // Handle the response if needed
-        console.log("Transfer successful:", response.data);
+        console.log("Transfer successful:", response?.data);
         // After successful transfer, perform the delete request
         axios
           .delete(
-            `${import.meta.env.VITE_BACKEND_API}/callback-1/${userData._id}`
+            `${import.meta.env.VITE_BACKEND_API}/callback-1/${userData?._id}`
           )
           .then(() => {
             console.log("Deletion successful");
@@ -133,7 +130,7 @@ const CallbackTable = () => {
       });
 
     const noti = {
-      message: `${NewProfile?.name} created a transfer: ${userData.name}`,
+      message: `${NewProfile?.name} created a transfer: ${userData?.name}`,
       currentDate: moment().format("MMMM Do YYYY, h:mm:ss a"),
     };
     await axios.post(`${import.meta.env.VITE_BACKEND_API}/notification`, noti);
@@ -141,15 +138,11 @@ const CallbackTable = () => {
   useEffect(() => {
     const timeoutRef = setTimeout(() => {
       Getdata();
-
-    }, 500)
+    }, 500);
     return () => {
-      clearTimeout(timeoutRef)
-    }
-   
+      clearTimeout(timeoutRef);
+    };
   }, [searchTerm, sortBy]);
-
-
 
   // Function to handle search term change
   const handleSearchChange = (event) => {
@@ -214,11 +207,9 @@ const CallbackTable = () => {
   };
   const filteredData = data?.filter((entry) => {
     // Check if the entry's name includes the search term
-    const nameIncludesSearchTerm = entry.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase()) || entry.employeeName
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
+    const nameIncludesSearchTerm =
+      entry?.name?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+      entry?.employeeName?.toLowerCase().includes(searchTerm?.toLowerCase());
 
     // Check if the entry's currentDate includes the selected month
     const currentDateIncludesMonth =
@@ -226,7 +217,8 @@ const CallbackTable = () => {
 
     // Check if the entry's currentDate matches the selected date
     const formattedDate = moment(date).format("MMM Do YY");
-    const currentDateMatchesDate = !date || entry.createdDate === formattedDate;
+    const currentDateMatchesDate =
+      !date || entry?.createdDate === formattedDate;
 
     // Return true if all conditions are met
     return (
@@ -241,10 +233,10 @@ const CallbackTable = () => {
       <div className="employee-project-container container py-4">
         <div className=" filterPanel d-flex justify-content-between align-items-end">
           <div className="emp-select-months-year">
-          <select
+            <select
               className="emp-select-month "
               style={{
-                width:"180px",
+                width: "180px",
                 fontSize: "0.8rem",
               }}
               onChange={handleEmployeeChange}
@@ -253,11 +245,11 @@ const CallbackTable = () => {
               {night.map((res) => {
                 return (
                   <>
-                    <option value={res._id}>{res.name}</option>
+                    <option value={res?._id}>{res?.name}</option>
                   </>
                 );
               })}
-          </select>
+            </select>
             <div className="emp-select-month">
               <select
                 style={{
@@ -301,52 +293,41 @@ const CallbackTable = () => {
               />
 
               {/* for search */}
-             
             </div>
-          
           </div>
-         
-             
+
           <div className="d-flex  gap-2 ">
-          <input
-                value={searchTerm}
-                onChange={handleSearchChange}
-                placeholder="search..."
-                className="search shadow px-4"
-                style={{
-                  border: "none",
-                  borderBottom: "1px solid coral",
-                  borderRadius:"10px",
-                }}
-              />
-            <button className="empbuttonDowload px-4" onClick={downloadExcel}
-            style={{fontSize: "0.8rem",}}>
-            <PiDownloadSimpleBold
-            style={{marginRight:"5px"}}
+            <input
+              value={searchTerm}
+              onChange={handleSearchChange}
+              placeholder="search..."
+              className="search shadow px-4"
+              style={{
+                border: "none",
+                borderBottom: "1px solid coral",
+                borderRadius: "10px",
+              }}
             />
-            
-               Callback Data
+            <button
+              className="empbuttonDowload px-4"
+              onClick={downloadExcel}
+              style={{ fontSize: "0.8rem" }}
+            >
+              <PiDownloadSimpleBold style={{ marginRight: "5px" }} />
+              Callback Data
             </button>
           </div>
         </div>
         <hr />
-         
-          <div className="project-title my-2">
-          <div className="allproject col">
-          <h6>All Callbacks</h6>
 
+        <div className="project-title my-2">
+          <div className="allproject col">
+            <h6>All Callbacks</h6>
           </div>
-        
-          <div
-            className="col d-flex justify-content-end"
-           
-          >
-           
-          
-           
-          </div>
+
+          <div className="col d-flex justify-content-end"></div>
         </div>
-        
+
         <div class="tab-content table-cont " id="pills-tabContent">
           <div
             class="tab-pane fade show active table-responsive"
@@ -462,23 +443,23 @@ const CallbackTable = () => {
                   </button>
                 </div>
               </Modal>
+              {loader ?     <Spin tip="loading..." style={styles.spinner} /> :
               <tbody>
                 {filteredData?.map((res, index) => {
                   return (
                     <>
-                      <tr key={res._id}>
-                      
-                        <td>{res.createdDate}</td>
-                        <td>{res.employeeName}</td>
-                        <td>{res.name}</td>
-                        <td>{res.email}</td>
-                        <td>{res.phone}</td>
-                        <td>{res.calldate}</td>
-                        <td>{res.domainName}</td>
-                        <td>{res.address}</td>
-                        <td>{res.comments}</td>
-                        <td>{res.buget}</td>
-                       
+                      <tr key={res?._id}>
+                        <td>{res?.createdDate}</td>
+                        <td>{res?.employeeName}</td>
+                        <td>{res?.name}</td>
+                        <td>{res?.email}</td>
+                        <td>{res?.phone}</td>
+                        <td>{res?.calldate}</td>
+                        <td>{res?.domainName}</td>
+                        <td>{res?.address}</td>
+                        <td>{res?.comments}</td>
+                        <td>{res?.buget}</td>
+
                         <td class="d-flex gap-1">
                           <button
                             className="buttonFilled"
@@ -505,14 +486,14 @@ const CallbackTable = () => {
                             className="buttonFilled"
                             style={{ fontSize: "0.8rem" }}
                             onClick={() =>
-                              navigate(`/callbackview/${res._id}`)
+                              navigate(`/callbackview/${res?._id}`)
                             }
                           >
                             View
                           </button>
 
                           <button
-                            onClick={() => handleDel(res._id)}
+                            onClick={() => handleDel(res?._id)}
                             style={{ outline: "none", border: "none" }}
                           >
                             <img
@@ -527,9 +508,9 @@ const CallbackTable = () => {
                   );
                 })}
               </tbody>
+}
             </table>
           </div>
-        
         </div>
       </div>
     </>
@@ -537,3 +518,15 @@ const CallbackTable = () => {
 };
 
 export default CallbackTable;
+
+
+
+const styles = {
+
+  spinner: {
+    display:"flex",
+    alignSelf: "center",
+    justifyContent: "center",
+    margin: "4rem",
+  },
+}

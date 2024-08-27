@@ -17,7 +17,8 @@ function UpdateEmployee() {
       const res = await axios.get(
         `${import.meta.env.VITE_BACKEND_API}/alluser/${id}`
       );
-      setData(res.data[0]);
+      setData(res?.data);
+      console.log("dataaaaaa", res.data)
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -36,14 +37,15 @@ function UpdateEmployee() {
 
   const handleUpdate = async (values) => {
     const payload = { user_id: id, ...values };
+    console.log('payload emp ', payload)
     try {
       const res = await axios.put(`${import.meta.env.VITE_BACKEND_API}/updateuser`, payload);
       toast.success(res.data, {});
       setTimeout(() => {
-        navigate('/employeeactivity');
+        navigate('/activity');
       }, 1500);
     } catch (error) {
-      toast.warning(error.response.data, {});
+      toast.warning(error?.response.data, {});
     }
   }
 

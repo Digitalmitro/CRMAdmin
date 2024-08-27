@@ -10,8 +10,8 @@ const ENDPOINT = import.meta.env.VITE_BACKEND_API; // Update with your server en
 let socket;
 
 const EmpMsg = () => {
-  const token = Cookies.get("token");
-  const decodeToken = token && jwtDecode(token);
+  const Admintoken = Cookies.get("Admintoken");
+  const decodeToken = Admintoken && jwtDecode(Admintoken);
   const userId = decodeToken._id;
 
   const messagesEndRef = useRef(null); 
@@ -26,10 +26,11 @@ const EmpMsg = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const admin = JSON.parse(localStorage.getItem('admin'))
+  const [loader, setloader] = useState(true);
 
   const [formData, setFormData] = useState({
-    name: decodeToken.name,
-    email: decodeToken.email,
+    name: decodeToken?.name,
+    email: decodeToken?.email,
     message: "",
     senderId: userId,
     date: moment().format("h:mm:ss a"),
@@ -44,7 +45,7 @@ const EmpMsg = () => {
     }
   };
   useEffect(() => {
-    scrollToBottom(); // Scroll to bottom on page load or when messages change
+    scrollToBottom(); 
   }, [messages]);
 
 
@@ -124,7 +125,8 @@ const EmpMsg = () => {
         const res = await axios.get(
           `${import.meta.env.VITE_BACKEND_API}/employees`
         );
-        setEmployees(res.data);
+        setEmployees(res?.data);
+        setloader(false)
       } catch (err) {
         console.log(err);
       }
@@ -169,6 +171,7 @@ const EmpMsg = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           style={styles.searchBar}
         />
+            {loader ? <>     <Spin tip="loading..." style={styles.spinner} /> </>:
         <List
           itemLayout="horizontal"
           dataSource={filteredEmployees}
@@ -191,7 +194,9 @@ const EmpMsg = () => {
               />
             </List.Item>
           )}
+        
         />
+        }
       </div>
       <div className="chat-container" style={styles.chatContainer}>
         {selectedEmployee ? (
@@ -204,7 +209,6 @@ const EmpMsg = () => {
                 <Spin tip="Loading..." style={styles.spinner} />
               ) : (
                 messages?.map((item, index) => {
-                  console.log(item);
                   return (
                     <> 
                     <div
@@ -223,8 +227,9 @@ const EmpMsg = () => {
                       <p style={styles.senderName}>
                         <strong>{item.name}</strong>
                       </p>
-                      <p style={styles.messageText}>{item.message}</p>
-                      <p style={styles.messageTime}>{item.time}</p>
+                      <p style={styles.messageText}>{item.message}<span  style={styles.messageTime}>{item.time}</span></p>
+                    
+
                     </div>
                     <div ref={messagesEndRef} /> 
                     </>
@@ -274,7 +279,7 @@ const styles = {
     borderRight: "1px solid #e0e0e0",
     display: "flex",
     flexDirection: "column",
-    height: "76vh ",
+    height: "80vh ",
     overflowY: "auto !important", 
     scrollbarWidth: "thin",
   },
@@ -333,6 +338,8 @@ const styles = {
     color: "#757575",
     textAlign: "right",
     margin: 0,
+    // marginTop: ".5rem",
+    marginLeft: "2rem",
   },
   inputContainer: {
     display: "flex",
