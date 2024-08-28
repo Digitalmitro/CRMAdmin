@@ -1,27 +1,53 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState } from "react";
 
 import { GoArrowUp } from "react-icons/go";
 import moment from "moment";
-import { MyContext } from '../../App';
+import { MyContext } from "../../App";
 import attendanceimg from "../../assets/finger-print-12.png";
 import callbackImg from "../../assets/callback-12.png";
 import transferImg from "../../assets/transfer-img.png";
 import salesImg from "../../assets/sales-img.png";
 import projectImg from "../../assets/project-12.png";
-import { useNavigate } from 'react-router-dom';
-
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useEffect } from "react";
 
 const Dashboard = () => {
-
   const context = useContext(MyContext);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const handleClick = (index, path, label) => {
     context.setActiveButton(index);
-    context.setBreadcrumbs([{ label: index === 0 ? "" : "Dashboard", path: '/' },
-    { label, path }]);
+    context.setBreadcrumbs([
+      { label: index === 0 ? "" : "Dashboard", path: "/" },
+      { label, path },
+    ]);
     navigate(path);
   };
 
+  const adminToken = localStorage.getItem("token");
+
+  const checkToken = async () => {
+    if(adminToken){
+    await axios
+      .get(`${import.meta.env.VITE_BACKEND_API}/check-admin-token`, {
+        headers: { token: adminToken },
+      })
+      .then((res) => {
+        console.log(`Response --> ${res}`);
+      })
+      .catch((e) => {
+        alert("User not valid, logging out...");
+        localStorage.clear();
+        navigate("/Login");
+      });
+    }else{
+      console.log("NO ADMIN TOKEN")
+    }
+  };
+
+  useEffect(() => {
+    checkToken();
+  }, [adminToken]);
 
   return (
     <>
@@ -41,9 +67,13 @@ const Dashboard = () => {
               color: "#222",
             }}
           >
-            <div  style={{ color: "#555151" }}
-            className={`custom-button ${context.activeButton === 1 ? 'active' : ''}`}
-            onClick={() => handleClick(1, '/attendance', 'Attendance')}>
+            <div
+              style={{ color: "#555151" }}
+              className={`custom-button ${
+                context.activeButton === 1 ? "active" : ""
+              }`}
+              onClick={() => handleClick(1, "/attendance", "Attendance")}
+            >
               <div
                 style={{ textAlign: "center", padding: "20px", height: "96px" }}
               >
@@ -80,9 +110,13 @@ const Dashboard = () => {
               color: "#222",
             }}
           >
-            <div  style={{ color: "#555151" }}
-            className={`custom-button ${context.activeButton === 2 ? 'active' : ''}`}
-            onClick={() => handleClick(2, '/callbacks', 'Callbacks')}>
+            <div
+              style={{ color: "#555151" }}
+              className={`custom-button ${
+                context.activeButton === 2 ? "active" : ""
+              }`}
+              onClick={() => handleClick(2, "/callbacks", "Callbacks")}
+            >
               <div style={{ textAlign: "center", padding: "20px" }}>
                 <img
                   src={callbackImg}
@@ -148,21 +182,21 @@ const Dashboard = () => {
               color: "#222",
             }}
           >
-          <div>
-            <div style={{ textAlign: "center", padding: "20px" }}>
-              <img
-                src={transferImg}
-                alt=""
-                style={{ width: "60px", height: "60px", textAlign: "center" }}
-              />
+            <div>
+              <div style={{ textAlign: "center", padding: "20px" }}>
+                <img
+                  src={transferImg}
+                  alt=""
+                  style={{ width: "60px", height: "60px", textAlign: "center" }}
+                />
+              </div>
+              <div className="gridtext d-flex  align-items-center justify-content-center">
+                <h6 style={{ fontSize: "0.9rem" }}>All Transfer: 43</h6>
+                <span>
+                  (+84.7% <GoArrowUp /> )
+                </span>
+              </div>
             </div>
-            <div className="gridtext d-flex  align-items-center justify-content-center">
-              <h6 style={{ fontSize: "0.9rem" }}>All Transfer: 43</h6>
-              <span>
-                (+84.7% <GoArrowUp /> )
-              </span>
-            </div>
-          </div>
           </a>
         </div>
 
@@ -180,21 +214,25 @@ const Dashboard = () => {
             style={{
               color: "#222",
             }}
-          > 
-          <div  style={{ color: "#555151" }}
-            className={`custom-button ${context.activeButton === 3 ? 'active' : ''}`}
-            onClick={() => handleClick(3, '/projects', 'Projects')}>
-            <div style={{ textAlign: "center", padding: "20px" }}>
-              <img
-                src={projectImg}
-                alt=""
-                style={{ width: "50px", height: "50px", textAlign: "center" }}
-              />
+          >
+            <div
+              style={{ color: "#555151" }}
+              className={`custom-button ${
+                context.activeButton === 3 ? "active" : ""
+              }`}
+              onClick={() => handleClick(3, "/projects", "Projects")}
+            >
+              <div style={{ textAlign: "center", padding: "20px" }}>
+                <img
+                  src={projectImg}
+                  alt=""
+                  style={{ width: "50px", height: "50px", textAlign: "center" }}
+                />
+              </div>
+              <div className="gridtext d-flex align-items-center justify-content-center">
+                <h6 style={{ fontSize: "1rem" }}>Projects</h6>
+              </div>
             </div>
-            <div className="gridtext d-flex align-items-center justify-content-center">
-              <h6 style={{ fontSize: "1rem" }}>Projects</h6>
-            </div>
-          </div>
           </a>
         </div>
       </div>

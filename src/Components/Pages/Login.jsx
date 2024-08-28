@@ -11,7 +11,8 @@ import logo from "../../assets/logo.png";
 const Login = () => {
   const navigate = useNavigate();
 
-  const Admintoken = Cookies.get("Admintoken");
+  let Admintoken;
+  // const Admintoken = Cookies.get("Admintoken");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,8 +29,10 @@ const Login = () => {
         payload,  { withCredentials: true } 
       );
       console.log(response?.data);
-      Cookies.set("Admintoken", response?.data.token);
+      Admintoken = response?.data.token
+      // Cookies.set("Admintoken", response?.data.token);
       localStorage.setItem("admin", JSON.stringify(response?.data.user));
+      localStorage.setItem("token", response?.data.token);
       toast.success(response?.data.status, {});
       setTimeout(() => {
         window.location.href = "/";

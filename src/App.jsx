@@ -47,7 +47,7 @@ function App() {
   const [toggleSidebar, setToggleSidebar] = useState(false);
   const [activeButton,setActiveButton]=useState(0)
 
-  const Admintoken = Cookies.get("Admintoken");
+  const Admintoken = localStorage.getItem('token');
 
 
   const value = {

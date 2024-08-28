@@ -43,6 +43,8 @@ const NavDrawer = ({ open, onClose }) => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
 
+  const adminToken = localStorage.getItem('token')
+
   // ant design drawer
   const classNames = {
     body: styles["my-drawer-body"],
@@ -67,7 +69,7 @@ const NavDrawer = ({ open, onClose }) => {
   };
   const Getdata = async () => {
     const res = await axios.get(
-      `${import.meta.env.VITE_BACKEND_API}/notification`
+      `${import.meta.env.VITE_BACKEND_API}/notification`, {headers: {token: adminToken}}
     );
     console.log("response", res);
 
