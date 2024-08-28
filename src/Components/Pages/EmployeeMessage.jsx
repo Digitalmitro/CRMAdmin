@@ -6,7 +6,7 @@ import Cookies from "cookies-js";
 import moment from "moment";
 import { jwtDecode } from "jwt-decode";
 
-const ENDPOINT = import.meta.env.VITE_BACKEND_API; // Update with your server endpoint
+const ENDPOINT = import.meta.env.VITE_BACKEND_API; 
 let socket;
 
 const EmpMsg = () => {

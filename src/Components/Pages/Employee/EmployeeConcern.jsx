@@ -260,6 +260,7 @@ const EmplyeeConcern = () => {
                   <th scope="col">Name</th>
                   <th scope="col">Email</th>
                   <th scope="col">Date</th>
+                  <th scope="col">Punch Type</th>
                   <th scope="col">Message</th>
                   <th scope="col">Current Status</th>
                   <th scope="col">Action</th>
@@ -362,8 +363,9 @@ const EmplyeeConcern = () => {
                         <td>{res?.name}</td>
                         <td>{res?.email}</td>
                         <td>{res?.date}</td>
+                        <td style={{color: res.punchType === "Punch Out" ? "blue": "red"}}>{res?.punchType}</td>
                         <td> {res?.message}</td>
-                        <td> {res?.status}</td>
+                        <td style={{color: res.status === "Approved" ? "green": (res.status === "Denied" &&"red")}}> {res?.status}</td>
 
                         <td class="d-flex gap-1">
                           <button

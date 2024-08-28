@@ -141,7 +141,7 @@ const ProjectList = () => {
     console.log("user._id");
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API}/projects`
+        `${import.meta.env.VITE_BACKEND_API}/projects` , { withCredentials: true } 
       );
       setprojectsData(response.data);
       setfilterProjectsData(response.data)

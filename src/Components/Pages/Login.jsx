@@ -18,14 +18,14 @@ const Login = () => {
 
   const handleSubmmit = async (e) => {
     e.preventDefault();
-    const credentials = {
+    const payload = {
       email: email,
       password: password,
     };
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_API}/loginadmin`,
-        credentials
+        payload,  { withCredentials: true } 
       );
       console.log(response?.data);
       Cookies.set("Admintoken", response?.data.token);

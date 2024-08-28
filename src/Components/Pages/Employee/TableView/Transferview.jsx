@@ -22,7 +22,7 @@ const TransferView = () => {
     const toggle = () => setIsOpen(!isOpen);
 
 
-    const [data, setData] = useState({}); // Ensure this useState hook is declared before accessing `data`
+    const [data, setData] = useState({}); 
     const [name, setName] = useState(data?.name);
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
