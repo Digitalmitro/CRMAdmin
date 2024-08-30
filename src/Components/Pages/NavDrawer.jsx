@@ -1,33 +1,32 @@
-import { useState, useEffect } from 'react'
-import moment from 'moment'
-import axios from 'axios'
-import io from "socket.io-client";
-
-import { useNavigate } from 'react-router-dom'
-import { ToastContainer, toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
-import { useParams } from 'react-router-dom'
-
-import { Button, ConfigProvider, Drawer, Space } from "antd";
-import { createStyles, useTheme } from "antd-style";
+import React from 'react';
+import { useState, useEffect } from 'react';
+import moment from 'moment';
+import axios from 'axios';
+import io from 'socket.io-client';
+import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useParams } from 'react-router-dom';
+import { Button, ConfigProvider, Drawer, Space, Badge } from 'antd';
+import { createStyles, useTheme } from 'antd-style';
 
 const socket = io(import.meta.env.VITE_BACKEND_API);
 
 const useStyle = createStyles(({ token }) => ({
-  "my-drawer-body": {
+  'my-drawer-body': {
     background: token.blue1,
   },
-  "my-drawer-mask": {
+  'my-drawer-mask': {
     boxShadow: `inset 0 0 15px #fff`,
   },
-  "my-drawer-header": {
+  'my-drawer-header': {
     background: token.green1,
   },
-  "my-drawer-footer": {
+  'my-drawer-footer': {
     color: token.colorPrimary,
   },
-  "my-drawer-content": {
-    borderLeft: "2px dotted #333",
+  'my-drawer-content': {
+    borderLeft: '2px dotted #333',
   },
 }));
 
@@ -35,55 +34,51 @@ const NavDrawer = ({ open, onClose }) => {
   const { styles } = useStyle();
   const token = useTheme();
 
-  const Profile = localStorage.getItem("admin");
+  const Profile = localStorage.getItem('admin');
   const NewProfile = JSON.parse(Profile);
   const user_id = NewProfile?._id;
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("Date"); 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('Date');
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
 
-  const adminToken = localStorage.getItem('token')
+  const adminToken = localStorage.getItem('token');
 
   useEffect(() => {
-    socket.on("connect", () => {
-        console.log("Connected to socket server");
+    socket.on('connect', () => {
+      console.log('Connected to socket server');
     });
 
-    // Listen for notifications
-    socket.on("new_notification", (notification) => {
-        // Add the new notification to the list
-        setData(prevData => [notification, ...prevData]);
+    socket.on('new_notification', (notification) => {
+      setData((prevData) => [notification, ...prevData]);
 
-        // Trigger a desktop notification
-        if (Notification.permission === "granted") {
-            new Notification(notification.message, {
-                body: notification.currentDate,
-            });
-        }
+      if (Notification.permission === 'granted') {
+        new Notification(notification.message, {
+          body: notification.currentDate,
+        });
+      }
     });
 
     return () => {
-        socket.off("new_notification");
-        socket.disconnect();
+      socket.off('new_notification');
+      socket.disconnect();
     };
-}, []);
+  }, []);
 
-  // ant design drawer
   const classNames = {
-    body: styles["my-drawer-body"],
-    mask: styles["my-drawer-mask"],
-    header: styles["my-drawer-header"],
-    footer: styles["my-drawer-footer"],
-    content: styles["my-drawer-content"],
+    body: styles['my-drawer-body'],
+    mask: styles['my-drawer-mask'],
+    header: styles['my-drawer-header'],
+    footer: styles['my-drawer-footer'],
+    content: styles['my-drawer-content'],
   };
   const drawerStyles = {
     mask: {
-      backdropFilter: "blur(10px)",
+      backdropFilter: 'blur(10px)',
     },
     content: {
-      boxShadow: "-10px 0 10px #666",
+      boxShadow: '-10px 0 10px #666',
     },
     header: {
       borderBottom: `1px solid ${token.colorPrimary}`,
@@ -92,11 +87,13 @@ const NavDrawer = ({ open, onClose }) => {
       fontSize: token.fontSizeLG,
     },
   };
+
   const Getdata = async () => {
     const res = await axios.get(
-      `${import.meta.env.VITE_BACKEND_API}/notification`, {headers: {token: adminToken}}
+      `${import.meta.env.VITE_BACKEND_API}/notification`,
+      { headers: { token: adminToken } }
     );
-    console.log("response", res);
+    console.log('response', res);
 
     setData(res.data.reverse());
   };
@@ -104,28 +101,49 @@ const NavDrawer = ({ open, onClose }) => {
   useEffect(() => {
     Getdata();
   }, []);
-  // console.log("data", data)
+
+  const handleClick = async (id) => {
+    try {
+      console.log('id', id);
+      const { data } = await axios.put(
+        `${import.meta.env.VITE_BACKEND_API}/notification/${id}`,
+        {
+          Status: true,
+        }
+      );
+      Getdata();
+      toast.success('Notification Seen');
+      onClose();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <Drawer
       title="Notifications"
       placement="right"
-      // footer="Footer"
       onClose={onClose}
       open={open}
       classNames={classNames}
       styles={drawerStyles}
     >
       <div className="notification pb-3">
-        <h5 className="all px-1 fw-bold">All </h5>
+        <h5 className="all px-1 fw-bold">All</h5>
         <p className="line"></p>
       </div>
 
       {data?.map((item, index) => (
-        <div className="d-flex gap-3 mb-2">
-          <div className="imageURl1  d-flex  justify-content-center">
+        <div
+          className="d-flex gap-3 mb-2"
+          onClick={() => handleClick(item._id)}
+          style={{ cursor: 'pointer' }}
+          key={index}
+        >
+          <Badge color={!item.Status ? 'red' : 'green'} />
+          <div className="imageURl1 d-flex justify-content-center">
             <p className="text-center py-1">
-              {" "}
-              <b>JW</b>{" "}
+              <b>JW</b>
             </p>
           </div>
           <div className="notificationText">
@@ -136,7 +154,6 @@ const NavDrawer = ({ open, onClose }) => {
           </div>
         </div>
       ))}
-
     </Drawer>
   );
 };

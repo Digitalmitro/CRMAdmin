@@ -15,7 +15,7 @@ import UserProfileDrawer from "./UserProfileDrawer";
 import io from "socket.io-client";
 import { useEffect } from "react";
 import axios from 'axios'
-
+import { Avatar, Badge, Space } from 'antd';
 
 const socket = io(import.meta.env.VITE_BACKEND_API);
 
@@ -47,6 +47,7 @@ const Header = () => {
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
+    
   };
 
   const showDrawer = () => {
@@ -63,9 +64,15 @@ const Header = () => {
     const res = await axios.get(
       `${import.meta.env.VITE_BACKEND_API}/notification`, {headers: {token: adminToken}}
     );
+    setData(res.data.reverse());
+
+    const filteredData = res.data.filter((notification) => notification.Status === false);
+     console.log("filteredData", filteredData)
+    // Store the length of the filtered array
+    setUnreadCount(filteredData.length);
+
     console.log("response", res);
 
-    setData(res.data.reverse());
   };
 
 
@@ -112,7 +119,7 @@ useEffect(() => {
 }, []);
   return (
     <>
-      <div className="container-fluid header w-100">
+      <div className="container-fluid header w-100 my-1">
         <div className="row1" style={{ padding: "0px 2rem" }}>
           <div className="col-md-6">
             <Link to={"/"}>
@@ -133,13 +140,16 @@ useEffect(() => {
               alignItems: "center",
             }}
           >
+           
             <Button onClick={toggleDrawer}>
+            <Badge count={unreadCount}>
               <img
                 src={BellIcon}
                 alt="Notifications"
                 style={{ width: "22px", height: "24px" }}
-              />
+              /></Badge>
             </Button>
+            
             {/* <p>{unreadCount}</p> */}
             <Button className="rounded-circle1">
               <img src={img1} width={20} alt="" />
