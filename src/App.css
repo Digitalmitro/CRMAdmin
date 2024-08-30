@@ -449,12 +449,14 @@ margin: 3px;
 }
 
 .right-emp-calender {
-  width: 730px;
-  height: 30vh;
+  /* width: 730px; */
+ 
   /* border: 2px solid red; */
   padding: 1rem;
   background-image: url("./assets/Rectangle60.png");
   box-shadow: 0 0 5px rgb(179, 170, 170);
+  height: 30vh;
+  overflow: auto;
 }
 
 .calender-title {

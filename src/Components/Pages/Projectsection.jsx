@@ -6,8 +6,8 @@ import { NavLink, useParams } from "react-router-dom";
 
 const ProjectList = () => {
   // const { id } = useParams();
-  const user = JSON.parse(localStorage.getItem("admin"));
-  const adminToken = localStorage.getItem('token')
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userToken = localStorage.getItem('userToken')
 
   const [modalOpened, setModalOpened] = useState(false);
   const [taskAssignees, setTaskAssignees] = useState([]);
@@ -213,7 +213,7 @@ const ProjectList = () => {
 
   const getUsersData = async () => {
     const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`,{
-      headers: { token: adminToken },
+      headers: { token: userToken },
     } );
 
     setUserData(res.data);

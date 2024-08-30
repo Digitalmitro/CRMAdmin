@@ -10,7 +10,7 @@ const ENDPOINT = import.meta.env.VITE_BACKEND_API;
 let socket;
 
 const EmpMsg = () => {
-  const Admintoken = Cookies.get("Admintoken");
+  const Admintoken = localStorage.getItem("token");
   const decodeToken = Admintoken && jwtDecode(Admintoken);
   const userId = decodeToken._id;
 

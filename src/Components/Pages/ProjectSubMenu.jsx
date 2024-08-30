@@ -58,9 +58,6 @@ const ProjectList = () => {
   });
   const [uploadedDocs, setUploadedDocs] = useState();
 
-  // const [isSearchVisible, setIsSearchVisible] = useState(false);
-  // const [filteredTasks, setFilteredTasks] = useState([]);
-
   const [newSubList, setNewSubList] = useState({
     TaskName: "",
     AsigneeName: "",

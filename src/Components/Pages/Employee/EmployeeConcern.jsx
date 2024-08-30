@@ -31,7 +31,7 @@ import filter from "../../../assets/mdi_filter.png";
 import menuList from "../../../assets/material-symbols_list.png";
 
 const EmplyeeConcern = () => {
-  const Admintoken = Cookies.get("Admintoken");
+  const Admintoken = localStorage.getItem("token");
   const Profile = localStorage.getItem("admin");
   const NewProfile = JSON.parse(Profile);
   const user_id = NewProfile?._id;
@@ -95,11 +95,14 @@ const EmplyeeConcern = () => {
  
 
   const getData = async () => {
-    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/concern`);
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/concern`,
+      {
+        headers:Admintoken
+      }
+    );
     setData(res.data);
     setFilteredData(res.data.reverse());
     const uniqueNames = [...new Set(res.data.map((item) => item.name))];
-    console.log('unique names', uniqueNames)
     setEmployeeNames(uniqueNames);
     setloader(false)
 
@@ -157,6 +160,8 @@ const EmplyeeConcern = () => {
         `${import.meta.env.VITE_BACKEND_API}/concern/${id}`,
         {
           status: event.target.name,
+        },{
+          headers:Admintoken
         }
       );
       getData();
@@ -260,7 +265,7 @@ const EmplyeeConcern = () => {
                   <th scope="col">Name</th>
                   <th scope="col">Email</th>
                   <th scope="col">Date</th>
-                  <th scope="col">Punch Type</th>
+                  <th scope="col">Message Type</th>
                   <th scope="col">Message</th>
                   <th scope="col">Current Status</th>
                   <th scope="col">Action</th>
@@ -363,7 +368,7 @@ const EmplyeeConcern = () => {
                         <td>{res?.name}</td>
                         <td>{res?.email}</td>
                         <td>{res?.date}</td>
-                        <td style={{color: res.punchType === "Punch Out" ? "blue": "red"}}>{res?.punchType}</td>
+                        <td style={{color: res.punchType === "Punch Out" ? "blue": (res.punchType === ("Leave Application" || "Leave") ? "red" : "green") }}>{res?.punchType}</td>
                         <td> {res?.message}</td>
                         <td style={{color: res.status === "Approved" ? "green": (res.status === "Denied" &&"red")}}> {res?.status}</td>
 
