@@ -112,7 +112,7 @@ function App() {
               <Route path="/transferview/:id" element={<TransferView />} />
               <Route path="/transfers" element={<Transfers />} />
               <Route path="/projects/:id" element={<ProjectSubMenu />} />
-              {/* <Route path="*" element={<Navigate to="/Login" replace />} /> */}
+              <Route path="*" element={<Navigate to="/Login" replace />} />
 
             </Routes>
           </div>

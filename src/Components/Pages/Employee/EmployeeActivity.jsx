@@ -27,7 +27,8 @@ import { PiDownloadSimpleBold } from "react-icons/pi";
 
 const EmplyeeActivity = () => {
 
-  const Admintoken = Cookies.get("Admintoken");
+  const adminToken = localStorage.getItem("token");
+
   const Profile = localStorage.getItem("admin");
   const NewProfile = JSON.parse(Profile);
   const user_id = NewProfile?._id;
@@ -89,7 +90,9 @@ const EmplyeeActivity = () => {
 
   const [night, setNight] = useState([]);
   const getNight = async () => {
-    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`);
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`, {
+      headers: { token: adminToken },
+    });
 
    
   };
@@ -117,7 +120,9 @@ const EmplyeeActivity = () => {
   // Modal
 
   const Getdata = async () => {
-    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`);
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`, {
+      headers: { token: adminToken }
+    });
     setData(res.data.reverse());
     filterAndSortResults(searchTerm, sortBy, shiftType, res.data);
     // const filteredData = res.data.filter((e) => e.type === "Night");
@@ -135,7 +140,9 @@ const handleDel = (id) => {
     cancelText: "No",
     onOk: async () => {
       try {
-       const resp = await axios.delete(`${import.meta.env.VITE_BACKEND_API}/alluser/${id}`);
+       const resp = await axios.delete(`${import.meta.env.VITE_BACKEND_API}/alluser/${id}`,{
+        headers: { token: adminToken },
+      });
         console.log("resp", resp)
         Getdata();
       } catch (error) {
@@ -147,7 +154,6 @@ const handleDel = (id) => {
     },
   });
 };
-
 
   const handleChange = (event) => {
     setSearchTerm(event.target.value);

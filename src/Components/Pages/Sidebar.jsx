@@ -28,6 +28,7 @@ import {
 const Sidebar = () => {
   const context = useContext(MyContext);
   const navigate = useNavigate();
+  const adminToken = localStorage.getItem('token')
 
   const [isSidebarModalOpen, setIsSidebarModalOpen] = useState(false);
   const [projectsName, setProjectsName] = useState("");
@@ -63,7 +64,9 @@ const Sidebar = () => {
     try {
   
       // Post the project name to the backend API
-      const response = await axios.post(`${import.meta.env.VITE_BACKEND_API}/projects`, payload);
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_API}/projects`, payload,{
+        headers: { token: adminToken },
+      } );
       // Update the local state with the new project data from the backend
      message.success("Project created")
     } catch (error) {

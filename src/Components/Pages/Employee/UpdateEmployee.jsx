@@ -8,6 +8,8 @@ import "react-toastify/dist/ReactToastify.css";
 import { useNavigate, useParams } from "react-router-dom";
 
 function UpdateEmployee() {
+  
+  const adminToken = localStorage.getItem('token')
   const { id } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null); 
@@ -15,7 +17,9 @@ function UpdateEmployee() {
   const handleData = async () => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API}/alluser/${id}`
+        `${import.meta.env.VITE_BACKEND_API}/alluser/${id}`, {
+          headers: { token: adminToken },
+        }
       );
       setData(res?.data);
       console.log("dataaaaaa", res.data)
@@ -39,7 +43,11 @@ function UpdateEmployee() {
     const payload = { user_id: id, ...values };
     console.log('payload emp ', payload)
     try {
-      const res = await axios.put(`${import.meta.env.VITE_BACKEND_API}/updateuser`, payload);
+      const res = await axios.put(`${import.meta.env.VITE_BACKEND_API}/updateuser`, payload,
+        {
+          headers: { token: adminToken },
+        }
+      );
       toast.success(res.data, {});
       setTimeout(() => {
         navigate('/activity');

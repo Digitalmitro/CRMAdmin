@@ -7,6 +7,7 @@ import { NavLink, useParams } from "react-router-dom";
 const ProjectList = () => {
   // const { id } = useParams();
   const user = JSON.parse(localStorage.getItem("admin"));
+  const adminToken = localStorage.getItem('token')
 
   const [modalOpened, setModalOpened] = useState(false);
   const [taskAssignees, setTaskAssignees] = useState([]);
@@ -85,7 +86,9 @@ const ProjectList = () => {
       projectName &&
         (await axios.put(
           `${import.meta.env.VITE_BACKEND_API}/projects/${projectListId}`,
-          { projectName: projectName }
+          { projectName: projectName }, {
+            headers: { token: adminToken },
+          }
         ));
       // Check if newTaskData is not empty
       if (Object.keys(newTaskData).length > 0) {
@@ -113,17 +116,15 @@ const ProjectList = () => {
   };
   const handleDelete = async (projectId, taskItem, taskId) => {
     // console.log(projectId, taskId, taskItem);
-    console.log(
-      `${
-        import.meta.env.VITE_BACKEND_API
-      }/projects/${projectId}/tasks/${taskId}`
-    );
+   
     if (window.confirm("Do you want to Delete this Task")) {
       try {
         const response = await axios.delete(
           `${
             import.meta.env.VITE_BACKEND_API
-          }/projects/${projectId}/tasks/${taskId}`
+          }/projects/${projectId}/tasks/${taskId}`, {
+            headers: { token: adminToken },
+          }
         );
         console.log("Action confirmed!");
         message.success("task Deleted Successfully");
@@ -141,7 +142,7 @@ const ProjectList = () => {
     console.log("user._id");
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API}/projects` , { withCredentials: true } 
+        `${import.meta.env.VITE_BACKEND_API}/projects`
       );
       setprojectsData(response.data);
       setfilterProjectsData(response.data)
@@ -211,7 +212,9 @@ const ProjectList = () => {
   };
 
   const getUsersData = async () => {
-    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`);
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`,{
+      headers: { token: adminToken },
+    } );
 
     setUserData(res.data);
   };

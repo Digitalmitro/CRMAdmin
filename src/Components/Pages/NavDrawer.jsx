@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import moment from 'moment'
 import axios from 'axios'
+import io from "socket.io-client";
 
 import { useNavigate } from 'react-router-dom'
 import { ToastContainer, toast } from 'react-toastify'
@@ -10,7 +11,7 @@ import { useParams } from 'react-router-dom'
 import { Button, ConfigProvider, Drawer, Space } from "antd";
 import { createStyles, useTheme } from "antd-style";
 
-
+const socket = io(import.meta.env.VITE_BACKEND_API);
 
 const useStyle = createStyles(({ token }) => ({
   "my-drawer-body": {
@@ -44,6 +45,30 @@ const NavDrawer = ({ open, onClose }) => {
   const [filteredData, setFilteredData] = useState([]);
 
   const adminToken = localStorage.getItem('token')
+
+  useEffect(() => {
+    socket.on("connect", () => {
+        console.log("Connected to socket server");
+    });
+
+    // Listen for notifications
+    socket.on("new_notification", (notification) => {
+        // Add the new notification to the list
+        setData(prevData => [notification, ...prevData]);
+
+        // Trigger a desktop notification
+        if (Notification.permission === "granted") {
+            new Notification(notification.message, {
+                body: notification.currentDate,
+            });
+        }
+    });
+
+    return () => {
+        socket.off("new_notification");
+        socket.disconnect();
+    };
+}, []);
 
   // ant design drawer
   const classNames = {

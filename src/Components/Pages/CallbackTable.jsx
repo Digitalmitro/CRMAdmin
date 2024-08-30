@@ -28,6 +28,7 @@ import { PiDownloadSimpleBold } from "react-icons/pi";
 const CallbackTable = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const adminToken = localStorage.getItem('token')
 
   const handleChange = (date, dateString) => {
     console.log(date, dateString);
@@ -45,7 +46,7 @@ const CallbackTable = () => {
     onClose();
   };
 
-  const Admintoken = Cookies.get("Admintoken");
+  // const Admintoken = Cookies.get("Admintoken");
   const Profile = localStorage.getItem("admin");
   const NewProfile = JSON.parse(Profile);
   const user_id = NewProfile?._id;
@@ -61,12 +62,12 @@ const CallbackTable = () => {
   const [loader, setloader] = useState(true);
 
   useEffect(() => {
-    if (Admintoken) {
+    if (adminToken) {
       // Use the <Navigate /> component to redirect
     } else {
       return navigate("/Login");
     }
-  }, [Admintoken]);
+  }, [adminToken]);
 
   // Function to handle the change in the select input
   const handleMonthChange = (event) => {
@@ -79,7 +80,16 @@ const CallbackTable = () => {
       `${import.meta.env.VITE_BACKEND_API}/allcallback`
     );
     setData(res?.data.reverse());
-    const filteredData = res?.data.filter((e) => e.type === "Night");
+
+    // EmployeeNames list 
+    const uniqueNames = new Set();
+    const filteredData = res.data.filter((e) => {
+      if (e.employeeName && !uniqueNames.has(e.employeeName)) {
+        uniqueNames.add(e.employeeName);
+        return true;
+      }
+      return false;
+    });
     setNight(filteredData);
     setloader(false)
     // filterAndSortResults(searchTerm, sortBy, res?.data.callback)
@@ -88,7 +98,9 @@ const CallbackTable = () => {
   console.log(data);
 
   const getNight = async () => {
-    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`);
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`, {
+      headers: { token: adminToken },
+    });
     // const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/attendance`)
   };
   const handleDel = async (id) => {
@@ -245,7 +257,7 @@ const CallbackTable = () => {
               {night.map((res) => {
                 return (
                   <>
-                    <option value={res?._id}>{res?.name}</option>
+                    <option value={res?._id}>{res?.employeeName}</option>
                   </>
                 );
               })}

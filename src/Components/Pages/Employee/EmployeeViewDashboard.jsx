@@ -24,12 +24,15 @@ const EmployeeViewDashboard = () => {
     const [note, setNote] = useState([]);
     const [user, setUser] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-  
+    const adminToken = localStorage.getItem('token')
+
     const fetchData = async () => {
       try {
         setLoading(true);
         const us = await axios.get(
-          `${import.meta.env.VITE_BACKEND_API}/alluser/${id}`
+          `${import.meta.env.VITE_BACKEND_API}/alluser/${id}`,{
+            headers: { token: adminToken },
+          }
         );
         const res = await axios.get(
           `${import.meta.env.VITE_BACKEND_API}/callback-user/${id}`

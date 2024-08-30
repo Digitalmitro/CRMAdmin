@@ -26,6 +26,7 @@ const Doccs = () => {
   const [userdata, setUserData] = useState([]);
   const navigate = useNavigate();
   const { id } = useParams();
+  const adminToken = localStorage.getItem('token')
 
   const [newSubList, setNewSubList] = useState({
     TaskName: "",
@@ -120,7 +121,9 @@ const Doccs = () => {
 
   console.log("all document",documents)
   const getUsersData = async () => {
-    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`);
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`, {
+      headers: { token: adminToken },
+    });
 
     setUserData(res.data.reverse());
   };

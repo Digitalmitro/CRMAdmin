@@ -27,6 +27,7 @@ import { PiDownloadSimpleBold } from "react-icons/pi";
 // import "../style/Project.css"
 const Sales = () => {
   const [open, setOpen] = useState(false);
+  const adminToken = localStorage.getItem('token')
 
   const navigate = useNavigate();
   const [data, setData] = useState([]);
@@ -94,7 +95,9 @@ const Sales = () => {
   const [night, setNight] = useState([]);
 
   const getNight = async () => {
-    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`);
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`, {
+      headers: { token: adminToken },
+    });
     // const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/attendance`)
     // const filteredData = res.data.map((e) =>e.name);
     setNight(res?.data);

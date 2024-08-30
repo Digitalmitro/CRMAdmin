@@ -27,6 +27,7 @@ const CustomDrawer = ({ open, onClose }) => {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [type, setType] = useState("Day");
+  const adminToken = localStorage.getItem('token')
 
   const handleSubmit = async () => {
     try {
@@ -42,7 +43,9 @@ const CustomDrawer = ({ open, onClose }) => {
       };
       const res = await axios.post(
         `${import.meta.env.VITE_BACKEND_API}/registeruser`,
-        payload
+        payload,{
+          headers: { token: adminToken },
+        }
       );
 
       console.log("res", res);

@@ -15,6 +15,8 @@ const initialData = {
 const ProjectList = () => {
   const { id } = useParams();
   const [data, setData] = useState(initialData);
+  const adminToken = localStorage.getItem('token')
+  
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const [modalOpened, setModalOpened] = useState(false);
@@ -721,7 +723,9 @@ const ProjectList = () => {
       // Post the new task data to the backend
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_API}/projects/${id}`,
-        newTaskData
+        newTaskData, {
+          headers: { token: adminToken },
+        }
       );
 
       // Call getProjectsData to refresh the data
@@ -764,7 +768,9 @@ const ProjectList = () => {
   // set data for project
   const [userdata, setUserData] = useState([]);
   const getUsersData = async () => {
-    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`);
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`, {
+      headers: { token: adminToken },
+    });
 
     setUserData(res.data);
   };

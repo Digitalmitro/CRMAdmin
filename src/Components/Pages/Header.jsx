@@ -12,10 +12,16 @@ import { IoIosArrowDown } from "react-icons/io";
 import BellIcon from "../../assets/bellIcon.jpg";
 import NotificationDrawer from "./NavDrawer";
 import UserProfileDrawer from "./UserProfileDrawer";
+import io from "socket.io-client";
+import { useEffect } from "react";
+import axios from 'axios'
+
+
+const socket = io(import.meta.env.VITE_BACKEND_API);
 
 // import Sidebar from './Sidebar';
 const Header = () => {
-
+  const adminToken = localStorage.getItem('token')
   const Profile = localStorage.getItem('admin')
   const NewProfile = JSON.parse(Profile)
   const name = NewProfile?.name
@@ -26,6 +32,9 @@ const Header = () => {
   const [isToggle, setIsToggle] = useState(false);
   const [activeButton, setProfileActiveButton] = useState(0);
   const [open, setOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [data, setData] = useState([]);
+
 
   const handleClick = (index) => {
     setProfileActiveButton(index);
@@ -50,6 +59,57 @@ const Header = () => {
     onClose();
   };
 
+  const Getdata = async () => {
+    const res = await axios.get(
+      `${import.meta.env.VITE_BACKEND_API}/notification`, {headers: {token: adminToken}}
+    );
+    console.log("response", res);
+
+    setData(res.data.reverse());
+  };
+
+
+  useEffect(() => {
+    Getdata();
+  }, []);
+  useEffect(() => {
+    socket.on("connect", () => {
+        console.log("Connected to socket server");
+    });
+
+    // Listen for notifications
+    socket.on("new_notification", (notification) => {
+        // Add the new notification to the list
+        setData(prevData => [notification, ...prevData]);
+
+        // Trigger a desktop notification
+        if (Notification.permission === "granted") {
+            new Notification(notification.message, {
+                body: notification.currentDate,
+            });
+        }
+    });
+
+    return () => {
+        socket.off("new_notification");
+        socket.disconnect();
+    };
+}, []);
+
+useEffect(() => {
+  socket.on("new_notification", (notification) => {
+      setUnreadCount(prevCount => prevCount + 1);
+      // Add the notification to the list
+      setData(prevData => [notification, ...prevData]);
+
+      // Trigger a desktop notification
+      if (Notification.permission === "granted") {
+          new Notification(notification.message, {
+              body: notification.currentDate,
+          });
+      }
+  });
+}, []);
   return (
     <>
       <div className="container-fluid header w-100">
@@ -80,6 +140,7 @@ const Header = () => {
                 style={{ width: "22px", height: "24px" }}
               />
             </Button>
+            {/* <p>{unreadCount}</p> */}
             <Button className="rounded-circle1">
               <img src={img1} width={20} alt="" />
             </Button>

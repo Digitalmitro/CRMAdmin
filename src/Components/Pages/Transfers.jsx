@@ -88,9 +88,16 @@ const Transfers = () => {
     const res = await axios.get(
       `${import.meta.env.VITE_BACKEND_API}/alltransfer`
     );
-    const filteredData = res.data.filter((e) => e.type === "Night");
+    const uniqueNames = new Set();
+    const filteredData = res.data.filter((e) => {
+      if (e.employeeName && !uniqueNames.has(e.employeeName)) {
+        uniqueNames.add(e.employeeName);
+        return true;
+      }
+      return false;
+    });
     setNight(filteredData);
-    console.log("transfer data data", res.data);
+    console.log("transfer data data", filteredData);
     setData(res.data);
     setloader(false)
     filterAndSortResults(searchTerm, sortBy, res.data);
@@ -196,7 +203,7 @@ const Transfers = () => {
             {night.map((res) => {
               return (
                 <>
-                  <option value={res?._id}>{res?.name}</option>
+                  <option value={res?._id}>{res?.employeeName}</option>
                 </>
               );
             })}
