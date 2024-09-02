@@ -146,7 +146,7 @@ const navigate = useNavigate()
     localStorage.clear()
     onClose()
     // await new Promise((resolve) => setTimeout(resolve, 100));
-    navigate("/Login");
+    navigate("/login");
     window.location.reload()
   };
 

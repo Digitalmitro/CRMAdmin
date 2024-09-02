@@ -9,7 +9,7 @@ import { MyContext } from "../../App";
 import { NavLink, useNavigate } from "react-router-dom";
 import homeicon from "../../assets/home-icon.png";
 import EmployeeIcon from "../../assets/employee12.png";
-import { message, Modal } from "antd";
+import { Badge, message, Modal } from "antd";
 import axios from "axios";
 import Tooltip from "@mui/material/Tooltip";
 // -------------
@@ -34,23 +34,10 @@ const Sidebar = () => {
   const [projectsName, setProjectsName] = useState("");
   const [projects, setProjects] = useState([]);
   const [projectsData, setProjectsData] = useState([]);
-
   const [activeProject, setActiveProject] = useState(null);
-
   const [isProjectsMenuOpen, setIsProjectsMenuOpen] = useState(true);
+  const [chatLength, setChatLength] = useState(0);
 
-  // ------
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [transferTo, setTransfer] = useState("");
-  const [domainName, setDomain] = useState("");
-  const [address, setAddress] = useState("");
-  const [country, setCountry] = useState("USA");
-  const [zipcode, setZip] = useState("");
-  const [comments, setComments] = useState("");
-  const [buget, setBuget] = useState("");
-  const [calldate, setCalldate] = useState("");
   // ------------
 
   const showSidebarModal = () => {
@@ -95,6 +82,7 @@ const Sidebar = () => {
     }
   };
 
+ 
   console.log(projectsData);
 
   const handleSidebarCancel = () => {
@@ -114,6 +102,9 @@ const Sidebar = () => {
     setIsProjectsMenuOpen(!isProjectsMenuOpen);
   };
 
+
+
+
   const handleClick = (index, path, label) => {
     context.setActiveButton(index);
     context.setBreadcrumbs([
@@ -122,6 +113,23 @@ const Sidebar = () => {
     ]);
     navigate(path);
   };
+
+  useEffect(() => {
+    const getChatNotification = async() => {
+      console.log("hello notify jhs")
+      try{
+           const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/notifymessage`)
+           const sendersNotification = res.data.data.filter((send) => send.senderName !== "Admin"
+          )
+           setChatLength(sendersNotification.length)
+           console.log("res message", sendersNotification)
+      }catch(err){
+  console.log(err)
+      }
+    }
+    getChatNotification()
+  },[])
+
 
   useEffect(() => {
     getProjectsData();
@@ -133,13 +141,10 @@ const Sidebar = () => {
         context.setToggleSidebar(true);
       }
     };
-
     // Add event listener for window resize
     window.addEventListener("resize", handleResize);
-
     // Call handler right away so state gets updated with initial window size
     handleResize();
-
     // Remove event listener on cleanup
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -1162,6 +1167,7 @@ const Sidebar = () => {
         {context.toggleSidebar ? (
           <Tooltip title="Send Messages">
             <li>
+
               <Button
                 style={{ color: "#555151" }}
                 className={`custom-button ${
@@ -1169,7 +1175,11 @@ const Sidebar = () => {
                 }`}
                 onClick={() => handleClick(8, "/employeemessage", "Messages")}
               >
+               
                 <span className="icon">
+                
+                <Badge count={5} 
+                >
                   <svg
                     width="24px"
                     height="24px"
@@ -1193,8 +1203,10 @@ const Sidebar = () => {
                         stroke-linejoin="round"
                       ></path>{" "}
                     </g>
-                  </svg>
+                  </svg> 
+                  </Badge>
                 </span>
+               
                 Send Messages
               </Button>
             </li>
@@ -1209,6 +1221,9 @@ const Sidebar = () => {
               onClick={() => handleClick(8, "/employeemessage", "Messages")}
             >
               <span className="icon">
+                <Badge count={chatLength}   overflowCount={99}
+                  style={{ left: '-1px', width:"12px", paddingLeft:"10px"}}
+    >  
                 <svg
                   width="24px"
                   height="24px"
@@ -1232,7 +1247,7 @@ const Sidebar = () => {
                       stroke-linejoin="round"
                     ></path>{" "}
                   </g>
-                </svg>
+                </svg> </Badge>
               </span>
               Send Messages
             </Button>

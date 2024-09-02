@@ -118,7 +118,7 @@ useEffect(() => {
     if (Admintoken) {
         // Use the <Navigate /> component to redirect
     } else {
-        return navigate('/Login')
+        return navigate('/login')
     }
 }, [country, Admintoken])
     // const token = useTheme();

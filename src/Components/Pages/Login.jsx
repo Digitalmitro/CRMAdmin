@@ -49,7 +49,7 @@ const Login = () => {
     if (Admintoken) {
       return navigate("/");
     } else {
-      return navigate("/Login");
+      return navigate("/login");
     }
   }, [Admintoken]);
 

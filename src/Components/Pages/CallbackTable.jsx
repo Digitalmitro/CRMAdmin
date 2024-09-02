@@ -65,7 +65,7 @@ const CallbackTable = () => {
     if (adminToken) {
       // Use the <Navigate /> component to redirect
     } else {
-      return navigate("/Login");
+      return navigate("/login");
     }
   }, [adminToken]);
 

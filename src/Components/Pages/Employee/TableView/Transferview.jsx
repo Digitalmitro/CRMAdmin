@@ -49,7 +49,7 @@ const TransferView = () => {
       getData();
       if (Admintoken) {
       } else {
-          return navigate("/Login");
+          return navigate("/lLogin");
       }
     }, [Admintoken]);
     

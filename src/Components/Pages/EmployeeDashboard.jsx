@@ -38,7 +38,7 @@ const Dashboard = () => {
       .catch((e) => {
         alert("User not valid, logging out...");
         localStorage.clear();
-        navigate("/Login");
+        navigate("/login");
       });
     }else{
       console.log("NO ADMIN TOKEN")

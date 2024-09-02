@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { Input, Button, Spin, List, Avatar } from "antd";
+import { Input, Button, Spin, List, Avatar, Badge } from "antd";
 import io from "socket.io-client";
 import Cookies from "cookies-js";
 import moment from "moment";
@@ -26,11 +26,14 @@ const EmpMsg = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const admin = JSON.parse(localStorage.getItem('admin'))
+  const [messageLength, setMessageLength]= useState([])
   const [loader, setloader] = useState(true);
+  const [chatSeen, setChatSeen] = useState([]);
+  const [length, setLength] = useState(0);
 
   const [formData, setFormData] = useState({
-    name: decodeToken?.name,
-    email: decodeToken?.email,
+    name: admin?.name,
+    email: admin?.email,
     message: "",
     senderId: userId,
     date: moment().format("h:mm:ss a"),
@@ -81,9 +84,27 @@ const EmpMsg = () => {
         time: moment().format("h:mm:ss a"),
         userId: selectedEmployee._id,
       };
-
+   
       setMessages([...messages, newMessage]);
       socket.emit("sendMsg", newMessage);
+      try{
+        console.log("hereeeee",newMessage)
+       const res =  await axios
+        .post(
+          `${import.meta.env.VITE_BACKEND_API}/notifymessage`, {
+            senderName:formData.name,
+            Date: moment().format("MMMM Do YYYY, h:mm:ss a"),
+            status:false,
+            message: input,
+            senderId: userId,
+            receiverId: selectedEmployee._id
+          }
+          )
+          console.log("res", res)
+    
+       }catch(err){
+        console.log(err)
+       }
       setInput("");
     }
   };
@@ -97,9 +118,18 @@ const EmpMsg = () => {
         }`
       )
       .then((res) => {
+
         const chatData = res.data.chatData;
 
         if (chatData.length > 0) {
+          console.log("chatData", res.data?.chatData[0]?.messages)
+
+          const filterStatus = res.data?.chatData[0]?.messages.filter((msg)=>
+              (msg.receiverId == userId  && msg.status)  && msg.status === 'false'
+        ) 
+          console.log("filterStatus", filterStatus)
+         
+          setMessageLength(filterStatus)
           setMessages(res.data.chatData[0].messages);
         } else {
           setMessages([]);
@@ -162,6 +192,48 @@ const EmpMsg = () => {
         )
       : employees;
 
+      useEffect(() => {
+        const getChatNotification = async () => {
+          try {
+            const res = await axios.get(
+              `${import.meta.env.VITE_BACKEND_API}/notifymessage`
+            );
+            // const hasReceivedMsg = res.data.data.filter(
+            //   (rec) => rec.receiverId === user._id
+            // );
+               
+            setChatSeen(res.data.data);
+            setLength(hasReceivedMsg[0]?.message?.length)
+           
+          } catch (err) {
+            console.log(err);
+          }
+        };
+        getChatNotification();
+      }, []);
+    
+      const handleMsgSeen = async(senderId) =>{
+        console.log("chatcSen",chatSeen)
+        const isUnseen = chatSeen.filter((chat) => chat.senderId === senderId)
+        console.log("isUnseen", isUnseen)
+        if(isUnseen.length > 0){
+     try{
+         const res = await axios.delete(`${import.meta.env.VITE_BACKEND_API}/notifymessage`,{
+          params:{
+            id:senderId,
+            type:"sender"
+          }
+         })
+        setLength(0)
+        }catch(err){
+          console.log(err)
+        }
+        }else{
+          console.log("nothing")
+        }
+   
+      }
+
   return (
     <div className="chat-app" style={styles.chatApp}>
       <div className="chatSidebar" style={styles.chatSidebar}>
@@ -175,10 +247,17 @@ const EmpMsg = () => {
         <List
           itemLayout="horizontal"
           dataSource={filteredEmployees}
-          renderItem={(employee) => (
+        
+          renderItem={(employee) => {
+            const matchingChat = chatSeen?.find(chat => chat.senderId === employee._id);
+            const messageCount = matchingChat ? matchingChat?.message.length : 0;
+        
+            return ( 
+           
             <List.Item
               key={employee._id}
-              onClick={() => setSelectedEmployee(employee)}
+              onClick={() => {setSelectedEmployee(employee); handleMsgSeen(employee._id)}}
+              
               style={{
                 ...styles.employeeItem,
                 backgroundColor:
@@ -186,14 +265,20 @@ const EmpMsg = () => {
                     ? "#e0e0e0"
                     : "#ffffff",
               }}
-            >
-              <List.Item.Meta
-                avatar={<Avatar>{employee.name[0]}</Avatar>}
+            > 
+
+            
+             <List.Item.Meta
+                avatar={
+                   
+                  <Badge count={ messageCount}>  <Avatar>{employee.name[0]}</Avatar>
+                  </Badge>
+                }
                 title={employee.name}
                 description={employee.lastMessage?? employee.email}
               />
             </List.Item>
-          )}
+          )}}
         
         />
         }

@@ -37,10 +37,9 @@ const EmplyeeConcern = () => {
   const user_id = NewProfile?._id;
   const user_name = NewProfile?.name;
   const aliceName = NewProfile?.aliceName;
-
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-
+  console.log("Adminten", Admintoken)
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("Date");
@@ -55,6 +54,8 @@ const EmplyeeConcern = () => {
   const [EmployeeNames, setEmployeeNames] = useState([]);
   const [SelectedEmployee, setSelectedEmployee] = useState([]);
   const [loader, setloader] = useState(true);
+
+    //  console.log("toksen", Admintoken)
 
   const showDrawers = () => {
     setOpen(true);
@@ -80,7 +81,7 @@ const EmplyeeConcern = () => {
     if (Admintoken) {
       // Use the <Navigate /> component to redirect
     } else {
-      return navigate("/Login");
+      return navigate("/login");
     }
   }), [Admintoken]
   useEffect(() => {
@@ -92,20 +93,21 @@ const EmplyeeConcern = () => {
     }
   }, [searchTerm, sortBy]);
 
- 
-
   const getData = async () => {
-    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/concern`,
-      {
-        headers:Admintoken
-      }
-    );
-    setData(res.data);
-    setFilteredData(res.data.reverse());
-    const uniqueNames = [...new Set(res.data.map((item) => item.name))];
-    setEmployeeNames(uniqueNames);
-    setloader(false)
-
+    try{
+      const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/concern`,
+        { headers: { token: Admintoken } }
+      );
+      setData(res.data);
+      setFilteredData(res.data.reverse());
+      const uniqueNames = [...new Set(res.data.map((item) => item.name))];
+      setEmployeeNames(uniqueNames);
+      setloader(false)
+  
+    }catch(err){
+      console.log(err)
+    }
+  
   };
   console.log("concern", data);
   const handleMonthChange = (event) => {
