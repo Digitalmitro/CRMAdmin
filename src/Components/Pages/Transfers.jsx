@@ -175,15 +175,20 @@ const Transfers = () => {
   });
   console.log(filteredData);
 
-  useEffect(() => {
-    const timeoutRef = setTimeout(() => {
+  // useEffect(() => {
+  //   const timeoutRef = setTimeout(() => {
+  //     Getdata();
+
+  //   }, 500)
+  //   return () => {
+  //     clearTimeout(timeoutRef)
+  //   }
+  // }, [searchTerm, sortBy]);
+
+    useEffect(() => {
       Getdata();
 
-    }, 500)
-    return () => {
-      clearTimeout(timeoutRef)
-    }
-  }, [searchTerm, sortBy]);
+  }, []);
 
   return (
     <>

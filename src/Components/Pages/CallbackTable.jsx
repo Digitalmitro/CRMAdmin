@@ -150,13 +150,8 @@ const CallbackTable = () => {
     await axios.post(`${import.meta.env.VITE_BACKEND_API}/notification`, noti);
   };
   useEffect(() => {
-    const timeoutRef = setTimeout(() => {
       Getdata();
-    }, 500);
-    return () => {
-      clearTimeout(timeoutRef);
-    };
-  }, [searchTerm, sortBy]);
+  }, []);
 
   // Function to handle search term change
   const handleSearchChange = (event) => {

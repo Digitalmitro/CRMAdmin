@@ -45,15 +45,15 @@ const Sales = () => {
   const [loader, setloader] = useState(true);
 
 
-  useEffect(()=>{
-    const timeoutRef = setTimeout(() => {
-      Getdata();
+  // useEffect(()=>{
+  //   const timeoutRef = setTimeout(() => {
+  //     Getdata();
 
-    }, 500)
-    return () => {
-      clearTimeout(timeoutRef)
-    }
-  },[searchTerm, sortBy])
+  //   }, 500)
+  //   return () => {
+  //     clearTimeout(timeoutRef)
+  //   }
+  // },[ sortBy])
   // ant desgin Drawer
   const showDrawer = () => {
     setOpen(true);
@@ -84,7 +84,6 @@ const Sales = () => {
   };
   const handleEmployeeChange = (event) => {
     setSelectedEmployee(event?.target.value);
-    console.log(event?.target.value);
   };
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -114,6 +113,7 @@ const Sales = () => {
 
 useEffect(()=> {
   getNight()
+  Getdata()
 },[])
 console.log("night", night)
 

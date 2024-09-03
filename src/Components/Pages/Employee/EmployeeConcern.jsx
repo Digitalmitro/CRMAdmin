@@ -85,13 +85,8 @@ const EmplyeeConcern = () => {
     }
   }), [Admintoken]
   useEffect(() => {
-    const timeoutRef = setTimeout(() => {
       getData();
-    }, 500)
-    return () => {
-      clearTimeout(timeoutRef)
-    }
-  }, [searchTerm, sortBy]);
+  }, []);
 
   const getData = async () => {
     try{

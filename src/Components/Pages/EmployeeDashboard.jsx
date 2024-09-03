@@ -15,6 +15,7 @@ import { useEffect } from "react";
 const Dashboard = () => {
   const context = useContext(MyContext);
   const navigate = useNavigate();
+  const [dataLength, setDataLength] = useState({})
   const handleClick = (index, path, label) => {
     context.setActiveButton(index);
     context.setBreadcrumbs([
@@ -45,8 +46,28 @@ const Dashboard = () => {
     }
   };
 
+  const getDashboardData =  () => {
+  
+       axios
+      .get(`${import.meta.env.VITE_BACKEND_API}/adminDashboardlength`)
+      .then((res) => {
+        console.log(`Response --> ${JSON.stringify(res, null, 2)}`);
+        setDataLength(res.data)
+      })
+      .catch((e) => {
+       console.log(e)
+      });
+ 
+  
+   
+  };
+
+
+
+console.log("dataLength", dataLength)
   useEffect(() => {
     checkToken();
+    getDashboardData()
   }, [adminToken]);
 
   return (
@@ -125,10 +146,10 @@ const Dashboard = () => {
                 />
               </div>
               <div className="gridtext d-flex align-items-center justify-content-center">
-                <h6 style={{ fontSize: "0.9rem" }}>All Callback: 914</h6>
-                <span>
+                <h6 style={{ fontSize: "0.9rem" }}>All Callback: {dataLength?.callback} </h6>
+                {/* <span>
                   (+84.7% <GoArrowUp /> )
-                </span>
+                </span> */}
               </div>
             </div>
           </a>
@@ -158,9 +179,9 @@ const Dashboard = () => {
                 />
               </div>
               <div className="gridtext d-flex  align-items-center justify-content-center">
-                <h6 style={{ fontSize: "0.9rem" }}>All Sales: 43</h6>
+                <h6 style={{ fontSize: "0.9rem" }}>All Sales: {dataLength.sale}</h6>
                 <span>
-                  (+84.7% <GoArrowUp /> )
+                  {/* (+84.7% <GoArrowUp /> ) */}
                 </span>
               </div>
             </div>
@@ -191,10 +212,8 @@ const Dashboard = () => {
                 />
               </div>
               <div className="gridtext d-flex  align-items-center justify-content-center">
-                <h6 style={{ fontSize: "0.9rem" }}>All Transfer: 43</h6>
-                <span>
-                  (+84.7% <GoArrowUp /> )
-                </span>
+                <h6 style={{ fontSize: "0.9rem" }}>All Transfer: {dataLength?.transfer}</h6>
+             
               </div>
             </div>
           </a>
@@ -230,7 +249,7 @@ const Dashboard = () => {
                 />
               </div>
               <div className="gridtext d-flex align-items-center justify-content-center">
-                <h6 style={{ fontSize: "1rem" }}>Projects</h6>
+                <h6 style={{ fontSize: "1rem" }}>Projects : {dataLength?.project}</h6>
               </div>
             </div>
           </a>

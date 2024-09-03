@@ -101,15 +101,8 @@ const EmplyeeActivity = () => {
   const [userData, setUserData] = useState({});
 
   useEffect(() => {
-   const timeoutRef =  setTimeout(() => {
     Getdata();
-    },500)
-
-    // getNight();
-  return ()=> {
-    clearTimeout(timeoutRef)
-  }
-  }, [searchTerm, sortBy, shiftType]);
+  }, []);
 
   const refreshData = () => {
   };
@@ -124,7 +117,6 @@ const EmplyeeActivity = () => {
       headers: { token: adminToken }
     });
     setData(res.data.reverse());
-    filterAndSortResults(searchTerm, sortBy, shiftType, res.data);
     // const filteredData = res.data.filter((e) => e.type === "Night");
     setloader(false)
 
@@ -167,7 +159,7 @@ const handleDel = (id) => {
     setShiftType(event.target.value);
   };
 
-  const filterAndSortResults = (searchTerm, sortBy, shiftType, data) => {
+  const filterAndSortResults = () => {
     let filteredResults = data?.filter((item) => {
       const matchesSearchTerm = Object.values(item)
         .join(" ")
@@ -219,6 +211,10 @@ const handleDel = (id) => {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
+  useEffect(()=>{
+    filterAndSortResults();
+
+  },[searchTerm, sortBy, shiftType, data])
 
   return (
     <>
