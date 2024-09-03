@@ -163,7 +163,9 @@ const EmplyeeConcern = () => {
         {
           status: event.target.name,
         },{
-          headers:Admintoken
+          headers:{
+            token:Admintoken
+          }
         }
       );
       getData();

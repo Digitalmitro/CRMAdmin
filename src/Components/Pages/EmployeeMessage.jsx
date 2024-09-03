@@ -156,6 +156,7 @@ const EmpMsg = () => {
           `${import.meta.env.VITE_BACKEND_API}/employees`
         );
         setEmployees(res?.data);
+        
         setloader(false)
       } catch (err) {
         console.log(err);
@@ -163,7 +164,7 @@ const EmpMsg = () => {
     };
     fetchEmployees();
   }, []);
-
+console.log("employees", employees)
   const typingHandler = (e) => {
     setInput(e.target.value);
 

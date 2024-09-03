@@ -24,7 +24,6 @@ const EmployeeAttendance = () => {
   const navigate = useNavigate();
   const [date, setDate] = useState("");
   const [data3, setData3] = useState([]);
-  console.log(import.meta.env.VITE_BACKEND_API);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -52,7 +51,6 @@ const EmployeeAttendance = () => {
     const ressss = await axios.get(
       `${import.meta.env.VITE_BACKEND_API}/attendance/${id}`
     );
-console.log("ressss", ressss)
     setData3(ressss.data.attendance.reverse());
   };
   console.log("data3", data3)
@@ -102,6 +100,7 @@ console.log("ressss", ressss)
       return acc;
     }, {})
   );
+  
   console.log(groupedData);
   // Add missing weekend days between the data
   const weekendEntries = [];
@@ -279,7 +278,6 @@ console.log("ressss", ressss)
                 background: "#FF560E",
                 paddingRight: "12px",
                 overflow: "hidden",
-                color: "#fff",
               }}
               onChange={handleMonthChange}
             >
@@ -311,7 +309,6 @@ console.log("ressss", ressss)
                 paddingLeft: "15px",
                 background: "#FF560E",
                 borderRadius: "6px",
-                color: "#fff",
               }}
               type="date"
             />

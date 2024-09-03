@@ -47,7 +47,8 @@ const Header = () => {
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
-    
+    handleSeenNotification()
+    Getdata()
   };
 
   const showDrawer = () => {
@@ -62,7 +63,7 @@ const Header = () => {
 
   const Getdata = async () => {
     const res = await axios.get(
-      `${import.meta.env.VITE_BACKEND_API}/notification`, {headers: {token: adminToken}}
+      `${import.meta.env.VITE_BACKEND_API}/notification`, {headers: {token: {token: adminToken}}}
     );
     setData(res.data.reverse());
 
@@ -75,6 +76,20 @@ const Header = () => {
 
   };
 
+  const handleSeenNotification = async() => {
+    console.log("status click ")
+
+    try{
+    const res = await axios.put(`${import.meta.env.VITE_BACKEND_API}/notifications-seen`)
+    console.log("status update successfull")
+    }catch(err){
+      console.log("err", err)
+    }
+  //   const filteredData = res.data.filter((notification) => notification.Status === false);
+  //   console.log("filteredData", filteredData)
+  //  // Store the length of the filtered array
+  //  setUnreadCount(filteredData.length);
+  }
 
   useEffect(() => {
     Getdata();
