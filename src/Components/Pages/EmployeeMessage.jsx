@@ -323,7 +323,7 @@ const EmpMsg = () => {
                         </p>
                         <p style={styles.messageText}>
                           {item.message}
-                          <span style={styles.messageTime}>{typeof item.time === "string" ? item.time : moment(item.time).format("DD/MM/YYYY HH:mm")}</span>
+                          <span style={styles.messageTime}>{moment(item.time).format("DD/MM/YYYY HH:mm")}</span>
                         </p>
                       </div>
                       <div ref={messagesEndRef} />
