@@ -6,7 +6,7 @@ import Cookies from "cookies-js";
 import moment from "moment";
 import { jwtDecode } from "jwt-decode";
 
-const ENDPOINT = import.meta.env.VITE_BACKEND_API; 
+const ENDPOINT = import.meta.env.VITE_BACKEND_API;
 let socket;
 
 const EmpMsg = () => {
@@ -14,7 +14,7 @@ const EmpMsg = () => {
   const decodeToken = Admintoken && jwtDecode(Admintoken);
   const userId = decodeToken._id;
 
-  const messagesEndRef = useRef(null); 
+  const messagesEndRef = useRef(null);
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -25,8 +25,8 @@ const EmpMsg = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const admin = JSON.parse(localStorage.getItem('admin'))
-  const [messageLength, setMessageLength]= useState([])
+  const admin = JSON.parse(localStorage.getItem("admin"));
+  const [messageLength, setMessageLength] = useState([]);
   const [loader, setloader] = useState(true);
   const [chatSeen, setChatSeen] = useState([]);
   const [length, setLength] = useState(0);
@@ -41,16 +41,14 @@ const EmpMsg = () => {
     user_id: userId,
   });
 
-
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
   useEffect(() => {
-    scrollToBottom(); 
+    scrollToBottom();
   }, [messages]);
-
 
   // Establish socket connection only when an employee is selected
   useEffect(() => {
@@ -72,6 +70,8 @@ const EmpMsg = () => {
     }
   }, [selectedEmployee]);
 
+  const curTime = new Date();
+
   const handleSendMessage = async () => {
     if (input.trim() !== "") {
       const newMessage = {
@@ -81,30 +81,29 @@ const EmpMsg = () => {
         receiverId: selectedEmployee._id,
         message: input,
         role: "admin",
-        time: moment().format("h:mm:ss a"),
+        time: curTime,
         userId: selectedEmployee._id,
       };
-   
+
       setMessages([...messages, newMessage]);
       socket.emit("sendMsg", newMessage);
-      try{
-        console.log("hereeeee",newMessage)
-       const res =  await axios
-        .post(
-          `${import.meta.env.VITE_BACKEND_API}/notifymessage`, {
-            senderName:formData.name,
+      try {
+        console.log("hereeeee", newMessage);
+        const res = await axios.post(
+          `${import.meta.env.VITE_BACKEND_API}/notifymessage`,
+          {
+            senderName: formData.name,
             Date: moment().format("MMMM Do YYYY, h:mm:ss a"),
-            status:false,
+            status: false,
             message: input,
             senderId: userId,
-            receiverId: selectedEmployee._id
+            receiverId: selectedEmployee._id,
           }
-          )
-          console.log("res", res)
-    
-       }catch(err){
-        console.log(err)
-       }
+        );
+        console.log("res", res);
+      } catch (err) {
+        console.log(err);
+      }
       setInput("");
     }
   };
@@ -118,18 +117,18 @@ const EmpMsg = () => {
         }`
       )
       .then((res) => {
-
         const chatData = res.data.chatData;
 
         if (chatData.length > 0) {
-          console.log("chatData", res.data?.chatData[0]?.messages)
+          console.log("chatData", res.data?.chatData[0]?.messages);
 
-          const filterStatus = res.data?.chatData[0]?.messages.filter((msg)=>
-              (msg.receiverId == userId  && msg.status)  && msg.status === 'false'
-        ) 
-          console.log("filterStatus", filterStatus)
-         
-          setMessageLength(filterStatus)
+          const filterStatus = res.data?.chatData[0]?.messages.filter(
+            (msg) =>
+              msg.receiverId == userId && msg.status && msg.status === "false"
+          );
+          console.log("filterStatus", filterStatus);
+
+          setMessageLength(filterStatus);
           setMessages(res.data.chatData[0].messages);
         } else {
           setMessages([]);
@@ -156,15 +155,15 @@ const EmpMsg = () => {
           `${import.meta.env.VITE_BACKEND_API}/employees`
         );
         setEmployees(res?.data);
-        
-        setloader(false)
+
+        setloader(false);
       } catch (err) {
         console.log(err);
       }
     };
     fetchEmployees();
   }, []);
-console.log("employees", employees)
+  console.log("employees", employees);
   const typingHandler = (e) => {
     setInput(e.target.value);
 
@@ -193,47 +192,48 @@ console.log("employees", employees)
         )
       : employees;
 
-      useEffect(() => {
-        const getChatNotification = async () => {
-          try {
-            const res = await axios.get(
-              `${import.meta.env.VITE_BACKEND_API}/notifymessage`
-            );
-            // const hasReceivedMsg = res.data.data.filter(
-            //   (rec) => rec.receiverId === user._id
-            // );
-               
-            setChatSeen(res.data.data);
-            setLength(hasReceivedMsg[0]?.message?.length)
-           
-          } catch (err) {
-            console.log(err);
-          }
-        };
-        getChatNotification();
-      }, []);
-    
-      const handleMsgSeen = async(senderId) =>{
-        console.log("chatcSen",chatSeen)
-        const isUnseen = chatSeen.filter((chat) => chat.senderId === senderId)
-        console.log("isUnseen", isUnseen)
-        if(isUnseen.length > 0){
-     try{
-         const res = await axios.delete(`${import.meta.env.VITE_BACKEND_API}/notifymessage`,{
-          params:{
-            id:senderId,
-            type:"sender"
-          }
-         })
-        setLength(0)
-        }catch(err){
-          console.log(err)
-        }
-        }else{
-          console.log("nothing")
-        }
-   
+  useEffect(() => {
+    const getChatNotification = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_API}/notifymessage`
+        );
+        // const hasReceivedMsg = res.data.data.filter(
+        //   (rec) => rec.receiverId === user._id
+        // );
+
+        setChatSeen(res.data.data);
+        setLength(hasReceivedMsg[0]?.message?.length);
+      } catch (err) {
+        console.log(err);
       }
+    };
+    getChatNotification();
+  }, []);
+
+  const handleMsgSeen = async (senderId) => {
+    console.log("chatcSen", chatSeen);
+    const isUnseen = chatSeen.filter((chat) => chat.senderId === senderId);
+    console.log("isUnseen", isUnseen);
+    if (isUnseen.length > 0) {
+      try {
+        const res = await axios.delete(
+          `${import.meta.env.VITE_BACKEND_API}/notifymessage`,
+          {
+            params: {
+              id: senderId,
+              type: "sender",
+            },
+          }
+        );
+        setLength(0);
+      } catch (err) {
+        console.log(err);
+      }
+    } else {
+      console.log("nothing");
+    }
+  };
 
   return (
     <div className="chat-app" style={styles.chatApp}>
@@ -244,45 +244,53 @@ console.log("employees", employees)
           onChange={(e) => setSearchQuery(e.target.value)}
           style={styles.searchBar}
         />
-            {loader ? <>     <Spin tip="loading..." style={styles.spinner} /> </>:
-        <List
-          itemLayout="horizontal"
-          dataSource={filteredEmployees}
-        
-          renderItem={(employee) => {
-            const matchingChat = chatSeen?.find(chat => chat.senderId === employee._id);
-            const messageCount = matchingChat ? matchingChat?.message.length : 0;
-        
-            return ( 
-           
-            <List.Item
-              key={employee._id}
-              onClick={() => {setSelectedEmployee(employee); handleMsgSeen(employee._id)}}
-              
-              style={{
-                ...styles.employeeItem,
-                backgroundColor:
-                  selectedEmployee?._id === employee._id
-                    ? "#e0e0e0"
-                    : "#ffffff",
-              }}
-            > 
+        {loader ? (
+          <>
+            {" "}
+            <Spin tip="loading..." style={styles.spinner} />{" "}
+          </>
+        ) : (
+          <List
+            itemLayout="horizontal"
+            dataSource={filteredEmployees}
+            renderItem={(employee) => {
+              const matchingChat = chatSeen?.find(
+                (chat) => chat.senderId === employee._id
+              );
+              const messageCount = matchingChat
+                ? matchingChat?.message.length
+                : 0;
 
-            
-             <List.Item.Meta
-                avatar={
-                   
-                  <Badge count={ messageCount}>  <Avatar>{employee.name[0]}</Avatar>
-                  </Badge>
-                }
-                title={employee.name}
-                description={employee.lastMessage?? employee.email}
-              />
-            </List.Item>
-          )}}
-        
-        />
-        }
+              return (
+                <List.Item
+                  key={employee._id}
+                  onClick={() => {
+                    setSelectedEmployee(employee);
+                    handleMsgSeen(employee._id);
+                  }}
+                  style={{
+                    ...styles.employeeItem,
+                    backgroundColor:
+                      selectedEmployee?._id === employee._id
+                        ? "#e0e0e0"
+                        : "#ffffff",
+                  }}
+                >
+                  <List.Item.Meta
+                    avatar={
+                      <Badge count={messageCount}>
+                        {" "}
+                        <Avatar>{employee.name[0]}</Avatar>
+                      </Badge>
+                    }
+                    title={employee.name}
+                    description={employee.lastMessage ?? employee.email}
+                  />
+                </List.Item>
+              );
+            }}
+          />
+        )}
       </div>
       <div className="chat-container" style={styles.chatContainer}>
         {selectedEmployee ? (
@@ -296,28 +304,29 @@ console.log("employees", employees)
               ) : (
                 messages?.map((item, index) => {
                   return (
-                    <> 
-                    <div
-                      key={index}
-                      className={
-                        item.role === "admin" ? "right-msg" : "left-msg"
-                      }
-                      style={{
-                        ...styles.messageBubble,
-                        alignSelf:
-                          item.role === "admin" ? "flex-end" : "flex-start",
-                        backgroundColor:
-                          item.role === "admin" ? "#b3e5fc" : "#c8e6c9",
-                      }}
-                    >
-                      <p style={styles.senderName}>
-                        <strong>{item.name}</strong>
-                      </p>
-                      <p style={styles.messageText}>{item.message}<span  style={styles.messageTime}>{item.time}</span></p>
-                    
-
-                    </div>
-                    <div ref={messagesEndRef} /> 
+                    <>
+                      <div
+                        key={index}
+                        className={
+                          item.role === "admin" ? "right-msg" : "left-msg"
+                        }
+                        style={{
+                          ...styles.messageBubble,
+                          alignSelf:
+                            item.role === "admin" ? "flex-end" : "flex-start",
+                          backgroundColor:
+                            item.role === "admin" ? "#b3e5fc" : "#c8e6c9",
+                        }}
+                      >
+                        <p style={styles.senderName}>
+                          <strong>{item.name}</strong>
+                        </p>
+                        <p style={styles.messageText}>
+                          {item.message}
+                          <span style={styles.messageTime}>{typeof item.time === "string" ? item.time : moment(item.time).format("DD/MM/YYYY HH:mm")}</span>
+                        </p>
+                      </div>
+                      <div ref={messagesEndRef} />
                     </>
                   );
                 })
@@ -366,7 +375,7 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     height: "80vh ",
-    overflowY: "auto !important", 
+    overflowY: "auto !important",
     scrollbarWidth: "thin",
   },
   searchBar: {
@@ -393,12 +402,12 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     overflowY: "auto",
-    overflowX:"hidden",
+    overflowX: "hidden",
     padding: "10px",
-      scrollbarWidth: "thin",
+    scrollbarWidth: "thin",
     marginBottom: "20px",
     // maxHeight:  "calc(100vh - 150px)",
-    maxHeight:  "80vh",
+    maxHeight: "80vh",
   },
   spinner: {
     alignSelf: "center",
