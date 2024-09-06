@@ -12,9 +12,9 @@ import { Stepper, Step, StepLabel, StepContent, TextField, Button } from "@mui/m
 
 const CallbackView = () => {
     const navigate = useNavigate();
-    const Admintoken = Cookies.get('Admintoken');
     const { id } = useParams();
     const Profile = localStorage.getItem("admin");
+    const Admintoken = localStorage.getItem("token");
     const NewProfile = JSON.parse(Profile);
     const user_id = NewProfile?._id;
     const [isOpen, setIsOpen] = useState(true);

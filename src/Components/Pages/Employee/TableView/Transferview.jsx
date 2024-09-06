@@ -11,10 +11,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Stepper, Step, StepLabel, StepContent, TextField, Button } from "@mui/material";
 
 const TransferView = () => {
- 
+ const navigate = useNavigate()
     const { id } = useParams();
-    const Admintoken = Cookies.get('Admintoken');
     const Profile = localStorage.getItem("admin");
+    const Admintoken = localStorage.getItem("token");
     const NewProfile = JSON.parse(Profile);
     const user_id = NewProfile?._id;
     console.log("NewProfile", NewProfile);
@@ -49,7 +49,7 @@ const TransferView = () => {
       getData();
       if (Admintoken) {
       } else {
-          return navigate("/lLogin");
+          return navigate("/login");
       }
     }, [Admintoken]);
     

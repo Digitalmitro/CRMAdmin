@@ -12,8 +12,8 @@ import { Stepper, Step, StepLabel, StepContent, TextField, Button } from "@mui/m
 
 const SalesView = () => {
     const { id } = useParams();
-    const Admintoken = Cookies.get('Admintoken');
     const Profile = localStorage.getItem("admin");
+    const Admintoken = localStorage.getItem("token");
     const NewProfile = JSON.parse(Profile);
     const user_id = NewProfile?._id;
     console.log("NewProfile?", NewProfile);
@@ -48,6 +48,7 @@ const SalesView = () => {
       if (Admintoken) {
           // Use the <Navigate /> component to redirect
       } else {
+    
           return navigate("/login");
       }
     }, [Admintoken]);
