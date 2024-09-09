@@ -437,7 +437,7 @@ const handleDel = (id) => {
                           </button>
                           {/* TEMP REMOVAL OF ADMIN EDIT AND DELETE ACTIONS */}
 
-                          {/* <button
+                          <button
                             className="btn btn-dark ms-2"
                             onClick={() =>
                               navigate(`/updateemployee/${res._id}`)
@@ -482,7 +482,7 @@ const handleDel = (id) => {
                                 </g>
                               </g>
                             </svg>
-                          </button> */}
+                          </button>
                           {/* <button
                             className="btn btn-danger ms-2"
                             onClick={() => handleDel(res._id)}
