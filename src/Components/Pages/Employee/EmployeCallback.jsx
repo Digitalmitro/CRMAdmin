@@ -70,7 +70,7 @@ const EmplyeeActivity = () => {
     // const resss = await axios.get(`${import.meta.env.VITE_BACKEND_API}/sale-user/${id}`);
     // const ressss = await axios.get(`${import.meta.env.VITE_BACKEND_API}/attendance/${id}`);
     console.log("res.data.callback", res.data.callback);
-    setData(res.data.callback);
+    setData(res.data.callback.reverse());
     filterAndSortResults(searchTerm, sortBy, res.data);
     // setData1(ress.data.transfer);
     // setData2(resss.data.sale);

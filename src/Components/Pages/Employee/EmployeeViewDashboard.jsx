@@ -12,6 +12,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 
 const EmployeeViewDashboard = () => {
+  const adminToken = localStorage.getItem('token')
 
     const navigate = useNavigate();
     const { id } = useParams();
@@ -24,8 +25,26 @@ const EmployeeViewDashboard = () => {
     const [note, setNote] = useState([]);
     const [user, setUser] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const adminToken = localStorage.getItem('token')
+  const [dataLength, setDataLength] = useState({})
 
+
+
+  useEffect(()=>{
+  
+    async function getDashboardDataLength() {
+      try{
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_API}/employeesdashboard/${id}`
+        );
+        setDataLength(res.data);
+      }catch(err){
+        console.log(err)
+      }
+      }
+  
+      getDashboardDataLength()
+  },[])
+  console.log("dataLength", dataLength)
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -112,7 +131,7 @@ const EmployeeViewDashboard = () => {
                 style={{ color: "#222" }}
               >
                 <h5 style={{ fontSize: "0.9rem" }}>
-                 Employee Attendace  
+                 Employee Attendace   {dataLength?.attendance} 
                 </h5>
               </div>
             </div>
@@ -145,9 +164,9 @@ const EmployeeViewDashboard = () => {
                 />
               </div>
               <div className="gridtext d-flex align-items-center justify-content-center">
-                <h6 style={{ fontSize: "0.9rem" }}>Employee Callback</h6>
+                <h6 style={{ fontSize: "0.9rem" }}>Employee Callback : {dataLength?.callback}</h6>
                 <span>
-                  (+84.7% <GoArrowUp /> )
+                
                 </span>
               </div>
             </div>
@@ -179,7 +198,7 @@ const EmployeeViewDashboard = () => {
                 />
               </div>
               <div className="gridtext d-flex  align-items-center justify-content-center">
-                <h6 style={{ fontSize: "0.9rem" }}>Employee Sales</h6>
+                <h6 style={{ fontSize: "0.9rem" }}>Employee Sales{dataLength?.sale}</h6>
                 <span>
                   (+84.7% <GoArrowUp /> )
                 </span>
@@ -216,7 +235,7 @@ const EmployeeViewDashboard = () => {
               />
             </div>
             <div className="gridtext d-flex  align-items-center justify-content-center">
-              <h6 style={{ fontSize: "0.9rem" }}>Employee Transfer</h6>
+              <h6 style={{ fontSize: "0.9rem" }}>Employee Transfer : {dataLength?.transfer}</h6>
               <span>
                 (+84.7% <GoArrowUp /> )
               </span>
@@ -251,7 +270,7 @@ const EmployeeViewDashboard = () => {
               />
             </div>
             <div className="gridtext d-flex align-items-center justify-content-center">
-              <h6 style={{ fontSize: "1rem" }}>Projects</h6>
+              <h6 style={{ fontSize: "1rem" }}>Projects : {dataLength?.project}</h6>
               {/* <span>(+84.7%  <GoArrowUp /> )</span> */}
             </div>
           </div>

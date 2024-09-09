@@ -62,7 +62,7 @@ const EmpMsg = () => {
       socket.on("chat message", (newMessage) => {
         setMessages((prevMessages) => [...prevMessages, newMessage]);
       });
-
+fetchEmployees()
       return () => {
         socket.disconnect();
         setSocketConnected(false);
@@ -147,22 +147,22 @@ const EmpMsg = () => {
       getChatData(selectedEmployee._id);
     }
   }, [selectedEmployee]);
+  const fetchEmployees = async () => {
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_BACKEND_API}/employees`
+      );
+      setEmployees(res?.data);
 
+      setloader(false);
+    } catch (err) {
+      console.log(err);
+    }
+  };
   useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_BACKEND_API}/employees`
-        );
-        setEmployees(res?.data);
-
-        setloader(false);
-      } catch (err) {
-        console.log(err);
-      }
-    };
+   
     fetchEmployees();
-  }, []);
+  }, [selectedEmployee]);
   console.log("employees", employees);
   const typingHandler = (e) => {
     setInput(e.target.value);
@@ -198,9 +198,7 @@ const EmpMsg = () => {
         const res = await axios.get(
           `${import.meta.env.VITE_BACKEND_API}/notifymessage`
         );
-        // const hasReceivedMsg = res.data.data.filter(
-        //   (rec) => rec.receiverId === user._id
-        // );
+       
 
         setChatSeen(res.data.data);
         setLength(hasReceivedMsg[0]?.message?.length);
@@ -230,6 +228,7 @@ const EmpMsg = () => {
       } catch (err) {
         console.log(err);
       }
+      fetchEmployees()
     } else {
       console.log("nothing");
     }

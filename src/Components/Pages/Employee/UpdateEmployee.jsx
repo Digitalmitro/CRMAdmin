@@ -14,6 +14,16 @@ function UpdateEmployee() {
   const navigate = useNavigate();
   const [data, setData] = useState(null); 
 
+  const initialValues = data ? {
+    name: data.name,
+    aliceName: data.aliceName,
+    email: data.email,
+    phone: data.phone,
+    type: data.type,
+    password: '' // Set password to empty
+  } : {};
+
+
   const handleData = async () => {
     try {
       const res = await axios.get(
@@ -69,7 +79,7 @@ function UpdateEmployee() {
             <Form
               layout="vertical"
               hideRequiredMark
-              initialValues={data}
+              initialValues={initialValues}
               onFinish={handleUpdate}
             >
               <Row gutter={16}>
@@ -89,7 +99,7 @@ function UpdateEmployee() {
                     name="aliceName"
                     label="Alice Name"
                     rules={[
-                      { required: true, message: 'Enter Alice Name' },
+                      {  message: 'Enter Alice Name' },
                     ]}
                   >
                     <Input placeholder="Enter Alice Name" />

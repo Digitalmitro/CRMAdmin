@@ -83,7 +83,7 @@ const EmplyeeActivity = () => {
           `${import.meta.env.VITE_BACKEND_API}/sale-user/${id}`
         );
          console.log("resss", resss)
-        setData2(resss.data.sale);
+        setData2(resss.data.sale.reverse());
         filterAndSortResults(searchTerm, sortBy, resss.data.sale);
       
       };

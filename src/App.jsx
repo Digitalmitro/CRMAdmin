@@ -112,7 +112,7 @@ function App() {
               <Route path="/transferview/:id" element={<TransferView />} />
               <Route path="/transfers" element={<Transfers />} />
               <Route path="/projects/:id" element={<ProjectSubMenu />} />
-              {/* <Route path="*" element={<Navigate to="/login" replace />} /> */}
+              <Route path="*" element={<Navigate to="/login" replace />} />
 
             </Routes>
           </div>
@@ -120,7 +120,7 @@ function App() {
        </>
     ):(
       <Routes>
-         {/* <Route path="*" element={<Navigate to="/login" replace />} /> */}
+         <Route path="*" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
       </Routes>
   )}
