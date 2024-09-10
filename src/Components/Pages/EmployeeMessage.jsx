@@ -62,7 +62,7 @@ const EmpMsg = () => {
       socket.on("chat message", (newMessage) => {
         setMessages((prevMessages) => [...prevMessages, newMessage]);
       });
-fetchEmployees()
+// fetchEmployees()
       return () => {
         socket.disconnect();
         setSocketConnected(false);
@@ -162,7 +162,7 @@ fetchEmployees()
   useEffect(() => {
    
     fetchEmployees();
-  }, [selectedEmployee]);
+  }, []);
   console.log("employees", employees);
   const typingHandler = (e) => {
     setInput(e.target.value);
@@ -224,7 +224,10 @@ fetchEmployees()
             },
           }
         );
-        setLength(0);
+        // setLength(0);
+        setChatSeen((prevChatSeen) =>
+          prevChatSeen.filter((chat) => chat.senderId !== senderId)
+        );
       } catch (err) {
         console.log(err);
       }
