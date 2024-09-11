@@ -44,7 +44,7 @@ const EmplyeeActivity = () => {
       const { id } = useParams();
       const [allnotes, setAllNotes] = useState([]);
       const [user, setUser] = useState(null);
-    
+      
       useEffect(() => {
         getNotes();
       }, []);
@@ -69,9 +69,9 @@ const EmplyeeActivity = () => {
         }, 3000);
       }, []);
     
-      setTimeout(() => {
-        setNote(false);
-      }, 2000);
+      // setTimeout(() => {
+      //   setNote(false);
+      // }, 1000);
     
 
       const showDrawer = () => {

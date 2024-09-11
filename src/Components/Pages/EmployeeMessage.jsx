@@ -159,10 +159,11 @@ const EmpMsg = () => {
       console.log(err);
     }
   };
+
   useEffect(() => {
-   
     fetchEmployees();
   }, []);
+  
   console.log("employees", employees);
   const typingHandler = (e) => {
     setInput(e.target.value);
@@ -198,8 +199,6 @@ const EmpMsg = () => {
         const res = await axios.get(
           `${import.meta.env.VITE_BACKEND_API}/notifymessage`
         );
-       
-
         setChatSeen(res.data.data);
         setLength(hasReceivedMsg[0]?.message?.length);
       } catch (err) {
@@ -231,7 +230,7 @@ const EmpMsg = () => {
       } catch (err) {
         console.log(err);
       }
-      fetchEmployees()
+      // fetchEmployees()
     } else {
       console.log("nothing");
     }
