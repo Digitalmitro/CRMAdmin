@@ -149,6 +149,32 @@ const CallbackTable = () => {
     };
     await axios.post(`${import.meta.env.VITE_BACKEND_API}/notification`, noti);
   };
+
+  const handleSales = async (userData) => {
+    console.log("userData", userData);
+
+    // Perform the POST request here with Axios
+    axios
+      .post(`${import.meta.env.VITE_BACKEND_API}/callback-to-sales`, {callback_id: userData._id, saleData: userData})
+      .then((response) => {
+        // Handle the response if needed
+        console.log("Sent to sales successfully:", response?.data);
+        // After successful transfer, perform the delete request
+        Getdata();
+      })
+      .catch((error) => {
+        console.error("Error transferring:", error);
+      });
+
+    const noti = {
+      message: `${NewProfile?.name} created a transfer: ${userData?.name}`,
+      Status:false,
+      currentDate: moment().format("MMMM Do YYYY, h:mm:ss a"),
+      Date: moment().format("MMMM Do YYYY, h:mm:ss a"),
+    };
+    await axios.post(`${import.meta.env.VITE_BACKEND_API}/notification`, noti);
+  };
+
   useEffect(() => {
       Getdata();
   }, []);
@@ -360,7 +386,7 @@ const CallbackTable = () => {
                   <th scope="col">Comments</th>
                   <th scope="col">Budget</th>
 
-                  <th scope="col">Sent To</th>
+                  <th scope="col">Send To</th>
                   <th scope="col">Action</th>
                 </tr>
               </thead>
@@ -479,6 +505,17 @@ const CallbackTable = () => {
                             }}
                           >
                             Transfer
+                          </button>
+
+                          <button
+                            className="buttonFilled"
+                            style={{ fontSize: "0.8rem" }}
+                            onClick={() => {
+                              setUserData(res); // Set the user data to be transferred
+                              handleSales(res); // Call function to handle transfer
+                            }}
+                          >
+                            Sales
                           </button>
                         </td>
 

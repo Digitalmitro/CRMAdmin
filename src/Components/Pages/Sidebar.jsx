@@ -24,6 +24,9 @@ import {
   Checkbox,
 } from "antd";
 // ----------
+import io from "socket.io-client";
+
+const socket = io(import.meta.env.VITE_BACKEND_API);
 
 const Sidebar = () => {
   const context = useContext(MyContext);
@@ -82,7 +85,8 @@ const Sidebar = () => {
     }
   };
 
- 
+  const admin = JSON.parse(localStorage.getItem("admin"));
+
   console.log(projectsData);
 
   const handleSidebarCancel = () => {
@@ -101,35 +105,51 @@ const Sidebar = () => {
   const handleProjectsToggle = () => {
     setIsProjectsMenuOpen(!isProjectsMenuOpen);
   };
-
-
-
-
   const handleClick = (index, path, label) => {
     context.setActiveButton(index);
     context.setBreadcrumbs([
       { label: index === 0 ? "" : "Dashboard", path: "/" },
       { label, path },
     ]);
+
+    // Pass state using navigate
     navigate(path);
   };
 
   useEffect(() => {
-    const getChatNotification = async() => {
-      console.log("hello notify jhs")
-      try{
-           const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/notifymessage`)
-           const sendersNotification = res.data.data.filter((send) => send.senderName !== "Admin"
-          )
-           setChatLength(sendersNotification.length)
-           console.log("res message", sendersNotification)
-      }catch(err){
-  console.log(err)
+    const getChatNotification = async () => {
+      console.log("hello notify jhs");
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_API}/notifymessage`
+        );
+        const sendersNotification = res.data.data.filter(
+          (send) => send.senderName !== "Admin"
+        );
+        setChatLength(sendersNotification.length);
+        console.log("res message", sendersNotification);
+      } catch (err) {
+        console.log(err);
       }
-    }
-    getChatNotification()
-  },[])
+    };
+    getChatNotification();
+  }, []);
 
+  const [concernLength, setConcernLength] = useState(0);
+
+  useEffect(() => {
+    socket.on("connect", () => {
+      console.log("Connected to socket server");
+    });
+    socket.emit("register", admin._id);
+    console.log("LISTENING TO NOTIFICATION");
+    // Listen for new notifications
+    socket.on("newConcernNotification", (notification) => {
+      setConcernLength((prevCount) => prevCount + 1);
+    });
+    // Cleanup listener on component unmount
+    return () => socket.off("newConcernNotification");
+  }, []);
 
   useEffect(() => {
     getProjectsData();
@@ -1079,37 +1099,35 @@ const Sidebar = () => {
                 }
               >
                 <span className="icon">
-                  <svg
-                    fill="#000000"
-                    viewBox="0 0 36 36"
-                    xmlns="http://www.w3.org/2000/svg"
+                  <Badge
+                    count={concernLength}
+                    overflowCount={99}
+                    style={{ left: "-1px", width: "12px", paddingLeft: "10px" }}
                   >
-                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                    <g
-                      id="SVGRepo_tracerCarrier"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    ></g>
-                    <g id="SVGRepo_iconCarrier">
-                      {" "}
-                      <title>employee_line</title>{" "}
+                    <svg
+                      width="24px"
+                      height="24px"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                       <g
-                        id="b1a346b4-a871-40fe-88af-10f4227eef9a"
-                        data-name="Layer 3"
-                      >
-                        {" "}
-                        <path d="M16.43,16.69a7,7,0,1,1,7-7A7,7,0,0,1,16.43,16.69Zm0-11.92a5,5,0,1,0,5,5A5,5,0,0,0,16.43,4.77Z"></path>{" "}
-                        <path d="M22,17.9A25.41,25.41,0,0,0,5.88,19.57a4.06,4.06,0,0,0-2.31,3.68V29.2a1,1,0,1,0,2,0V23.25a2,2,0,0,1,1.16-1.86,22.91,22.91,0,0,1,9.7-2.11,23.58,23.58,0,0,1,5.57.66Z"></path>{" "}
-                        <rect
-                          x="22.14"
-                          y="27.41"
-                          width="6.14"
-                          height="1.4"
-                        ></rect>{" "}
-                        <path d="M33.17,21.47H28v2h4.17v8.37H18V23.47h6.3v.42a1,1,0,0,0,2,0V20a1,1,0,0,0-2,0v1.47H17a1,1,0,0,0-1,1V32.84a1,1,0,0,0,1,1H33.17a1,1,0,0,0,1-1V22.47A1,1,0,0,0,33.17,21.47Z"></path>{" "}
-                      </g>{" "}
-                    </g>
-                  </svg>
+                        id="SVGRepo_tracerCarrier"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      ></g>
+                      <g id="SVGRepo_iconCarrier">
+                        <path
+                          d="M10 9H17M10 13H17M7 9H7.01M7 13H7.01M21 20L17.6757 18.3378C17.4237 18.2118 17.2977 18.1488 17.1656 18.1044C17.0484 18.065 16.9277 18.0365 16.8052 18.0193C16.6672 18 16.5263 18 16.2446 18H6.2C5.07989 18 4.51984 18 4.09202 17.782C3.71569 17.5903 3.40973 17.2843 3.21799 16.908C3 16.4802 3 15.9201 3 14.8V7.2C3 6.07989 3 5.51984 3.21799 5.09202C3.40973 4.71569 3.71569 4.40973 4.09202 4.21799C4.51984 4 5.0799 4 6.2 4H17.8C18.9201 4 19.4802 4 19.908 4.21799C20.2843 4.40973 20.5903 4.71569 20.782 5.09202C21 5.51984 21 6.0799 21 7.2V20Z"
+                          stroke="#4d4c4c"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        ></path>
+                      </g>
+                    </svg>
+                  </Badge>
                 </span>
                 Emp Concern
               </Button>
@@ -1127,37 +1145,35 @@ const Sidebar = () => {
               }
             >
               <span className="icon">
-                <svg
-                  fill="#000000"
-                  viewBox="0 0 36 36"
-                  xmlns="http://www.w3.org/2000/svg"
+                <Badge
+                  count={concernLength}
+                  overflowCount={99}
+                  style={{ left: "-1px", width: "12px", paddingLeft: "10px" }}
                 >
-                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                  <g
-                    id="SVGRepo_tracerCarrier"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></g>
-                  <g id="SVGRepo_iconCarrier">
-                    {" "}
-                    <title>employee_line</title>{" "}
+                  <svg
+                    width="24px"
+                    height="24px"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                     <g
-                      id="b1a346b4-a871-40fe-88af-10f4227eef9a"
-                      data-name="Layer 3"
-                    >
-                      {" "}
-                      <path d="M16.43,16.69a7,7,0,1,1,7-7A7,7,0,0,1,16.43,16.69Zm0-11.92a5,5,0,1,0,5,5A5,5,0,0,0,16.43,4.77Z"></path>{" "}
-                      <path d="M22,17.9A25.41,25.41,0,0,0,5.88,19.57a4.06,4.06,0,0,0-2.31,3.68V29.2a1,1,0,1,0,2,0V23.25a2,2,0,0,1,1.16-1.86,22.91,22.91,0,0,1,9.7-2.11,23.58,23.58,0,0,1,5.57.66Z"></path>{" "}
-                      <rect
-                        x="22.14"
-                        y="27.41"
-                        width="6.14"
-                        height="1.4"
-                      ></rect>{" "}
-                      <path d="M33.17,21.47H28v2h4.17v8.37H18V23.47h6.3v.42a1,1,0,0,0,2,0V20a1,1,0,0,0-2,0v1.47H17a1,1,0,0,0-1,1V32.84a1,1,0,0,0,1,1H33.17a1,1,0,0,0,1-1V22.47A1,1,0,0,0,33.17,21.47Z"></path>{" "}
-                    </g>{" "}
-                  </g>
-                </svg>
+                      id="SVGRepo_tracerCarrier"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <path
+                        d="M10 9H17M10 13H17M7 9H7.01M7 13H7.01M21 20L17.6757 18.3378C17.4237 18.2118 17.2977 18.1488 17.1656 18.1044C17.0484 18.065 16.9277 18.0365 16.8052 18.0193C16.6672 18 16.5263 18 16.2446 18H6.2C5.07989 18 4.51984 18 4.09202 17.782C3.71569 17.5903 3.40973 17.2843 3.21799 16.908C3 16.4802 3 15.9201 3 14.8V7.2C3 6.07989 3 5.51984 3.21799 5.09202C3.40973 4.71569 3.71569 4.40973 4.09202 4.21799C4.51984 4 5.0799 4 6.2 4H17.8C18.9201 4 19.4802 4 19.908 4.21799C20.2843 4.40973 20.5903 4.71569 20.782 5.09202C21 5.51984 21 6.0799 21 7.2V20Z"
+                        stroke="#4d4c4c"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      ></path>
+                    </g>
+                  </svg>
+                </Badge>
               </span>
               Emp Concern
             </Button>
@@ -1167,7 +1183,6 @@ const Sidebar = () => {
         {context.toggleSidebar ? (
           <Tooltip title="Send Messages">
             <li>
-
               <Button
                 style={{ color: "#555151" }}
                 className={`custom-button ${
@@ -1175,10 +1190,52 @@ const Sidebar = () => {
                 }`}
                 onClick={() => handleClick(8, "/employeemessage", "Messages")}
               >
-               
                 <span className="icon">
-                
-                <Badge count={5} 
+                  <Badge count={5}>
+                    <svg
+                      width="24px"
+                      height="24px"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                      <g
+                        id="SVGRepo_tracerCarrier"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      ></g>
+                      <g id="SVGRepo_iconCarrier">
+                        {" "}
+                        <path
+                          d="M10 9H17M10 13H17M7 9H7.01M7 13H7.01M21 20L17.6757 18.3378C17.4237 18.2118 17.2977 18.1488 17.1656 18.1044C17.0484 18.065 16.9277 18.0365 16.8052 18.0193C16.6672 18 16.5263 18 16.2446 18H6.2C5.07989 18 4.51984 18 4.09202 17.782C3.71569 17.5903 3.40973 17.2843 3.21799 16.908C3 16.4802 3 15.9201 3 14.8V7.2C3 6.07989 3 5.51984 3.21799 5.09202C3.40973 4.71569 3.71569 4.40973 4.09202 4.21799C4.51984 4 5.0799 4 6.2 4H17.8C18.9201 4 19.4802 4 19.908 4.21799C20.2843 4.40973 20.5903 4.71569 20.782 5.09202C21 5.51984 21 6.0799 21 7.2V20Z"
+                          stroke="#4d4c4c"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        ></path>{" "}
+                      </g>
+                    </svg>
+                  </Badge>
+                </span>
+                Send Messages
+              </Button>
+            </li>
+          </Tooltip>
+        ) : (
+          <li>
+            <Button
+              style={{ color: "#555151" }}
+              className={`custom-button ${
+                context.activeButton === 8 ? "active" : ""
+              }`}
+              onClick={() => handleClick(8, "/employeemessage", "Messages")}
+            >
+              <span className="icon">
+                <Badge
+                  count={chatLength}
+                  overflowCount={99}
+                  style={{ left: "-1px", width: "12px", paddingLeft: "10px" }}
                 >
                   <svg
                     width="24px"
@@ -1203,51 +1260,8 @@ const Sidebar = () => {
                         stroke-linejoin="round"
                       ></path>{" "}
                     </g>
-                  </svg> 
-                  </Badge>
-                </span>
-               
-                Send Messages
-              </Button>
-            </li>
-          </Tooltip>
-        ) : (
-          <li>
-            <Button
-              style={{ color: "#555151" }}
-              className={`custom-button ${
-                context.activeButton === 8 ? "active" : ""
-              }`}
-              onClick={() => handleClick(8, "/employeemessage", "Messages")}
-            >
-              <span className="icon">
-                <Badge count={chatLength}   overflowCount={99}
-                  style={{ left: '-1px', width:"12px", paddingLeft:"10px"}}
-    >  
-                <svg
-                  width="24px"
-                  height="24px"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                  <g
-                    id="SVGRepo_tracerCarrier"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></g>
-                  <g id="SVGRepo_iconCarrier">
-                    {" "}
-                    <path
-                      d="M10 9H17M10 13H17M7 9H7.01M7 13H7.01M21 20L17.6757 18.3378C17.4237 18.2118 17.2977 18.1488 17.1656 18.1044C17.0484 18.065 16.9277 18.0365 16.8052 18.0193C16.6672 18 16.5263 18 16.2446 18H6.2C5.07989 18 4.51984 18 4.09202 17.782C3.71569 17.5903 3.40973 17.2843 3.21799 16.908C3 16.4802 3 15.9201 3 14.8V7.2C3 6.07989 3 5.51984 3.21799 5.09202C3.40973 4.71569 3.71569 4.40973 4.09202 4.21799C4.51984 4 5.0799 4 6.2 4H17.8C18.9201 4 19.4802 4 19.908 4.21799C20.2843 4.40973 20.5903 4.71569 20.782 5.09202C21 5.51984 21 6.0799 21 7.2V20Z"
-                      stroke="#4d4c4c"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    ></path>{" "}
-                  </g>
-                </svg> </Badge>
+                  </svg>
+                </Badge>
               </span>
               Send Messages
             </Button>

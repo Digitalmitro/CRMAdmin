@@ -67,6 +67,7 @@ const EmplyeeConcern = () => {
   const [isConcernModalOpen, setIsConcernModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
 
+
   const handleView = (row) => {
     setSelectedRow(row);
     setIsModalOpen(true);
@@ -78,39 +79,53 @@ const EmplyeeConcern = () => {
     toast.success(`${status} action performed successfully!`);
   };
 
-
   const handleApproved = async (status) => {
-    const { ConcernDate, ActualPunchIn, ActualPunchOut, shiftType } = selectedRow;
-    console.log("currentDate", ConcernDate)
-    const formattedConcernDate = moment(ConcernDate, 'MMMM D YYYY').format('YYYY-MM-DD');
-    const punchInDateTime = moment(`${formattedConcernDate} ${ActualPunchIn}`, 'YYYY-MM-DD h:mm:ss A').utc().toISOString();
-    const punchOutDateTime = moment(`${formattedConcernDate} ${ActualPunchOut}`, 'YYYY-MM-DD h:mm:ss A').utc().toISOString();
-    console.log("sjkhsadjh", punchInDateTime, punchOutDateTime)
+    const { ConcernDate, ActualPunchIn, ActualPunchOut, shiftType } =
+      selectedRow;
+    console.log("currentDate", ConcernDate);
+    const formattedConcernDate = moment(ConcernDate, "MMMM D YYYY").format(
+      "YYYY-MM-DD"
+    );
+    const punchInDateTime = moment(
+      `${formattedConcernDate} ${ActualPunchIn}`,
+      "YYYY-MM-DD h:mm:ss A"
+    )
+      .utc()
+      .toISOString();
+    const punchOutDateTime = moment(
+      `${formattedConcernDate} ${ActualPunchOut}`,
+      "YYYY-MM-DD h:mm:ss A"
+    )
+      .utc()
+      .toISOString();
+    console.log("sjkhsadjh", punchInDateTime, punchOutDateTime);
     try {
-      const concernDateUTC = moment(ConcernDate, 'MMMM D YYYY').utc().startOf('day').toISOString();
-  
+      const concernDateUTC = moment(ConcernDate, "MMMM D YYYY")
+        .utc()
+        .startOf("day")
+        .toISOString();
+
       // Construct the payload for the PUT request
       const payload = {
         user_id,
-        ConcernDate: concernDateUTC ,
+        ConcernDate: concernDateUTC,
         punchIn: punchInDateTime,
         punchOut: punchOutDateTime,
-        shiftType
+        shiftType,
       };
-  
+
       // Make the PUT request to update the attendance
-      const response = await axios.put('/attendance-approval', payload);
-  
+      const response = await axios.put("/attendance-approval", payload);
+
       // Handle the response as needed
-      handleApproveOrDeny("Approved")
+      handleApproveOrDeny("Approved");
       // Close the modal or show a success message
       handleCancel();
     } catch (error) {
-      console.error('Error updating attendance:', error);
+      console.error("Error updating attendance:", error);
       // Handle error, show a message to the user, etc.
     }
   };
-
 
   const handleConcernCancel = () => {
     setIsConcernModalOpen(false);
@@ -162,6 +177,20 @@ const EmplyeeConcern = () => {
       console.log(err);
     }
   };
+
+  const updateConcerns = async () => {
+    await axios
+      .put(`${import.meta.env.VITE_BACKEND_API}/notifications/update-status`,{}, {
+        headers: { token: Admintoken },
+      })
+      .then((res) => {
+        console.log("Concerns seen");
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  };
+
   const handleMonthChange = (event) => {
     setSelectedMonth(event.target.value);
   };
@@ -180,7 +209,7 @@ const EmplyeeConcern = () => {
 
   useEffect(() => {
     window.scrollTo(0, document.body.scrollHeight);
-   
+
     // Filter data based on search term and selected date
     const filtered = data.filter((item) => {
       const matchSearchTerm =
@@ -206,9 +235,7 @@ const EmplyeeConcern = () => {
   }, [searchTerm, data, selectedDate, SelectedEmployee]);
 
   async function handleStatus(id, event) {
-    
     try {
-   
       const { data } = await axios.put(
         `${import.meta.env.VITE_BACKEND_API}/concern/${id}`,
         {
@@ -220,16 +247,21 @@ const EmplyeeConcern = () => {
           },
         }
       );
-      setCallApi(!callApi)
+      setCallApi(!callApi);
       getData();
       toast.success(data.message, {});
     } catch (error) {
       console.log(error);
     }
   }
-useEffect(()=>{
-  getData()
-},[callApi])
+
+  useEffect(() => {
+    updateConcerns();
+  }, []);
+
+  useEffect(() => {
+    getData();
+  }, [callApi]);
   return (
     <>
       <div className="employee-project-container container py-4">
@@ -331,7 +363,7 @@ useEffect(()=>{
                 </tr>
               </thead>
               {/* for email */}
-            
+
               {loader ? (
                 <Spin tip="loading..." style={styles.spinner} />
               ) : (
@@ -342,19 +374,19 @@ useEffect(()=>{
                         <tr key={res?._id}>
                           <td>{res?.name}</td>
                           <td>{res?.email}</td>
-                          <td>{res?.date}</td>
+                          <td>{moment(res?.createdAt).format("DD/MM/YYYY HH:MM a")}</td>
                           <td
                             style={{
                               color:
-                                res.punchType === "Punch Out"
+                                res.concernType === "Punch Out"
                                   ? "blue"
-                                  : res.punchType ===
+                                  : res.concernType ===
                                     ("Leave Application" || "Leave")
                                   ? "red"
                                   : "green",
                             }}
                           >
-                            {res?.punchType}
+                            {res?.concernType}
                           </td>
                           <td> {res?.message}</td>
                           <td
@@ -376,7 +408,6 @@ useEffect(()=>{
                             >
                               View
                             </button>
-                        
                           </td>
                         </tr>
                       </>
@@ -397,16 +428,22 @@ useEffect(()=>{
                       alignItems: "center",
                       color: "grey",
                     }}
-                  > <div  style={{
-                    color:
-                    selectedRow.status === "Approved"
-                        ? "green"
-                        : selectedRow.status === "Denied" && "red",
-                  }}> - - {selectedRow.status} -</div>
-                    <div style={{ textAlign: "right" }}>
-                     - {selectedRow.currenDate} - -
+                  >
+                    {" "}
+                    <div
+                      style={{
+                        color:
+                          selectedRow.status === "Approved"
+                            ? "green"
+                            : selectedRow.status === "Denied" && "red",
+                      }}
+                    >
+                      {" "}
+                      - - {selectedRow.status} -
                     </div>
-                   
+                    <div style={{ textAlign: "right" }}>
+                      - {selectedRow.currenDate} - -
+                    </div>
                   </div>
                 }
                 open={isModalOpen}
@@ -414,19 +451,28 @@ useEffect(()=>{
                 footer={[
                   <Button
                     key="deny"
-                    onClick={() => (handleApproveOrDeny("Denied"))}
+                    onClick={() => handleApproveOrDeny("Denied")}
                     type="danger"
                     style={{
-                      backgroundColor: selectedRow.status === "Approved" ? "#d3d3d3" : undefined, // Grey color
-                      borderColor: selectedRow.status === "Approved" ? "#d3d3d3" : undefined, // Grey color
-                      color: selectedRow.status === "Approved" ? "#a9a9a9" : undefined // Darker grey for text
+                      backgroundColor:
+                        selectedRow.status === "Approved"
+                          ? "#d3d3d3"
+                          : undefined, // Grey color
+                      borderColor:
+                        selectedRow.status === "Approved"
+                          ? "#d3d3d3"
+                          : undefined, // Grey color
+                      color:
+                        selectedRow.status === "Approved"
+                          ? "#a9a9a9"
+                          : undefined, // Darker grey for text
                     }}
                   >
                     Deny
                   </Button>,
                   <Button
                     key="approve"
-                    onClick={() => ( handleApproved())}
+                    onClick={() => handleApproved()}
                     type="primary"
                   >
                     Approve
@@ -469,10 +515,9 @@ useEffect(()=>{
                   </div>
                   <div style={{ marginTop: "20px" }}>
                     <Text strong> Date Of Concern: </Text>
-                    <Input
-                      value={ selectedRow.ConcernDate }
-                    />
+                    <Input value={selectedRow.ConcernDate} />
                   </div>
+                  {!selectedRow.concernType.includes("Leave") &&
                   <div
                     style={{
                       marginTop: "20px",
@@ -495,9 +540,7 @@ useEffect(()=>{
                     <div>
                       <Text strong>Actual Out Time : </Text>
 
-                  
                       <Input
-                        
                         value={selectedRow.ActualPunchOut}
                         disabled
                         style={{
@@ -508,6 +551,8 @@ useEffect(()=>{
                       />
                     </div>
                   </div>
+                  }
+
                   <div style={{ marginTop: "20px" }}>
                     <Text strong>Message: </Text>
                     <Input.TextArea

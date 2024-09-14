@@ -83,7 +83,6 @@ const Transfers = () => {
     setSearchTerm(e.target.value);
   };
 
-
   const Getdata = async () => {
     const res = await axios.get(
       `${import.meta.env.VITE_BACKEND_API}/alltransfer`
@@ -99,8 +98,58 @@ const Transfers = () => {
     setNight(filteredData);
     console.log("transfer data data", filteredData);
     setData(res.data);
-    setloader(false)
+    setloader(false);
     filterAndSortResults(searchTerm, sortBy, res.data);
+  };
+
+  const handleSales = async (userData) => {
+    console.log("userData", userData);
+
+    // Perform the POST request here with Axios
+    axios
+      .post(`${import.meta.env.VITE_BACKEND_API}/transfer-to-sales`, {transfer_id: userData._id, saleData: userData})
+      .then((response) => {
+        // Handle the response if needed
+        console.log("Sent to sales successfully:", response?.data);
+        // After successful transfer, perform the delete request
+        Getdata();
+      })
+      .catch((error) => {
+        console.error("Error transferring:", error);
+      });
+
+    const noti = {
+      message: `${NewProfile?.name} created a transfer: ${userData?.name}`,
+      Status:false,
+      currentDate: moment().format("MMMM Do YYYY, h:mm:ss a"),
+      Date: moment().format("MMMM Do YYYY, h:mm:ss a"),
+    };
+    await axios.post(`${import.meta.env.VITE_BACKEND_API}/notification`, noti);
+  };
+
+  const handleCallback = async (userData) => {
+    console.log("userData", userData);
+
+    // Perform the POST request here with Axios
+    axios
+      .post(`${import.meta.env.VITE_BACKEND_API}/transfer-to-callback`, {transfer_id: userData._id, callbackData: userData})
+      .then((response) => {
+        // Handle the response if needed
+        console.log("Sent to callback successfully:", response?.data);
+        // After successful transfer, perform the delete request
+        Getdata();
+      })
+      .catch((error) => {
+        console.error("Error transferring:", error);
+      });
+
+    const noti = {
+      message: `${NewProfile?.name} created a transfer: ${userData?.name}`,
+      Status:false,
+      currentDate: moment().format("MMMM Do YYYY, h:mm:ss a"),
+      Date: moment().format("MMMM Do YYYY, h:mm:ss a"),
+    };
+    await axios.post(`${import.meta.env.VITE_BACKEND_API}/notification`, noti);
   };
 
   const filterAndSortResults = (searchTerm, sortBy, data) => {
@@ -167,9 +216,14 @@ const Transfers = () => {
       selectedEmployee !== "" ? entry?.user_id === selectedEmployee : true;
     const searchMatches =
       searchTerm !== ""
-        ? Object.values(entry).concat(entry?.employeeName).some((value) =>
-            value?.toString().toLowerCase().includes(searchTerm?.toLowerCase())
-          )
+        ? Object.values(entry)
+            .concat(entry?.employeeName)
+            .some((value) =>
+              value
+                ?.toString()
+                .toLowerCase()
+                .includes(searchTerm?.toLowerCase())
+            )
         : true;
     return dateMatches && monthMatches && employeeMatches && searchMatches;
   });
@@ -185,128 +239,124 @@ const Transfers = () => {
   //   }
   // }, [searchTerm, sortBy]);
 
-    useEffect(() => {
-      Getdata();
-
+  useEffect(() => {
+    Getdata();
   }, []);
 
   return (
     <>
-    <div className="employee-project-container container py-4">
-    <div  className=" filterPanel d-flex justify-content-between align-items-end">
-        <div className="emp-select-months-year">
-        <select
-            className=" emp-select-month "
-            style={{
-              width:"180px",
-              fontSize:"0.8rem",
-              height:"35px",
-            }}
-            onChange={handleEmployeeChange}
-          >
-            <option value="">Select Employee</option>
-            {night.map((res) => {
-              return (
-                <>
-                  <option value={res?._id}>{res?.employeeName}</option>
-                </>
-              );
-            })}
-        </select>
-          <div className="emp-select-month">
+      <div className="employee-project-container container py-4">
+        <div className=" filterPanel d-flex justify-content-between align-items-end">
+          <div className="emp-select-months-year">
             <select
+              className=" emp-select-month "
               style={{
-                width: "124px",
-                height: "30px",
-            
-                paddingRight: "12px",
-                overflow: "hidden",
-              }}
-              onChange={handleMonthChange}
-            >
-              <option value="">Select Month</option>
-              <option value="Jan">Jan</option>
-              <option value="Feb">Feb</option>
-              <option value="Mar">Mar</option>
-              <option value="Apr">Apr</option>
-              <option value="May">May</option>
-              <option value="Jun">Jun</option>
-              <option value="Jul">July</option>
-              <option value="Aug">Aug</option>
-              <option value="Sep">Sep</option>
-              <option value="Oct">Oct</option>
-              <option value="Nov">Nov</option>
-              <option value="Dec">Dec</option>
-            </select>
-          </div>
-          <div className="emp-select-date">
-            <input
-              onChange={(e) => setDate(e.target.value)}
-              style={{
-                width: "130px",
-                height: "35px",
+                width: "180px",
                 fontSize: "0.8rem",
-                paddingRight: "12px",
-                paddingBottom: "10px",
-                paddingTop: "8px",
-                paddingLeft: "15px",
-                borderRadius: "6px",
+                height: "35px",
               }}
-              type="date"
-            />
+              onChange={handleEmployeeChange}
+            >
+              <option value="">Select Employee</option>
+              {night.map((res) => {
+                return (
+                  <>
+                    <option value={res?._id}>{res?.employeeName}</option>
+                  </>
+                );
+              })}
+            </select>
+            <div className="emp-select-month">
+              <select
+                style={{
+                  width: "124px",
+                  height: "30px",
 
-            {/* for search */}
-           
+                  paddingRight: "12px",
+                  overflow: "hidden",
+                }}
+                onChange={handleMonthChange}
+              >
+                <option value="">Select Month</option>
+                <option value="Jan">Jan</option>
+                <option value="Feb">Feb</option>
+                <option value="Mar">Mar</option>
+                <option value="Apr">Apr</option>
+                <option value="May">May</option>
+                <option value="Jun">Jun</option>
+                <option value="Jul">July</option>
+                <option value="Aug">Aug</option>
+                <option value="Sep">Sep</option>
+                <option value="Oct">Oct</option>
+                <option value="Nov">Nov</option>
+                <option value="Dec">Dec</option>
+              </select>
+            </div>
+            <div className="emp-select-date">
+              <input
+                onChange={(e) => setDate(e.target.value)}
+                style={{
+                  width: "130px",
+                  height: "35px",
+                  fontSize: "0.8rem",
+                  paddingRight: "12px",
+                  paddingBottom: "10px",
+                  paddingTop: "8px",
+                  paddingLeft: "15px",
+                  borderRadius: "6px",
+                }}
+                type="date"
+              />
+
+              {/* for search */}
+            </div>
           </div>
-          
-        </div>
-        <input
-              value={searchTerm}
-              onChange={handleSearch}
-              placeholder="search..."
-              className="search shadow  px-2"
-              style={{
-                // marginLeft: "10px",
-                
-                border: "none",
-                borderBottom: "1px solid coral",
-                borderRadius: "10px",
-              }}
-            />
-        <div className="d-flex align-items-end justify-content-end">
-        {/* <div className=""> */}
-        <button className="empbuttonDowload mx-2" onClick={downloadExcel}
-        style={{fontSize:"0.8rem",}}>
-          <PiDownloadSimpleBold
-          style={{marginRight:"5px", }}/> Transfer Data
-          </button>
-        {/* </div> */}
-          
-        </div>
+          <input
+            value={searchTerm}
+            onChange={handleSearch}
+            placeholder="search..."
+            className="search shadow  px-2"
+            style={{
+              // marginLeft: "10px",
 
-      </div>
-      <hr />
-      <div className="project-title my-2">
-        <div className="allproject col">
-          <h6>Transfers</h6>
+              border: "none",
+              borderBottom: "1px solid coral",
+              borderRadius: "10px",
+            }}
+          />
+          <div className="d-flex align-items-end justify-content-end">
+            {/* <div className=""> */}
+            <button
+              className="empbuttonDowload mx-2"
+              onClick={downloadExcel}
+              style={{ fontSize: "0.8rem" }}
+            >
+              <PiDownloadSimpleBold style={{ marginRight: "5px" }} /> Transfer
+              Data
+            </button>
+            {/* </div> */}
+          </div>
         </div>
-     
-     <div className=" col d-flex justify-content-end ">
-    
-     </div>
-      </div>
-      <div class="tab-content table-cont " id="pills-tabContent">
-        <div
-          class="tab-pane fade show active table-responsive"
-          id="pills-activeproject-home"
-          role="tabpanel"
-          aria-labelledby="pills-activeproject-home"
-          tabindex="0"
-        >
-          <table class="table table-bordered mt-2">
-            <thead>
-              <tr>
-              <th scope="col">Created By </th>
+        <hr />
+        <div className="project-title my-2">
+          <div className="allproject col">
+            <h6>Transfers</h6>
+          </div>
+
+          <div className=" col d-flex justify-content-end "></div>
+        </div>
+        <div class="tab-content table-cont " id="pills-tabContent">
+          <div
+            class="tab-pane fade show active table-responsive"
+            id="pills-activeproject-home"
+            role="tabpanel"
+            aria-labelledby="pills-activeproject-home"
+            tabindex="0"
+          >
+            <table class="table table-bordered mt-2">
+              <thead>
+                <tr>
+                  <th scope="col">Created By </th>
                   <th scope="col">Name</th>
                   <th scope="col">Email</th>
                   <th scope="col">Phone</th>
@@ -317,137 +367,167 @@ const Transfers = () => {
 
                   <th scope="col">Comments</th>
                   <th scope="col">Budget</th>
+
+                  <th scope="col">Send To</th>
                   <th scope="col">Created Date</th>
 
                   <th scope="col">Action</th>
-              </tr>
-            </thead>
-            {/* for email */}
-            <Modal
-              title={`Sent mail to ${selectedResult?.email}`}
-              open={isModalOpen}
-              onOk={handleOk}
-              onCancel={handleCancel}
-              width={800}
-              centered
-            >
-              <div
-                className="d-flex"
-                style={{
-                  gap: "15px",
-                  justifyContent: "space-between",
-                }}
+                </tr>
+              </thead>
+              {/* for email */}
+              <Modal
+                title={`Sent mail to ${selectedResult?.email}`}
+                open={isModalOpen}
+                onOk={handleOk}
+                onCancel={handleCancel}
+                width={800}
+                centered
               >
-                <button
-                  className="btn btn-success"
-                  onClick={() => {
-                    handelSeoMail(
-                      selectedResult?.name,
-                      aliceName,
-                      selectedResult?.email
-                    );
-                    handleCancel();
-                    toast.success("Mail sent successfully!", {});
+                <div
+                  className="d-flex"
+                  style={{
+                    gap: "15px",
+                    justifyContent: "space-between",
                   }}
                 >
-                  Seo Proposal
-                </button>
-                <button
-                  className="btn btn-success"
-                  onClick={() => {
-                    handelSMMail(
-                      selectedResult?.name,
-                      aliceName,
-                      selectedResult?.email
+                  <button
+                    className="btn btn-success"
+                    onClick={() => {
+                      handelSeoMail(
+                        selectedResult?.name,
+                        aliceName,
+                        selectedResult?.email
+                      );
+                      handleCancel();
+                      toast.success("Mail sent successfully!", {});
+                    }}
+                  >
+                    Seo Proposal
+                  </button>
+                  <button
+                    className="btn btn-success"
+                    onClick={() => {
+                      handelSMMail(
+                        selectedResult?.name,
+                        aliceName,
+                        selectedResult?.email
+                      );
+                      handleCancel();
+                      toast.success("Mail sent successfully!", {});
+                    }}
+                  >
+                    Smo Proposal
+                  </button>
+                  <button
+                    className="btn btn-success"
+                    onClick={() => {
+                      handelDMMail(
+                        selectedResult?.name,
+                        aliceName,
+                        selectedResult?.email
+                      );
+                      handleCancel();
+                      toast.success("Mail sent successfully!", {});
+                    }}
+                  >
+                    Digital Marketing Proposal
+                  </button>
+                  <button
+                    className="btn btn-success"
+                    onClick={() => {
+                      handelBWMail(
+                        selectedResult?.name,
+                        aliceName,
+                        selectedResult?.email
+                      );
+                      handleCancel();
+                      toast.success("Mail sent successfully!", {});
+                    }}
+                  >
+                    Basic Website Proposal
+                  </button>
+                  <button
+                    className="btn btn-success"
+                    onClick={() => {
+                      handelEcomMail(
+                        selectedResult?.name,
+                        aliceName,
+                        selectedResult?.email
+                      );
+                      handleCancel();
+                      toast.success("Mail sent successfully!", {});
+                    }}
+                  >
+                    E-commerce Proposal
+                  </button>
+                </div>
+              </Modal>
+              {loader ? (
+                <Spin tip="loading..." style={styles.spinner} />
+              ) : (
+                <tbody>
+                  {filteredData?.map((res, index) => {
+                    return (
+                      <>
+                        <tr key={res._id}>
+                          <td>{res?.employeeName}</td>
+                          <td>{res?.name}</td>
+                          <td>{res?.email}</td>
+                          <td>{res?.phone}</td>
+                          <td>{res?.calldate}</td>
+                          <td>{res?.domainName}</td>
+                          <td>{res?.country}</td>
+                          <td>{res?.address}</td>
+                          <td>{res.comments}</td>
+                          <td>{res?.buget}</td>
+
+                          <td class="d-flex gap-1">
+                            <button
+                              className="buttonFilled"
+                              style={{ fontSize: "0.8rem" }}
+                              onClick={() => {
+                                handleCallback(res); // Call function to handle transfer
+                              }}
+                            >
+                              Callback
+                            </button>
+
+                            <button
+                              className="buttonFilled"
+                              style={{ fontSize: "0.8rem" }}
+                              onClick={() => {
+                                handleSales(res); // Call function to handle transfer
+                              }}
+                            >
+                              Sales
+                            </button>
+                          </td>
+
+                          <td>{res?.createdDate}</td>
+
+                          <td>
+                            {" "}
+                            <button
+                              className="buttonFilled"
+                              style={{ fontSize: "0.8rem" }}
+                              onClick={() =>
+                                navigate(`/transferview/${res?._id}`)
+                              }
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      </>
                     );
-                    handleCancel();
-                    toast.success("Mail sent successfully!", {});
-                  }}
-                >
-                  Smo Proposal
-                </button>
-                <button
-                  className="btn btn-success"
-                  onClick={() => {
-                    handelDMMail(
-                      selectedResult?.name,
-                      aliceName,
-                      selectedResult?.email
-                    );
-                    handleCancel();
-                    toast.success("Mail sent successfully!", {});
-                  }}
-                >
-                  Digital Marketing Proposal
-                </button>
-                <button
-                  className="btn btn-success"
-                  onClick={() => {
-                    handelBWMail(
-                      selectedResult?.name,
-                      aliceName,
-                      selectedResult?.email
-                    );
-                    handleCancel();
-                    toast.success("Mail sent successfully!", {});
-                  }}
-                >
-                  Basic Website Proposal
-                </button>
-                <button
-                  className="btn btn-success"
-                  onClick={() => {
-                    handelEcomMail(
-                      selectedResult?.name,
-                      aliceName,
-                      selectedResult?.email
-                    );
-                    handleCancel();
-                    toast.success("Mail sent successfully!", {});
-                  }}
-                >
-                  E-commerce Proposal
-                </button>
-              </div>
-            </Modal>
-            {loader ?     <Spin tip="loading..." style={styles.spinner} /> :
-            <tbody>
-              {filteredData?.map((res, index) => {
-                return (
-                  <>
-                    <tr key={res._id}>
-                    <td>{res?.employeeName}</td>
-                      <td>{res?.name}</td>
-                      <td>{res?.email}</td>
-                      <td>{res?.phone}</td>
-                      <td>{res?.calldate}</td>
-                      <td>{res?.domainName}</td>
-                      <td>{res?.country}</td>
-                      <td>{res?.address}</td>
-                      <td>{res.comments}</td>
-                      <td>{res?.buget}</td>
-                      <td>{res?.createdDate}</td>
-                      
-                      <td> <button
-                          className="buttonFilled"
-                          style={{ fontSize: "0.8rem" }}
-                          onClick={() =>
-                            navigate(`/transferview/${res?._id}`)
-                          }
-                        >
-                          View
-                        </button></td>
-                    </tr>
-                  </>
-                );
-              })}
-            </tbody>
-}
-          </table>
+                  })}
+                </tbody>
+              )}
+            </table>
+          </div>
+          {/* <CallableDrawer open={open} onClose={handleSubmit} refreshData={refreshData} /> */}
         </div>
-        {/* <CallableDrawer open={open} onClose={handleSubmit} refreshData={refreshData} /> */}
       </div>
-    </div>
     </>
   );
 };
@@ -455,11 +535,10 @@ const Transfers = () => {
 export default Transfers;
 
 const styles = {
-
   spinner: {
-    display:"flex",
+    display: "flex",
     alignSelf: "center",
     justifyContent: "center",
     margin: "4rem",
   },
-}
+};
