@@ -102,20 +102,19 @@ const EmplyeeConcern = () => {
     try {
       const concernDateUTC = moment(ConcernDate, "MMMM D YYYY")
         .utc()
-        .startOf("day")
         .toISOString();
 
       // Construct the payload for the PUT request
       const payload = {
-        user_id,
-        ConcernDate: concernDateUTC,
+        user_id: selectedRow.user_id,
+        concernDate: concernDateUTC,
         punchIn: punchInDateTime,
         punchOut: punchOutDateTime,
         shiftType,
       };
 
       // Make the PUT request to update the attendance
-      const response = await axios.put("/attendance-approval", payload);
+      const response = await axios.put(`${import.meta.env.VITE_BACKEND_API}/attendance-approval`, payload);
 
       // Handle the response as needed
       handleApproveOrDeny("Approved");
