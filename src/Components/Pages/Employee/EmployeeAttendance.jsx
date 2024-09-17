@@ -19,7 +19,7 @@ const EmployeeAttendance = () => {
   const [completeEndHalfDay, setcompleteEndHalfDay] = useState(0);
 
   const { id } = useParams();
-  const adminToken = locasetAttendanceListlStorage.getItem("token");
+  const adminToken = localStorage.getItem("token");
 
   async function getEmpAttendanceData() {
     try {
