@@ -19,6 +19,7 @@ const EmployeeAttendance = () => {
   const [completeEndHalfDay, setcompleteEndHalfDay] = useState(0);
 
   const { id } = useParams();
+  const adminToken = locasetAttendanceListlStorage.getItem("token");
 
   async function getEmpAttendanceData() {
     try {
@@ -27,7 +28,8 @@ const EmployeeAttendance = () => {
           import.meta.env.VITE_BACKEND_API
         }/attendancelist/${id}?month=${selectedMonth}${
           date ? `&date=${date}` : ""
-        }`
+        }`,
+        { headers: { token: adminToken } }
       );
       setAttendanceList(res?.data?.data?.reverse());
     } catch (err) {

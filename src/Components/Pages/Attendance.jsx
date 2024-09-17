@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 
-import { ToastContainer, toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
-import Cookies from 'js-cookie'
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Cookies from "js-cookie";
 import * as XLSX from "xlsx";
-import moment from 'moment'
-import { Modal } from 'antd'
+import moment from "moment";
+import { Modal } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
-import { DatePicker, Space , Spin} from 'antd';
-import axios from "axios"
+import { DatePicker, Space, Spin } from "antd";
+import axios from "axios";
 // import "./Projects/Projects.css";
 import downArrow from "../../assets/bxs_down-arrow.png";
 import menuDots from "../../assets/lucide_ellipsis.png";
@@ -19,488 +19,408 @@ import { BsThreeDots } from "react-icons/bs";
 import { PiDownloadSimpleBold } from "react-icons/pi";
 
 const Attendance = () => {
-  const Admintoken = Cookies.get('Admintoken')
-  const Profile = localStorage.getItem('user')
-  const NewProfile = JSON.parse(Profile)
-  const name = NewProfile?.name
-  const email = NewProfile?.email
-  const user_id = NewProfile?._id
+  const [date, setDate] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [attendanceList, setAttendanceList] = useState([]);
+  const [absentCount, setAbsentCount] = useState(0);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [completeEndLate, setCompleteEndLate] = useState(0);
+  const [completeEndHalfDay, setCompleteEndHalfDay] = useState(0);
 
-  const [hidden, setHidden] = useState(false)
-  const [data, setData] = useState([])
-  const [selectedResult, setSelectedResult] = useState(null);
+  const adminToken = localStorage.getItem("token");
 
-  const [loader, setloader] = useState(true);
-
-
-  const getAttData = async () => {
-    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/attendance/${user_id}`)
-    setData(res.data.attendance)
-  }
-
-  //model
-  const [msgDate, setMsgDate] = useState('')
-  const [message, setMessage] = useState('')
-
-  const handleChange = (date, dateString) => {
-    console.log(date, dateString);
-  };
-
-  const [isModalOpen, setIsModalOpen] = useState(false)
-
-  const [isOpen, setIsOpen] = useState(true)
-  const toggle = () => setIsOpen(!isOpen)
-
-  // location tracker
-  const [latitude, setLatitude] = useState('')
-  const [longitude, setLongitude] = useState('')
-  const [locationPermission, setLocationPermission] = useState(false)
-  const [iframe, setIframe] = useState(false)
-
-  const [percent, setPercent] = useState(29)
-
-  const status = percent === 100 ? 'success' : percent <= 29 ? 'red' : 'active'
-  const color = percent === 100 ? '#52c41a' : percent <= 29 ? 'red' : '#ffc107'
-
-  const [hide, setHide] = useState(false)
-
-  const [punchin, setPunchin] = useState('')
-  const [punchOut, setPunchOut] = useState('')
-
-  const [timeDifferenceMinutes, setTimeDifferenceMinutes] = useState(0) // State to hold the working time in minutes
-
-  const [checkoutClicked, setCheckoutClicked] = useState(false)
-
-  const [loading, setLoading] = useState(false)
-  function handleLoading() {
-    setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
-    }, 750)
-  }
-
-
-
-  const [userIP, setUserIP] = useState(null)
-  const getIp = async () => {
-    // Fetch user's IP address
-    const response = await fetch('https://api.ipify.org?format=json')
-    const data = await response.json()
-    setUserIP(data.ip)
-  }
-
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-
- 
-
-  const calculateTimeDifference = (time1, time2) => {
-    const format = 'hh:mm:ss A'
-    const time1Date = new Date('2000-01-01 ' + time1)
-    const time2Date = new Date('2000-01-01 ' + time2)
-
-    // Get the difference in milliseconds
-    let difference = Math.abs(time2Date - time1Date)
-
-    // Convert milliseconds to hours, minutes, seconds
-    let hours = Math.floor(difference / 3600000)
-    difference -= hours * 3600000
-    let minutes = Math.floor(difference / 60000)
-    difference -= minutes * 60000
-    let seconds = Math.floor(difference / 1000)
-
-    return `${hours}:${minutes}:${seconds}`
-  }
-
-  let filteredPunchin = []
-
-  if (data) {
-    filteredPunchin = data.filter(
-      (entry) =>
-        entry.hasOwnProperty('punchin') &&
-        !entry.hasOwnProperty('punchOut') &&
-        entry.currentDate === currentDate,
-    )
-  }
-
-  // console.log(
-  //   "punchin",
-  //   filteredPunchin.length > 0 ? filteredPunchin : "No data available"
-  // );
-  let filteredPunchOut = []
-
-
-  const isLate = filteredPunchin.length > 0 && isCheckinLate(filteredPunchin[0].punchin)
-  let timeDifference = null
-
-  if (filteredPunchin.length > 0 && filteredPunchOut.length > 0) {
-    // Assuming filteredPunchin and filteredPunchOut are arrays containing login and logout times respectively
-    timeDifference = calculateTimeDifference(
-      filteredPunchin[0].punchin,
-      filteredPunchOut[0].punchOut,
-    )
-
-    // console.log("Time Difference (minutes):", timeDifference);
-    const currentDate = moment().format('MMM Do YY')
+  async function getEmpAttendanceData() {
     try {
-      const response = axios.post(`${import.meta.env.VITE_BACKEND_API}/attendance`, {
-        currentDate,
-        time: timeDifference,
-        user_id,
-      })
-      // console.log(response.data);
-    } catch (error) {
-      console.error('Error sending checkout data:', error)
+      const res = await axios.get(
+        `${import.meta.env.VITE_BACKEND_API}/admin/todays-attendance`,
+        { headers: { token: adminToken } }
+      );
+      setAttendanceList(res?.data?.data?.reverse());
+    } catch (err) {
+      console.log(err);
     }
-  } else {
-    console.log('Cannot calculate time difference: Missing login or logout data')
-  }
-
-
-
-
-
-
-
-  const navigate = useNavigate()
-  const { id } = useParams()
-  const currentDate = moment().format("MMM Do YY");
-  const [open, setOpen] = useState(false);
-
-  console.log(currentDate)
-   const [date, setDate] = useState("")
-   const [data3, setData3] = useState([])
-
-
-// ant drwer design
-  const showDrawer = () => {
-    setOpen(true);
-  };
-  const onClose = () => {
-    setOpen(false);
-  };
-  const handleSubmit = () => {
-    // Handle form submit logic here
-    onClose();
-  };
-
-  const Getdata = async () => {
-    const ressss = await axios.get(`${import.meta.env.VITE_BACKEND_API}/attendance`)
-
-    setData3(ressss.data)
-    setloader(false)
-  }
-  const filteredDataAll = data3.filter((e) => e.currentDate === moment().format('MMM Do YY'))
-  console.log('test', filteredDataAll)
-
-
-  const groupedDataByUserId = Object.values(
-    filteredDataAll.reduce((acc, curr) => {
-      // Group entries by user_id
-      const userId = curr.user_id
-
-      if (!acc[userId]) {
-        acc[userId] = []
-      }
-
-      // Add the current entry to the corresponding group
-      acc[userId].push(curr)
-
-      return acc
-    }, {}),
-  )
-  console.log(groupedDataByUserId)
-  const mergedDataByUserId = groupedDataByUserId.map((userEntries) => {
-    // Merge all entries for each user into a single object
-    return userEntries.reduce((mergedObj, entry) => {
-      // Merge the fields of each entry into the merged object
-      return { ...mergedObj, ...entry }
-    }, {})
-  })
-
-  console.log(mergedDataByUserId)
-
-  const [selectedMonth, setSelectedMonth] = useState('')
-
-  const handleMonthChange = (event) => {
-    setSelectedMonth(event.target.value)
   }
 
   useEffect(() => {
-    
-    Getdata()
-  }, [])
-  
-  const downloadExcel = () => {
-    if (mergedDataByUserId.length === 0) {
-      console.error('No data to download')
-      return
+    getEmpAttendanceData();
+  }, [selectedMonth, date]);
+
+  const formatTime = (date) => {
+    const dateIst = new Date(date);
+    dateIst.setHours(dateIst.getHours());
+    dateIst.setMinutes(dateIst.getMinutes());
+    return new Intl.DateTimeFormat("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    }).format(dateIst);
+  };
+
+  const formatTotalWorkingTime = (time) => {
+    const totalWorkingTimeMinutes = time;
+    const hours = Math.floor(totalWorkingTimeMinutes / 60);
+    const minutes = Math.round(totalWorkingTimeMinutes % 60);
+    return `${hours < 10 ? "0" + hours : hours}h ${
+      minutes < 10 ? "0" + minutes : minutes
+    }m`;
+  };
+
+  const filteredAttendanceList = attendanceList.filter((entry) => {
+    const entryDate = moment(entry.currentDate).format("YYYY-MM-DD");
+    const entryMonth = moment(entry.currentDate).month() + 1;
+
+    if (selectedMonth && date) {
+      return (
+        entryMonth === selectedMonth &&
+        entryDate === moment(date).format("YYYY-MM-DD")
+      );
     }
+    if (selectedMonth) {
+      return entryMonth === selectedMonth;
+    }
+    if (date) {
+      return entryDate === moment(date).format("YYYY-MM-DD");
+    }
+    return true;
+  });
 
-    const worksheet = XLSX.utils.json_to_sheet(mergedDataByUserId)
-    const workbook = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1')
+  const isWeekday = (date) => {
+    const day = moment(date).day();
+    return day >= 1 && day <= 5;
+  };
 
-    // Convert workbook to array buffer
-    const arrayBuffer = XLSX.write(workbook, {
-      bookType: 'xlsx',
-      type: 'array',
-    })
+  useEffect(() => {
+    const calculateAbsences = () => {
+      const absentDates = new Set();
+      const today = moment().startOf("day");
 
-    // Convert array buffer to Blob
-    const excelBlob = new Blob([arrayBuffer], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    })
+      const selectedStart = moment()
+        .set("month", selectedMonth - 1)
+        .startOf("month");
+      const selectedEnd = moment.min(
+        today,
+        selectedStart.clone().endOf("month")
+      );
 
-    // Create a download link
-    const url = URL.createObjectURL(excelBlob)
-    const link = document.createElement('a')
-    link.href = url
-    link.setAttribute('download', 'attendance.xlsx')
-    document.body.appendChild(link)
+      for (
+        let m = selectedStart;
+        m.isSameOrBefore(selectedEnd, "day");
+        m.add(1, "day")
+      ) {
+        if (isWeekday(m)) {
+          const formattedDate = m.format("YYYY-MM-DD");
+          const isAbsent = !attendanceList.some(
+            (entry) =>
+              moment(entry.currentDate).format("YYYY-MM-DD") === formattedDate
+          );
 
-    // Trigger the download
-    link.click()
+          if (isAbsent) {
+            absentDates.add(formattedDate);
+          }
+        }
+      }
 
-    // Cleanup
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
-  }
+      setAbsentCount(absentDates.size);
+    };
 
+    calculateAbsences();
+  }, [attendanceList, selectedMonth]);
 
+  useEffect(() => {
+    const calculateTotals = () => {
+      let totalLate = 0;
+      let totalHalfDay = 0;
 
-  return <>
-    {/* modal */}
-    <Modal
-      title="Drop a message"
-      centered
-      open={isModalOpen}
-      onOk={handleOk}
-      onCancel={handleCancel}
-    >
-      <div className="container">
-        <div className="row">
-          <div className="col">
-            <h6>Select Date</h6>
-            <Space direction="vertical" style={{  outline: "none", border: "1px solid #f24e1e" }}>
-              <DatePicker onChange={(e) => setMessage(e.target.value)} />
+      filteredAttendanceList.forEach((entry) => {
+        if (entry.status === "Late") {
+          totalLate += 1;
+        }
+        if (entry.workStatus === "Half Day") {
+          totalHalfDay += 1;
+        }
+      });
 
-            </Space>
+      setCompleteEndLate(totalLate);
+      setCompleteEndHalfDay(totalHalfDay);
+    };
+
+    calculateTotals();
+  }, [filteredAttendanceList]);
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleMonthChange = (event) => {
+    const month = parseInt(event.target.value, 10); // Convert selected month to a number
+    setSelectedMonth(month);
+  };
+
+  const downloadExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(
+      filteredAttendanceList.map((entry) => ({
+        Date: moment(entry.currentDate).format("MMM-Do-YYYY"),
+        PunchIn: entry.punches[0]?.punchIn
+          ? formatTime(entry.punches[0].punchIn)
+          : "N/A",
+        PunchOut: entry.punches[entry.punches.length - 1]?.punchOut
+          ? formatTime(entry.punches[entry.punches.length - 1].punchOut)
+          : "N/A",
+        Production: entry.totalWorkingTime
+          ? formatTotalWorkingTime(entry.totalWorkingTime)
+          : "0",
+        Status: entry.status,
+        IPAddress: entry.ip,
+        WorkStatus: entry.workStatus,
+      }))
+    );
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "AttendanceData");
+    XLSX.writeFile(wb, "AttendanceData.xlsx");
+  };
+
+  return (
+    <>
+      <div className="employee-project-container container">
+        {/* <div className="emp-select-months-year">
+          <div className="emp-select-month">
+            <select
+              style={{
+                width: "124px",
+                height: "30px",
+                paddingRight: "12px",
+                color: "#222",
+              }}
+              onChange={handleMonthChange}
+            >
+              <option value="">Select Month</option>
+              <option value="1">Jan</option>
+              <option value="2">Feb</option>
+              <option value="3">Mar</option>
+              <option value="4">Apr</option>
+              <option value="5">May</option>
+              <option value="6">Jun</option>
+              <option value="7">Jul</option>
+              <option value="8">Aug</option>
+              <option value="9">Sep</option>
+              <option value="10">Oct</option>
+              <option value="11">Nov</option>
+              <option value="12">Dec</option>
+            </select>
           </div>
-          <div className="col">
-            <h6>write concern</h6>
-
-            <textarea onChange={(e) => setMessage(e.target.value)} />
-          </div>
-        </div>
-      </div>
-    </Modal>
-
-
-    <div className="attendance-container">
-    
-    <div className="employee-project-container container py-4">
-        <hr />
-        <div className=" " style={{marginBottom:"-10px"}}>
-         <div className=" AttenDance  d-flex justify-content-between">
-         <div className="allproject">
-            <h6
-            style={{fontSize:"19px"}}>Today's Attendance</h6>
-          </div>
-          <div class="text-end">
-        <button className="empbuttonDowload" 
-        style={{ width:"160px", fontSize: "0.8rem",}} onClick={downloadExcel}
-        
-        >
-        <PiDownloadSimpleBold style={{ marginRight:"5px",  }}/>
-        Attendance Data
-        </button>
-      
-        </div>
-         </div>
           <div
-            className="list-of-days"
+            className="emp-select-month"
+            style={{ width: "123px", paddingRight: "0.2rem", height: "34px" }}
+          >
+            <input
+              onChange={(e) => setDate(e.target.value)}
+              style={{ width: "118px", height: "30px", color: "#222" }}
+              type="date"
+            />
+          </div>
+        </div> */}
+        <div className="emp-select-months-year">
+          <button
+            onClick={downloadExcel}
             style={{
-              display: "flex",
-              width: "50%",
-              justifyContent: "flex-end",
+              height: "25px",
+              width: "330px",
+              borderRadius: "10px",
+              background: "#1d8cf8",
+              color: "#fff",
+              fontSize: "0.8rem",
+              border: "1px solid #1d8cf8",
+              float: "right",
             }}
           >
-          </div>
+            Export to Excel
+          </button>
         </div>
-        <div class="tab-content table-cont " id="pills-tabContent">
+        <hr />
+
+        <div className="tab-content" id="pills-tabContent">
           <div
-            class="tab-pane fade show active table-responsive"
+            className="tab-pane fade show active table-responsive"
             id="pills-activeproject-home"
             role="tabpanel"
             aria-labelledby="pills-activeproject-home"
-            tabindex="0"
+            tabIndex="0"
           >
-            <table class="table table-bordered mt-2">
-              <thead>
-                <tr>
-                <th scope="col">Name</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Date</th>
-                    <th scope="col">Punch in</th>
-                    <th scope="col">Punch Out</th>
-
-                    <th scope="col">Production</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">IP Address </th>
-
-                </tr>
-              </thead>
-              {/* for email */}
-              <Modal
-                title={`Sent mail to ${selectedResult?.email}`}
-                open={isModalOpen}
-                onOk={handleOk}
-                onCancel={handleCancel}
-                width={800}
-                centered
-              >
+            <div
+              className="project-title my-2"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <div className="allproject">
+                <h6>All Details</h6>
+              </div>
+              {/* {!date && (
                 <div
-                  className="d-flex"
-                  style={{
-                    gap: "15px",
-                    justifyContent: "space-between",
-                  }}
+                  className="list-of-days"
+                  style={{ display: "flex", justifyContent: "center" }}
                 >
-                  <button
-                    className="btn btn-success"
-                    onClick={() => {
-                      handelSeoMail(
-                        selectedResult?.name,
-                        aliceName,
-                        selectedResult?.email
-                      );
-                      handleCancel();
-                      toast.success("Mail sent successfully!", {});
-                    }}
-                  >
-                    Seo Proposal
-                  </button>
-                  <button
-                    className="btn btn-success"
-                    onClick={() => {
-                      handelSMMail(
-                        selectedResult?.name,
-                        aliceName,
-                        selectedResult?.email
-                      );
-                      handleCancel();
-                      toast.success("Mail sent successfully!", {});
-                    }}
-                  >
-                    Smo Proposal
-                  </button>
-                  <button
-                    className="btn btn-success"
-                    onClick={() => {
-                      handelDMMail(
-                        selectedResult?.name,
-                        aliceName,
-                        selectedResult?.email
-                      );
-                      handleCancel();
-                      toast.success("Mail sent successfully!", {});
-                    }}
-                  >
-                    Digital Marketing Proposal
-                  </button>
-                  <button
-                    className="btn btn-success"
-                    onClick={() => {
-                      handelBWMail(
-                        selectedResult?.name,
-                        aliceName,
-                        selectedResult?.email
-                      );
-                      handleCancel();
-                      toast.success("Mail sent successfully!", {});
-                    }}
-                  >
-                    Basic Website Proposal
-                  </button>
-                  <button
-                    className="btn btn-success"
-                    onClick={() => {
-                      handelEcomMail(
-                        selectedResult?.name,
-                        aliceName,
-                        selectedResult?.email
-                      );
-                      handleCancel();
-                      toast.success("Mail sent successfully!", {});
-                    }}
-                  >
-                    E-commerce Proposal
-                  </button>
+                  <div className="emp-holidays-btn">
+                    <button
+                      style={{
+                        height: "25px",
+                        width: "300px",
+                        borderRadius: "10px",
+                        background: "#f3f3fb",
+                        color: "#72757a",
+                        fontSize: "0.8rem",
+                        border: "1px solid #dcd2d2",
+                      }}
+                    >
+                      Late :{completeEndLate}
+                    </button>
+                    <button
+                      style={{
+                        height: "25px",
+                        width: "300px",
+                        borderRadius: "10px",
+                        background: "#f3f3fb",
+                        color: "#72757a",
+                        fontSize: "0.8rem",
+                        border: "1px solid #dcd2d2",
+                      }}
+                    >
+                      Absent :{absentCount}
+                    </button>
+                    <button
+                      style={{
+                        height: "25px",
+                        width: "330px",
+                        borderRadius: "10px",
+                        background: "#f3f3fb",
+                        color: "#72757a",
+                        fontSize: "0.8rem",
+                        border: "1px solid #dcd2d2",
+                      }}
+                    >
+                      Complete End Late :{completeEndLate}
+                    </button>
+                    <button
+                      style={{
+                        height: "25px",
+                        width: "330px",
+                        borderRadius: "10px",
+                        background: "#f3f3fb",
+                        color: "#72757a",
+                        fontSize: "0.8rem",
+                        border: "1px solid #dcd2d2",
+                      }}
+                    >
+                      Complete End Half Day :{completeEndHalfDay}
+                    </button>
+                    <button
+                      onClick={downloadExcel}
+                      style={{
+                        height: "25px",
+                        width: "330px",
+                        borderRadius: "10px",
+                        background: "#1d8cf8",
+                        color: "#fff",
+                        fontSize: "0.8rem",
+                        border: "1px solid #1d8cf8",
+                      }}
+                    >
+                      Export to Excel
+                    </button>
+                  </div>
                 </div>
-              </Modal>
-              {loader ? <>     <Spin tip="loading..." style={styles.spinner} /> </>:
-              <tbody>
-                {mergedDataByUserId?.map((res, index) => {
-                  return (
-                    <>
-                      <tr key={res._id}>
-                      <td>{res.userName}</td>
-                        <td>{res.userEmail}</td>
-                        <td>{res.currentDate}</td>
-                        <td>{res.punchin}</td>
-                        <td>{res.punchOut}</td>
-                        <td>{res.time}</td>
-                        <td
-                          style={{
-                            color:
-                              res.status === "LATE"
-                                ? "goldenrod"
-                                : res.status === "Week Off"
-                                ? "blue"
-                                : res.status === "Absent"
-                                ? "red"
-                                
-                                : "green",
-                          }}
-                        >
-                          {res.status}
+              )} */}
+
+              <table className="table table-striped mt-3">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>PunchIn</th>
+                    <th>PunchOut</th>
+                    <th>Production</th>
+                    <th>Status</th>
+                    <th>IPAddress</th>
+                    <th>WorkStatus</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAttendanceList.length > 0 ? (
+                    filteredAttendanceList.map((attendance, index) => (
+                      <tr key={index}>
+                        <td>
+                          {attendance.userName}
                         </td>
-                        <td>{res.ip}</td>
-                        
+                        <td>
+                          {moment(attendance.currentDate).format("MMM-Do-YYYY")}
+                        </td>
+                        <td>
+                          {attendance.punches[0]?.punchIn
+                            ? formatTime(attendance.punches[0].punchIn)
+                            : "N/A"}
+                        </td>
+                        <td>
+                          {attendance.punches[attendance.punches.length - 1]
+                            ?.punchOut
+                            ? formatTime(
+                                attendance.punches[
+                                  attendance.punches.length - 1
+                                ].punchOut
+                              )
+                            : "N/A"}
+                        </td>
+                        <td>
+                          {attendance.totalWorkingTime
+                            ? formatTotalWorkingTime(
+                                attendance.totalWorkingTime
+                              )
+                            : "0"}
+                        </td>
+                        <td>{attendance.status}</td>
+                        <td>{attendance.ip}</td>
+                        <td>{attendance.workStatus}</td>
                       </tr>
-                    </>
-                  );
-                })}
-              </tbody>
-}
-            </table>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7" className="text-center">
+                        No data available
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        
         </div>
       </div>
+    </>
+  );
+};
 
-      
-    </div>
-  </>;
+const getStatusColor = (status) => {
+  switch (status) {
+    case "LATE":
+      return "goldenrod";
+    case "Week Off":
+      return "blue";
+    case "Absent":
+      return "red";
+    default:
+      return "green";
+  }
 };
 
 export default Attendance;
 
-
-
-
 const styles = {
-
   spinner: {
-    display:"flex",
+    display: "flex",
     alignSelf: "center",
     justifyContent: "center",
     margin: "4rem",
-
   },
-}
+};
