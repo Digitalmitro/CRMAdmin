@@ -1,24 +1,57 @@
 import { useEffect, useState } from "react";
 import "./Login.css";
-// import "../App.css";
 import { Navigate, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
-// import Api from "../BackendApi";
 import logo from "../../assets/logo.png";
+
 const Login = () => {
   const navigate = useNavigate();
-
-  let Admintoken;
-  // const Admintoken = Cookies.get("Admintoken");
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [showOtpInput, setShowOtpInput] = useState(false);
+  const [Admintoken, setAdminToken] = useState(null);
+  const [loading, setLoading] = useState(false); // Loading state
 
+  // Function to handle OTP verification
+  const verifyOtp = async (e) => {
+    e.preventDefault();
+    setLoading(true); // Start loading when verifying OTP
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_API}/admin/verify-otp`,
+        {
+          email: email,
+          otp: otp,
+        },
+        { withCredentials: true }
+      );
+      console.log("OTP Verified", response?.data);
+      const token = response?.data.token;
+      setAdminToken(token);
+      localStorage.setItem("admin", JSON.stringify(response?.data.user));
+      localStorage.setItem("token", token);
+      toast.success(response?.data.status, {});
+
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1200);
+    } catch (error) {
+      console.error("OTP verification failed", error);
+      toast.error("Invalid OTP. Please try again.", {});
+    } finally {
+      setLoading(false); // Stop loading after the response
+    }
+  };
+
+  // Function to handle login
   const handleSubmmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // Start loading when submitting login
     const payload = {
       email: email,
       password: password,
@@ -26,92 +59,115 @@ const Login = () => {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_API}/loginadmin`,
-        payload,  { withCredentials: true } 
+        payload,
+        { withCredentials: true }
       );
-      console.log(response?.data);
-      Admintoken = response?.data.token
-      // Cookies.set("Admintoken", response?.data.token);
-      localStorage.setItem("admin", JSON.stringify(response?.data.user));
-      localStorage.setItem("token", response?.data.token);
-      toast.success(response?.data.status, {});
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 1200);
+      console.log("Login Response", response?.data);
+
+      if (response?.data.success === true) {
+        setOtpSent(true); // OTP has been sent, show OTP input field
+        toast.success("OTP sent to your email.", {});
+      } else if (response?.data.token) {
+        // If no OTP verification is required, directly log in
+        const token = response?.data.token;
+        setAdminToken(token);
+        localStorage.setItem("admin", JSON.stringify(response?.data.user));
+        localStorage.setItem("token", token);
+        toast.success("Login successful", {});
+
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1200);
+      }
     } catch (error) {
-      toast.warning(error?.response?.data.status, {});
-      // toast.warning("login unsuccessful");
-    }
-    if (Admintoken) {
-      return <Navigate to="/" />;
+      console.error("Login failed", error);
+      toast.error("Login failed. Please try again.", {});
+    } finally {
+      setLoading(false); // Stop loading after the response
     }
   };
+
   useEffect(() => {
     if (Admintoken) {
-      return navigate("/");
+      navigate("/");
     } else {
-      return navigate("/login");
+      navigate("/login");
     }
   }, [Admintoken]);
 
   return (
     <>
       <ToastContainer />
-      <div className="container signup loginzoom" style={{display: "flex", justifyContent: "center", alignItems: "center", height: "100vh"}}>
-        <form class="form_main" action="">
-          <img src={logo} style={{ width: "10rem" }} alt="" />
-          {/* <p class="heading">ADMIN</p> */}
-          <div class="inputContainer">
-            <svg
-              viewBox="0 0 16 16"
-              fill="#2e2e2e"
-              height="16"
-              width="16"
-              xmlns="http://www.w3.org/2000/svg"
-              class="inputIcon"
-            >
-              <path d="M13.106 7.222c0-2.967-2.249-5.032-5.482-5.032-3.35 0-5.646 2.318-5.646 5.702 0 3.493 2.235 5.708 5.762 5.708.862 0 1.689-.123 2.304-.335v-.862c-.43.199-1.354.328-2.29.328-2.926 0-4.813-1.88-4.813-4.798 0-2.844 1.921-4.881 4.594-4.881 2.735 0 4.608 1.688 4.608 4.156 0 1.682-.554 2.769-1.416 2.769-.492 0-.772-.28-.772-.76V5.206H8.923v.834h-.11c-.266-.595-.881-.964-1.6-.964-1.4 0-2.378 1.162-2.378 2.823 0 1.737.957 2.906 2.379 2.906.8 0 1.415-.39 1.709-1.087h.11c.081.67.703 1.148 1.503 1.148 1.572 0 2.57-1.415 2.57-3.643zm-7.177.704c0-1.197.54-1.907 1.456-1.907.93 0 1.524.738 1.524 1.907S8.308 9.84 7.371 9.84c-.895 0-1.442-.725-1.442-1.914z"></path>
-            </svg>
-            <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              id="email"
-              class="inputField"
-              type="email"
-            />
-          </div>
+      <div
+        className="container signup loginzoom"
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <form className="form_main" action="">
+          <img src={logo} style={{ width: "10rem" }} alt="Logo" />
 
-          <div class="inputContainer">
-            <svg
-              viewBox="0 0 16 16"
-              fill="#2e2e2e"
-              height="16"
-              width="16"
-              xmlns="http://www.w3.org/2000/svg"
-              class="inputIcon"
-            >
-              <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"></path>
-            </svg>
-            <input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              id="password"
-              class="inputField"
-              type="password"
-            />
-          </div>
+          {loading ? (
+            <div className="loader"></div> // Display loader when loading is true
+          ) : (
+            <>
+              {!otpSent ? (
+                <>
+                  <div className="inputContainer">
+                    <input
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Email"
+                      id="email"
+                      className="inputField"
+                      type="email"
+                      disabled={loading} // Disable input during loading
+                    />
+                  </div>
 
-          <button onClick={handleSubmmit} id="button">
-            Login
-          </button>
-          {/* <div class="signupContainer">
-            <p>Don't have any account?</p>
-            <a href="#">Sign up</a>
-          </div> */}
+                  <div className="inputContainer">
+                    <input
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Password"
+                      id="password"
+                      className="inputField"
+                      type="password"
+                      disabled={loading} // Disable input during loading
+                    />
+                  </div>
+
+                  <button onClick={handleSubmmit} id="button" disabled={loading}>
+                    {loading ? "Logging in..." : "Login"}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="inputContainer">
+                    <input
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      placeholder="Enter OTP"
+                      id="otp"
+                      className="inputField"
+                      type="text"
+                      disabled={loading} // Disable input during loading
+                    />
+                  </div>
+                  <button onClick={verifyOtp} id="button" disabled={loading}>
+                    {loading ? "Verifying OTP..." : "Verify OTP"}
+                  </button>
+                </>
+              )}
+            </>
+          )}
         </form>
       </div>
     </>
   );
 };
+
 export default Login;
