@@ -67,7 +67,6 @@ const EmplyeeConcern = () => {
   const [isConcernModalOpen, setIsConcernModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
 
-
   const handleView = (row) => {
     setSelectedRow(row);
     setIsModalOpen(true);
@@ -114,7 +113,10 @@ const EmplyeeConcern = () => {
       };
 
       // Make the PUT request to update the attendance
-      const response = await axios.put(`${import.meta.env.VITE_BACKEND_API}/attendance-approval`, payload);
+      const response = await axios.put(
+        `${import.meta.env.VITE_BACKEND_API}/attendance-approval`,
+        payload
+      );
 
       // Handle the response as needed
       handleApproveOrDeny("Approved");
@@ -179,9 +181,13 @@ const EmplyeeConcern = () => {
 
   const updateConcerns = async () => {
     await axios
-      .put(`${import.meta.env.VITE_BACKEND_API}/notifications/update-status`,{}, {
-        headers: { token: Admintoken },
-      })
+      .put(
+        `${import.meta.env.VITE_BACKEND_API}/notifications/update-status`,
+        {},
+        {
+          headers: { token: Admintoken },
+        }
+      )
       .then((res) => {
         console.log("Concerns seen");
       })
@@ -373,7 +379,11 @@ const EmplyeeConcern = () => {
                         <tr key={res?._id}>
                           <td>{res?.name}</td>
                           <td>{res?.email}</td>
-                          <td>{moment(res?.createdAt).format("DD/MM/YYYY HH:MM a")}</td>
+                          <td>
+                            {moment(res?.createdAt).format(
+                              "DD/MM/YYYY HH:MM a"
+                            )}
+                          </td>
                           <td
                             style={{
                               color:
@@ -471,7 +481,13 @@ const EmplyeeConcern = () => {
                   </Button>,
                   <Button
                     key="approve"
-                    onClick={() => handleApproved()}
+                    onClick={() => {
+                      if (selectedRow.concernType.includes("Leave")) {
+                        handleApproveOrDeny("Approved")
+                      } else {
+                        handleApproved();
+                      }
+                    }}
                     type="primary"
                   >
                     Approve
@@ -516,41 +532,41 @@ const EmplyeeConcern = () => {
                     <Text strong> Date Of Concern: </Text>
                     <Input value={selectedRow.ConcernDate} />
                   </div>
-                  {!selectedRow.concernType.includes("Leave") &&
-                  <div
-                    style={{
-                      marginTop: "20px",
-                      display: "flex",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <div>
-                      <Text strong>Actual In Time: </Text>
-                      <Input
-                        value={selectedRow.ActualPunchIn}
-                        disabled
-                        style={{
-                          width: "100px",
-                          marginBottom: "10px",
-                          color: "#7a7b7f",
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <Text strong>Actual Out Time : </Text>
+                  {!selectedRow.concernType.includes("Leave") && (
+                    <div
+                      style={{
+                        marginTop: "20px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <div>
+                        <Text strong>Actual In Time: </Text>
+                        <Input
+                          value={selectedRow.ActualPunchIn}
+                          disabled
+                          style={{
+                            width: "100px",
+                            marginBottom: "10px",
+                            color: "#7a7b7f",
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <Text strong>Actual Out Time : </Text>
 
-                      <Input
-                        value={selectedRow.ActualPunchOut}
-                        disabled
-                        style={{
-                          width: "100px",
-                          marginBottom: "10px",
-                          color: "#7a7b7f",
-                        }}
-                      />
+                        <Input
+                          value={selectedRow.ActualPunchOut}
+                          disabled
+                          style={{
+                            width: "100px",
+                            marginBottom: "10px",
+                            color: "#7a7b7f",
+                          }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                  }
+                  )}
 
                   <div style={{ marginTop: "20px" }}>
                     <Text strong>Message: </Text>
