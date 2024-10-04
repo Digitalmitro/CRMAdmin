@@ -489,7 +489,7 @@ const CallbackTable = () => {
                         <td>{res?.name}</td>
                         <td>{res?.email}</td>
                         <td>{res?.phone}</td>
-                        <td>{res?.calldate}</td>
+                        <td>{moment(res?.calldate).format("DD/MM/YYYY")}</td>
                         <td>{res?.domainName}</td>
                         <td>{res?.address}</td>
                         <td>{res?.comments}</td>
