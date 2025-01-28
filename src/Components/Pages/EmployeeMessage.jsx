@@ -38,7 +38,7 @@ const EmpMsg = () => {
   useEffect(() => {
     if (selectedEmployee) {
       socket = io(ENDPOINT);
-      socket.emit("register", admin._id);
+      socket.emit("register", admin?._id);
       socket.on("connected", () => setSocketConnected(true));
       socket.on("typing", () => setIsTyping(true));
       socket.on("stop typing", () => setIsTyping(false));
@@ -165,7 +165,7 @@ const EmpMsg = () => {
               style={{
                 ...styles.employeeItem,
                 backgroundColor:
-                  selectedEmployee?._id === employee._id
+                  selectedEmployee?._id === employee?._id
                     ? "#e0e0e0"
                     : "#ffffff",
               }}

@@ -200,7 +200,7 @@ const navigate = useNavigate()
                   }}
                   className="mt-2 mx-auto"
                 >
-                  {user.name && user?.name.toUpperCase()}
+                  {user?.name && user?.name.toUpperCase()}
                 </h6>
               </div>
             </div>

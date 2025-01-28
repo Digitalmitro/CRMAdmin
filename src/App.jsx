@@ -40,6 +40,7 @@ import EmployeeViewDashboard from "./Components/Pages/Employee/EmployeeViewDashb
 import Doccs from './Components/Pages/docs'
 import Docs from './Components/Pages/docs'
 import EmpMsg from './Components/Pages/EmployeeMessage';
+import EmpNotification from './Components/Pages/NotificationPage'
 
 const MyContext = createContext()
 function App() {
@@ -109,7 +110,7 @@ import SeoMail from "./Components/Mail/SeoMail"; */}
 
               <Route path="/callbackview/:id" element={<CallbackView />} />
               <Route path="/employeemessage" element={<EmpMsg />} />
-
+              <Route path='/employeenotification' element={<EmpNotification/>} />
               <Route path="/salesview/:id" element={<SalesView />} />
               <Route path="/transferview/:id" element={<TransferView />} />
               <Route path="/transfers" element={<Transfers />} />

@@ -30,9 +30,9 @@ const EmplyeeActivity = () => {
   const token = Cookies.get("token");
   const Profile = localStorage.getItem("admin");
   const NewProfile = JSON.parse(Profile);
-  const user_id = NewProfile._id;
-  const user_name = NewProfile.name;
-  const aliceName = NewProfile.aliceName;
+  const user_id = NewProfile?._id;
+  const user_name = NewProfile?.name;
+  const aliceName = NewProfile?.aliceName;
 
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -397,7 +397,7 @@ const handleDel = (id) => {
                 {searchResults?.map((res, index) => {
                   return (
                     <>
-                      <tr key={res._id}>
+                      <tr key={res?._id}>
                         <td>{res?.name}</td>
                         <td>{res?.aliceName}</td>
                         <td>{res?.type}</td>
