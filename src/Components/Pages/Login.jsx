@@ -23,7 +23,7 @@ const Login = () => {
     setLoading(true); // Start loading when verifying OTP
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API}/admin/verify-otp`,
+        `${import.meta.env.VITE_BACKEND_API}/auth/verify-otp`,
         {
           email: email,
           otp: otp,
@@ -58,7 +58,7 @@ const Login = () => {
     };
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API}/loginadmin`,
+        `${import.meta.env.VITE_BACKEND_API}/auth/loginadmin`,
         payload,
         { withCredentials: true }
       );

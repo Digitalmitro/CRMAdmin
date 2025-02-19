@@ -26,12 +26,12 @@ const EmployeeAttendance = () => {
       const res = await axios.get(
         `${
           import.meta.env.VITE_BACKEND_API
-        }/attendancelist/${id}?month=${selectedMonth}${
+        }/attendance/${id}?month=${selectedMonth}${
           date ? `&date=${date}` : ""
         }`,
         { headers: { token: adminToken } }
       );
-      setAttendanceList(res?.data?.data?.reverse());
+      setAttendanceList(res?.data?.reverse());
     } catch (err) {
       console.log(err);
     }

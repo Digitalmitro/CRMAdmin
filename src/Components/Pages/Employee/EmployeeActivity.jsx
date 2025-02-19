@@ -90,7 +90,7 @@ const EmplyeeActivity = () => {
 
   const [night, setNight] = useState([]);
   const getNight = async () => {
-    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`, {
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/auth/`, {
       headers: { token: adminToken },
     });
 
@@ -113,7 +113,7 @@ const EmplyeeActivity = () => {
   // Modal
 
   const Getdata = async () => {
-    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/alluser`, {
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/auth/`, {
       headers: { token: adminToken }
     });
     setData(res.data.reverse());
