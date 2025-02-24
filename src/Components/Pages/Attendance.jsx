@@ -32,15 +32,15 @@ const Attendance = () => {
   async function getEmpAttendanceData() {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API}/admin/todays-attendance`,
+        `${import.meta.env.VITE_BACKEND_API}/attendance/today`,
         { headers: { token: adminToken } }
       );
-      setAttendanceList(res?.data?.data?.reverse());
+      setAttendanceList(res?.data?.data);
     } catch (err) {
       console.log(err);
     }
   }
-
+console.log(attendanceList)
   useEffect(() => {
     getEmpAttendanceData();
   }, [selectedMonth, date]);
@@ -334,9 +334,10 @@ const Attendance = () => {
                 </div>
               )} */}
 
-              <table className="table table-striped mt-3">
+              <table className="table table-striped mt-2">
                 <thead>
                   <tr>
+                    <th>NO</th>
                     <th>Name</th>
                     <th>Date</th>
                     <th>PunchIn</th>
@@ -348,36 +349,24 @@ const Attendance = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredAttendanceList.length > 0 ? (
-                    filteredAttendanceList.map((attendance, index) => (
+                  {attendanceList.length > 0 ? (
+                    attendanceList.map((attendance, index) => (
                       <tr key={index}>
+                        <td>{index+1}</td>
                         <td>
-                          {attendance.userName}
+                          {attendance?.user_id?.name }
                         </td>
                         <td>
-                          {moment(attendance.currentDate).format("MMM-Do-YYYY")}
+                          {moment(attendance?.currentDate).format("MMM-Do-YYYY")}
                         </td>
                         <td>
-                          {attendance.punches[0]?.punchIn
-                            ? formatTime(attendance.punches[0].punchIn)
-                            : "N/A"}
+                          {attendance?.firstPunchIn ? moment(attendance?.firstPunchIn).format("HH:mm"):"Punchin Not Done"}
                         </td>
                         <td>
-                          {attendance.punches[attendance.punches.length - 1]
-                            ?.punchOut
-                            ? formatTime(
-                                attendance.punches[
-                                  attendance.punches.length - 1
-                                ].punchOut
-                              )
-                            : "N/A"}
+                          {attendance?.punchOut ? moment(attendance?.punchOut).format("HH:mm") : "Punchout Not Done"}
                         </td>
                         <td>
-                          {attendance.totalWorkingTime
-                            ? formatTotalWorkingTime(
-                                attendance.totalWorkingTime
-                              )
-                            : "0"}
+                          {moment.utc(attendance?.workingTime * 60 * 1000).format("H [hr] m [mins]") || "0"}
                         </td>
                         <td>{attendance.status}</td>
                         <td>{attendance.ip}</td>

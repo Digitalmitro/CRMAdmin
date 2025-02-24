@@ -27,7 +27,7 @@ function UpdateEmployee() {
   const handleData = async () => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API}/alluser/${id}`, {
+        `${import.meta.env.VITE_BACKEND_API}/auth/${id}`, {
           headers: { token: adminToken },
         }
       );
@@ -51,9 +51,9 @@ function UpdateEmployee() {
 
   const handleUpdate = async (values) => {
     const payload = { user_id: id, ...values };
-    console.log('payload emp ', payload)
+    // console.log('payload emp ', payload)
     try {
-      const res = await axios.put(`${import.meta.env.VITE_BACKEND_API}/updateuser`, payload,
+      const res = await axios.put(`${import.meta.env.VITE_BACKEND_API}/auth/${id}`, payload,
         {
           headers: { token: adminToken },
         }

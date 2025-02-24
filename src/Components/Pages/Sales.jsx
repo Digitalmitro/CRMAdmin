@@ -102,10 +102,10 @@ const Sales = () => {
     setNight(res?.data);
   };
   const Getdata = async () => {
-    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/allsale`);
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/sale/all`);
 
     console.log("data", res?.data);
-    setData(res?.data.reverse());
+    setData(res?.data?.data);
     setloader(false)
     // filterAndSortResults(searchTerm, sortBy, res.data);
     
@@ -449,8 +449,8 @@ console.log("night", night)
                         <td>{res?.calldate}</td>
                         <td>{res?.domainName}</td>
                         <td>{res?.country}</td>
-                        <td>{res?.address}</td>
-                        <td>{res?.comments}</td>
+                        <td>{res?.address.split(' ')[0]}</td>
+                        <td>{res?.comments.split(' ')[0]}</td>
                         <td>{res?.buget}</td>
                         <td>{res?.createdDate}</td>
                         <td>

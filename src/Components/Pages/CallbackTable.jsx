@@ -77,13 +77,13 @@ const CallbackTable = () => {
 
   const Getdata = async () => {
     const res = await axios.get(
-      `${import.meta.env.VITE_BACKEND_API}/allcallback`
+      `${import.meta.env.VITE_BACKEND_API}/callback/all`
     );
-    setData(res?.data.reverse());
+    setData(res?.data?.data);
 
     // EmployeeNames list 
     const uniqueNames = new Set();
-    const filteredData = res.data.filter((e) => {
+    const filteredData = res.data?.data.filter((e) => {
       if (e.employeeName && !uniqueNames.has(e.employeeName)) {
         uniqueNames.add(e.employeeName);
         return true;

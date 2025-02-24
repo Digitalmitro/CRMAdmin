@@ -42,9 +42,12 @@ const CustomDrawer = ({ open, onClose }) => {
         type,
       };
       const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_API}/registeruser`,
+        `${import.meta.env.VITE_BACKEND_API}/auth/admin/create-user`,
         payload,{
-          headers: { token: adminToken },
+            headers: { 
+            'Content-Type':'application/json',
+            Authorization:`Bearer ${adminToken}`
+           },
         }
       );
 

@@ -34,7 +34,7 @@ const EmployeeViewDashboard = () => {
     async function getDashboardDataLength() {
       try{
         const res = await axios.get(
-          `${import.meta.env.VITE_BACKEND_API}/employeesdashboard/${id}`
+          `${import.meta.env.VITE_BACKEND_API}/attendance/employeesdashboard/${id}`
         );
         setDataLength(res.data);
       }catch(err){
@@ -49,7 +49,7 @@ const EmployeeViewDashboard = () => {
       try {
         setLoading(true);
         const us = await axios.get(
-          `${import.meta.env.VITE_BACKEND_API}/alluser/${id}`,{
+          `${import.meta.env.VITE_BACKEND_API}/auth/${id}`,{
             headers: { token: adminToken },
           }
         );

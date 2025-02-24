@@ -26,12 +26,12 @@ const EmployeeAttendance = () => {
       const res = await axios.get(
         `${
           import.meta.env.VITE_BACKEND_API
-        }/attendance/${id}?month=${selectedMonth}${
+        }/attendance/list/${id}?month=${selectedMonth}${
           date ? `&date=${date}` : ""
         }`,
         { headers: { token: adminToken } }
       );
-      setAttendanceList(res?.data?.reverse());
+      setAttendanceList(res?.data?.data);
     } catch (err) {
       console.log(err);
     }
@@ -364,57 +364,35 @@ const EmployeeAttendance = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredAttendanceList?.map((res, index) => {
-                  const firstPunchIn =
-                    res.punches[0]?.punchIn &&
-                    formatTime(res.punches[0].punchIn);
-
-                  const lastPunchout = res.punches[res.punches.length - 1]
-                    ?.punchOut
-                    ? res.punches[res?.punches.length - 1]?.punchOut
-                    : res.punches[res?.punches.length - 2]?.punchOut &&
-                      res.punches[res?.punches?.length - 2].punchOut;
-
-                  const formattedCuurentDate = moment(res.currentDate).format(
-                    "MMM-Do-YYYY"
-                  );
-
-                  return (
-                    <tr key={res._id}>
-                      <td>{formattedCuurentDate}</td>
-
-                      <td>{firstPunchIn}</td>
-                      <td>
-                        {" "}
-                        {lastPunchout
-                          ? formatTime(lastPunchout)
-                          : "Punch Out not Done"}
+                  {filteredAttendanceList.length > 0 ? (
+                    filteredAttendanceList.map((attendance, index) => (
+                      <tr key={index}>
+                    
+                        <td>
+                          {moment(attendance?.currentDate).format("MMM-Do-YYYY")}
+                        </td>
+                        <td>
+                          {attendance?.firstPunchIn ? moment(attendance?.firstPunchIn).format("HH:mm"):"Punchin Not Done"}
+                        </td>
+                        <td>
+                          {attendance?.punchOut ? moment(attendance?.punchOut).format("HH:mm") : "Punchout Not Done"}
+                        </td>
+                        <td>
+                          {moment.utc(attendance?.workingTime * 60 * 1000).format("H [hr] m [mins]") || "0"}
+                        </td>
+                        <td>{attendance.status}</td>
+                        <td>{attendance.ip}</td>
+                        <td>{attendance.workStatus}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7" className="text-center">
+                        No data available
                       </td>
-                      <td>
-                        {res?.totalWorkingTime
-                          ? formatTotalWorkingTime(res.totalWorkingTime)
-                          : "0"}
-                      </td>
-                      <td
-                        style={{
-                          color:
-                            res.status === "LATE"
-                              ? "goldenrod"
-                              : res.status === "Week Off"
-                              ? "blue"
-                              : res.status === "Absent"
-                              ? "red"
-                              : "green",
-                        }}
-                      >
-                        {res.status}
-                      </td>
-                      <td>{res.ip}</td>
-                      <td>{res.workStatus}</td>
                     </tr>
-                  );
-                })}
-              </tbody>
+                  )}
+                </tbody>
             </table>
           </div>
         </div>

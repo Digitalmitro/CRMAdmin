@@ -69,10 +69,7 @@ const CallbackView = () => {
         const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/callback-1/${id}`);
         setData(res.data);
     };
-
-
-
-    
+ 
     useEffect(() => {
         getData();
         if (Admintoken) {

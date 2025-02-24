@@ -85,10 +85,10 @@ const Transfers = () => {
 
   const Getdata = async () => {
     const res = await axios.get(
-      `${import.meta.env.VITE_BACKEND_API}/alltransfer`
+      `${import.meta.env.VITE_BACKEND_API}/transfer/all`
     );
     const uniqueNames = new Set();
-    const filteredData = res.data.filter((e) => {
+    const filteredData = res.data?.data.filter((e) => {
       if (e.employeeName && !uniqueNames.has(e.employeeName)) {
         uniqueNames.add(e.employeeName);
         return true;
@@ -97,7 +97,7 @@ const Transfers = () => {
     });
     setNight(filteredData);
     console.log("transfer data data", filteredData);
-    setData(res.data);
+    setData(res.data?.data);
     setloader(false);
     filterAndSortResults(searchTerm, sortBy, res.data);
   };
@@ -364,13 +364,10 @@ const Transfers = () => {
                   <th scope="col">Domain Name</th>
                   <th scope="col">Country</th>
                   <th scope="col">Address</th>
-
                   <th scope="col">Comments</th>
                   <th scope="col">Budget</th>
-
                   <th scope="col">Send To</th>
                   <th scope="col">Created Date</th>
-
                   <th scope="col">Action</th>
                 </tr>
               </thead>
@@ -478,7 +475,7 @@ const Transfers = () => {
                           <td>{res?.domainName}</td>
                           <td>{res?.country}</td>
                           <td>{res?.address}</td>
-                          <td>{res.comments}</td>
+                          <td>{res?.comments.split(' ')[0]}</td>
                           <td>{res?.buget}</td>
 
                           <td class="d-flex gap-1">
